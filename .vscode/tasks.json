@@ -3,16 +3,28 @@
     "runner": "terminal",
     "tasks": [
         {
-            "command": "/Users/exsystem/Documents/DelphiProject/jcf/JCF",
+            "command": "/Users/exsystem/DelphiProject/jcf/JCF",
             "args": [
-                "-config=/Users/exsystem/.lazarus/jcfsettings.cfg",
+                "-config=./.vscode/jcfsettings.inc.cfg",
                 "-inplace",
                 "-y",
                 "-F",
                 "${file}"
             ],
             "problemMatcher": [],
-            "label": "format code"
+            "label": "format inc code"
+        },
+        {
+            "command": "/Users/exsystem/DelphiProject/jcf/JCF",
+            "args": [
+                "-config=./.vscode/jcfsettings.cfg",
+                "-inplace",
+                "-y",
+                "-F",
+                "${file}"
+            ],
+            "problemMatcher": [],
+            "label": "format normal code"
         },
         {
             "command": ".vscode/CompileOmniPascalServerProject.sh",

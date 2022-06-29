@@ -4,6 +4,9 @@ Unit Lexer;
 
 Interface
 
+Uses
+  List;
+
 Type
   TTokenKind = (
     eUndefined,
@@ -22,13 +25,24 @@ Type
   PLexer = ^TLexer;
 
   TLexer = Record
+    RuleList: PList;
     Source: String;
     CurrentPos: UInt32;
     CurrentChar: Char;
   End;
 
+  TLexerRuleParser = Function(Lexer: PLexer; Out Token: TToken): Boolean;
+
+  PLexerRule = ^TLexerRule;
+
+  TLexerRule = Record
+    TokenKind: TTokenKind;
+    Parser: TLexerRuleParser;
+  End;
+
 Function TLexer_Create(Const Source: String): PLexer;
 Procedure TLexer_Destroy(Var Self: PLexer);
+Procedure TLexer_AddRule(Var Self: PLexer; Const Rule: TLexerRule);
 Function TLexer_GetNextToken(Var Self: PLexer; Out Token: TToken): Boolean;
 Procedure TLexer_MoveNextChar(Var Self: PLexer);
 Function TLexer_PeekNextChar(Var Self: PLexer): Char;
@@ -36,98 +50,31 @@ Function TLexer_PeekNextChar(Var Self: PLexer): Char;
 Implementation
 
 Uses
-  StringUtils;
+  StringUtils, TypeDef;
 
 Function TLexer_Create(Const Source: String): PLexer;
 Begin
   New(Result);
+  Result.RuleList := TList_Create(SizeOf(TLexerRule), 10);
   Result.Source := Source + #0;
   Result.CurrentPos := 0;
   Result.CurrentChar := '#';
 End;
 
 Function TLexer_GetNextToken(Var Self: PLexer; Out Token: TToken): Boolean;
+Var
+  I: TSize;
 Begin
   Repeat
     TLexer_MoveNextChar(Self);
   Until Not IsSpace(Self.CurrentChar);
 
-  Result := True;
-  If Self.CurrentChar = #0 Then
+  For I := 0 To Pred(Self.RuleList.Size) Do
   Begin
-    Token.Kind := eEof;
-    Token.Value := 'EOF';
-    Token.StartPos := Self.CurrentPos;
-    Exit(Result);
-  End;
-  If Self.CurrentChar = '+' Then
-  Begin
-    Token.Kind := eAdd;
-    Token.Value := Self.CurrentChar;
-    Token.StartPos := Self.CurrentPos;
-    Exit(Result);
-  End;
-  If Self.CurrentChar = '-' Then
-  Begin
-    Token.Kind := eSub;
-    Token.Value := Self.CurrentChar;
-    Token.StartPos := Self.CurrentPos;
-    Exit(Result);
-  End;
-  If Self.CurrentChar = '*' Then
-  Begin
-    Token.Kind := eMul;
-    Token.Value := Self.CurrentChar;
-    Token.StartPos := Self.CurrentPos;
-    Exit(Result);
-  End;
-  If Self.CurrentChar = '/' Then
-  Begin
-    Token.Kind := eDiv;
-    Token.Value := Self.CurrentChar;
-    Token.StartPos := Self.CurrentPos;
-    Exit(Result);
-  End;
-  If Self.CurrentChar = '(' Then
-  Begin
-    Token.Kind := eLParent;
-    Token.Value := Self.CurrentChar;
-    Token.StartPos := Self.CurrentPos;
-    Exit(Result);
-  End;
-  If Self.CurrentChar = ')' Then
-  Begin
-    Token.Kind := eRParent;
-    Token.Value := Self.CurrentChar;
-    Token.StartPos := Self.CurrentPos;
-    Exit(Result);
-  End;
-  If IsDigit(Self.CurrentChar) Then
-  Begin
-    // look self...
-    Token.StartPos := Self.CurrentPos;
-    While IsDigit(TLexer_PeekNextChar(Self)) Do
+    If PLexerRule(TList_Get(Self.RuleList, I)).Parser(Self, Token) Then
     Begin
-      TLexer_MoveNextChar(Self);
+      Exit(True);
     End;
-    // look after...
-    If Not (TLexer_PeekNextChar(Self) In [' ', '+', '-', '*', '/', ')']) Then
-    Begin
-      Token.Kind := eUndefined;
-      TLexer_MoveNextChar(Self);
-      While (Not IsSpace(TLexer_PeekNextChar(Self))) And
-        (TLexer_PeekNextChar(Self) <> #0) Do
-      Begin
-        TLexer_MoveNextChar(Self);
-      End;
-      Token.Value := Copy(Self.Source, Token.StartPos, Self.CurrentPos -
-        Token.StartPos + 1);
-      Exit(False);
-    End;
-    Token.Kind := eNum;
-    Token.Value := Copy(Self.Source, Token.StartPos, Self.CurrentPos -
-      Token.StartPos + 1);
-    Exit(Result);
   End;
 
   Token.StartPos := Self.CurrentPos;
@@ -142,6 +89,7 @@ End;
 
 Procedure TLexer_Destroy(Var Self: PLexer);
 Begin
+  Dispose(Self.RuleList);
   Dispose(Self);
   Self := nil;
 End;
@@ -155,6 +103,11 @@ End;
 Function TLexer_PeekNextChar(Var Self: PLexer): Char;
 Begin
   Result := Self.Source[Succ(Self.CurrentPos)];
+End;
+
+Procedure TLexer_AddRule(Var Self: PLexer; Const Rule: TLexerRule);
+Begin
+  TList_PushBack(Self.RuleList, @Rule);
 End;
 
 End.
