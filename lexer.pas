@@ -16,6 +16,8 @@ Type
     eEof
     );
 
+  PToken = ^TToken;
+
   TToken = Record
     Kind: TTokenKind;
     Value: String;
@@ -29,9 +31,10 @@ Type
     Source: String;
     CurrentPos: UInt32;
     CurrentChar: Char;
+    CurrentToken: TToken;
   End;
 
-  TLexerRuleParser = Function(Lexer: PLexer; Out Token: TToken): Boolean;
+  TLexerRuleParser = Function(Lexer: PLexer): Boolean;
 
   PLexerRule = ^TLexerRule;
 
@@ -43,7 +46,9 @@ Type
 Function TLexer_Create(Const Source: String): PLexer;
 Procedure TLexer_Destroy(Var Self: PLexer);
 Procedure TLexer_AddRule(Var Self: PLexer; Const Rule: TLexerRule);
-Function TLexer_GetNextToken(Var Self: PLexer; Out Token: TToken): Boolean;
+Function TLexer_GetNextToken(Var Self: PLexer): Boolean;
+Function TLexer_IsToken(Var Self: PLexer; Const TokenKind: TTokenKind): Boolean;
+Function TLexer_CompareNextToken(Var Self: PLexer; Const TokenKind: TTokenKind): Boolean;
 Procedure TLexer_MoveNextChar(Var Self: PLexer);
 Function TLexer_PeekNextChar(Var Self: PLexer): Char;
 
@@ -61,7 +66,7 @@ Begin
   Result.CurrentChar := '#';
 End;
 
-Function TLexer_GetNextToken(Var Self: PLexer; Out Token: TToken): Boolean;
+Function TLexer_GetNextToken(Var Self: PLexer): Boolean;
 Var
   I: TSize;
 Begin
@@ -71,19 +76,20 @@ Begin
 
   For I := 0 To Pred(Self.RuleList.Size) Do
   Begin
-    If PLexerRule(TList_Get(Self.RuleList, I)).Parser(Self, Token) Then
+    If PLexerRule(TList_Get(Self.RuleList, I)).Parser(Self) Then
     Begin
-      Exit(True);
+      Exit(Self.CurrentToken.Kind <> TTokenKind.eUndefined);
     End;
   End;
 
-  Token.StartPos := Self.CurrentPos;
+  Self.CurrentToken.StartPos := Self.CurrentPos;
   While (Not IsSpace(TLexer_PeekNextChar(Self))) And (TLexer_PeekNextChar(Self) <> #0) Do
   Begin
     TLexer_MoveNextChar(Self);
   End;
-  Token.Kind := eUndefined;
-  Token.Value := Copy(Self.Source, Token.StartPos, Self.CurrentPos - Token.StartPos + 1);
+  Self.CurrentToken.Kind := eUndefined;
+  Self.CurrentToken.Value := Copy(Self.Source, Self.CurrentToken.StartPos,
+    Self.CurrentPos - Self.CurrentToken.StartPos + 1);
   Result := False;
 End;
 
@@ -108,6 +114,17 @@ End;
 Procedure TLexer_AddRule(Var Self: PLexer; Const Rule: TLexerRule);
 Begin
   TList_PushBack(Self.RuleList, @Rule);
+End;
+
+Function TLexer_IsToken(Var Self: PLexer; Const TokenKind: TTokenKind): Boolean;
+Begin
+  Result := (Self.CurrentToken.Kind = TokenKind);
+End;
+
+Function TLexer_CompareNextToken(Var Self: PLexer; Const TokenKind: TTokenKind): Boolean;
+Begin
+  TLexer_GetNextToken(Self);
+  Result := TLexer_IsToken(Self, TokenKind);
 End;
 
 End.

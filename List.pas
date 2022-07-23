@@ -17,6 +17,7 @@ Type
 
 Function TList_Create(Const ElementSize: TSize; Const Capacity: TSize): PList;
 Function TList_IsEmpty(Self: PList): Boolean;
+Procedure TList_Clear(Self: PList);
 Function TList_Get(Self: PList; Const Index: TSize): Pointer;
 Procedure TList_Set(Self: PList; Const Index: TSize; Value: Pointer);
 Procedure TList_PushBack(Self: PList; Element: Pointer);
@@ -36,6 +37,11 @@ End;
 Function TList_IsEmpty(Self: PList): Boolean;
 Begin
   Result := Self.Size = 0;
+End;
+
+Procedure TList_Clear(Self: PList);
+Begin
+  Self.Size := 0;
 End;
 
 Function TList_Get(Self: PList; Const Index: TSize): Pointer;

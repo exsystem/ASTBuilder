@@ -5,18 +5,18 @@ Interface
 Uses
   Lexer;
 
-Function Parse(Lexer: PLexer; Out Token: TToken): Boolean;
+Function Parse(Lexer: PLexer): Boolean;
 Function Compose(): TLexerRule;
 
 Implementation
 
-Function Parse(Lexer: PLexer; out Token: TToken): Boolean;
+Function Parse(Lexer: PLexer): Boolean;
 Begin
   If Lexer.CurrentChar = ')' Then
   Begin
-    Token.Kind := eRParent;
-    Token.Value := Lexer.CurrentChar;
-    Token.StartPos := Lexer.CurrentPos;
+    Lexer.CurrentToken.Kind := eRParent;
+    Lexer.CurrentToken.Value := Lexer.CurrentChar;
+    Lexer.CurrentToken.StartPos := Lexer.CurrentPos;
     Exit(True);
   End;
   Exit(False);
