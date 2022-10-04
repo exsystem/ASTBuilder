@@ -3,7 +3,7 @@
     "runner": "terminal",
     "tasks": [
         {
-            "command": "/Users/exsystem/DelphiProject/jcf/JCF",
+            "command": "/Users/exsystem/DelphiProjects/jcf/JCF",
             "args": [
                 "-config=./.vscode/jcfsettings.inc.cfg",
                 "-inplace",
@@ -15,7 +15,7 @@
             "label": "format inc code"
         },
         {
-            "command": "/Users/exsystem/DelphiProject/jcf/JCF",
+            "command": "/Users/exsystem/DelphiProjects/jcf/JCF",
             "args": [
                 "-config=./.vscode/jcfsettings.cfg",
                 "-inplace",

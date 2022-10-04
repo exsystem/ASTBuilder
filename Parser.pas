@@ -4,19 +4,20 @@ Unit Parser;
 Interface
 
 Uses
-  Lexer, List, TypeDef;
+  Lexer, List, TypeDef, ASTNode;
 
 Type
   PParser = ^TParser;
 
-  TSymbolFunc = Function(Parser: PParser): Boolean;
-  TExpressionFunc = Function(Parser: PParser): Boolean;
+  TSymbolFunc = Function(Parser: PParser; out Ast: PAstNode): Boolean;
+  TExpressionFunc = Function(Parser: PParser; out Ast: PAstNode): Boolean;
 
   TParser = Record
     FLexer: PLexer;
     FTokenList: PList;
     FCurrentToken: TSize;
     MainProductionRule: TSymbolFunc;
+    Ast: PAstNode;
   End;
 
 Function TParser_Create(Lexer: PLexer; ProductionRule: TSymbolFunc): PParser;
@@ -30,7 +31,7 @@ Implementation
 
 Function TParser_Parse(Self: PParser): Boolean;
 Begin
-  Result := Self.MainProductionRule(Self) And
+  Result := Self.MainProductionRule(Self, Self.Ast) And
     TParser_MatchNextToken(Self, TTokenKind.eEof);
 End;
 
@@ -41,11 +42,16 @@ Begin
   Result.MainProductionRule := ProductionRule;
   Result.FTokenList := TList_Create(SizeOf(TToken), 5);
   Result.FCurrentToken := Pred(0);
+  Result.Ast := nil;
 End;
 
 Procedure TParser_Destroy(Self: PParser);
 Begin
   TList_Destroy(Self.FTokenList);
+  If Self.Ast <> nil Then
+  Begin
+    TAstNode_Destroy(Self.Ast);
+  End;
   Dispose(Self);
 End;
 
