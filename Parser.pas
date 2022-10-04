@@ -4,34 +4,35 @@ Unit Parser;
 Interface
 
 Uses
-  Lexer, List, TypeDef;
+  Lexer, List, TypeDef, ASTNode;
 
 Type
   PParser = ^TParser;
 
-  TSymbolFunc = Function(Parser: PParser): Boolean;
-  TExpressionFunc = Function(Parser: PParser): Boolean;
+  TSymbolFunc = Function(Parser: PParser; out Ast: PAstNode): Boolean;
+  TExpressionFunc = Function(Parser: PParser; out Ast: PAstNode): Boolean;
 
   TParser = Record
     FLexer: PLexer;
     FTokenList: PList;
     FCurrentToken: TSize;
     MainProductionRule: TSymbolFunc;
+    Ast: PAstNode;
   End;
 
 Function TParser_Create(Lexer: PLexer; ProductionRule: TSymbolFunc): PParser;
 Function TParser_Parse(Self: PParser): Boolean;
 Function TParser_GetNextToken(Self: PParser): Boolean;
 Function TParser_IsToken(Self: PParser; TokenKind: TTokenKind): Boolean;
-Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
-Function TParser_Prod(Self: PParser; Rules: TArray<TSymbolFunc>): Boolean;
+Function TParser_MatchNextToken(Self: PParser; TokenKind: TTokenKind): Boolean;
 Procedure TParser_Destroy(Self: PParser);
 
 Implementation
 
 Function TParser_Parse(Self: PParser): Boolean;
 Begin
-  Result := Self.MainProductionRule(Self) And TParser_Term(Self, TTokenKind.eEof);
+  Result := Self.MainProductionRule(Self, Self.Ast) And
+    TParser_MatchNextToken(Self, TTokenKind.eEof);
 End;
 
 Function TParser_Create(Lexer: PLexer; ProductionRule: TSymbolFunc): PParser;
@@ -41,15 +42,20 @@ Begin
   Result.MainProductionRule := ProductionRule;
   Result.FTokenList := TList_Create(SizeOf(TToken), 5);
   Result.FCurrentToken := Pred(0);
+  Result.Ast := nil;
 End;
 
 Procedure TParser_Destroy(Self: PParser);
 Begin
   TList_Destroy(Self.FTokenList);
+  If Self.Ast <> nil Then
+  Begin
+    TAstNode_Destroy(Self.Ast);
+  End;
   Dispose(Self);
 End;
 
-Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
+Function TParser_MatchNextToken(Self: PParser; TokenKind: TTokenKind): Boolean;
 Begin
   Result := TParser_GetNextToken(Self) And TParser_IsToken(Self, TokenKind);
   Exit;
@@ -72,30 +78,11 @@ End;
 Function TParser_IsToken(Self: PParser; TokenKind: TTokenKind): Boolean;
 Begin
   Result := (PToken(TList_Get(Self.FTokenList, Self.FCurrentToken)).Kind = TokenKind);
-  // Exit;
   If Not Result Then
   Begin
     Dec(Self.FCurrentToken);
   End;
 End;
 
-Function TParser_Prod(Self: PParser; Rules: TArray<TSymbolFunc>): Boolean;
-Var
-  //mSave: TSize;
-  I: Byte;
-  mRule: TSymbolFunc;
-Begin
-  //mSave := Self.FCurrentToken;
-  For I := Low(Rules) To High(Rules) Do
-  Begin
-    //Self.FCurrentToken := mSave;
-    mRule := Rules[I];
-    If mRule(Self) Then
-    Begin
-      Exit(True);
-    End;
-  End;
-  Exit(False);
-End;
 
 End.

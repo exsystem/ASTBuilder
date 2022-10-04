@@ -5,32 +5,44 @@ Unit TermRule;
 Interface
 
 Uses
-  Parser, Lexer;
+  Parser, Lexer, ASTNode;
 
-Function TermRule(Parser: PParser): Boolean;
-Function TermExpression1(Parser: PParser): Boolean;
-Function TermExpression2(Parser: PParser): Boolean;
+Function TermRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function TermExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function TermExpression2(Parser: PParser; Out Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
-  ExprRule;
+  ExprRule, LiteralNode, List;
 
-Function TermExpression1(Parser: PParser): Boolean;
+Function TermExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
 Begin
-  Result := TParser_Term(Parser, TTokenKind.eNum);
+  Result := TParser_MatchNextToken(Parser, TTokenKind.eNum);
+  If Not Result Then
+  Begin
+    Exit;
+  End;
+  Ast := TLiteralNode_Create(TLiteralType.eInteger,
+    PToken(TList_Get(Parser.FTokenList, Parser.FCurrentToken)).Value);
 End;
 
-Function TermRule(Parser: PParser): Boolean;
+Function TermRule(Parser: PParser; Out Ast: PAstNode): Boolean;
 Begin
-  Exit(TParser_Prod(Parser, [@TermExpression1, @TermExpression2]));
-  // Result := TermExpression1(Parser) Or TermExpression2(Parser);
+  Result := TermExpression1(Parser, Ast) Or TermExpression2(Parser, Ast);
 End;
 
-Function TermExpression2(Parser: PParser): Boolean;
+Function TermExpression2(Parser: PParser; Out Ast: PAstNode): Boolean;
 Begin
-  Result := (TParser_Term(Parser, TTokenKind.eLParent) And
-    ExprRule.ExprRule(Parser) And TParser_Term(Parser, TTokenKind.eRParent));
+  Result := (TParser_MatchNextToken(Parser, TTokenKind.eLParent) And
+    ExprRule.ExprRule(Parser, Ast) And TParser_MatchNextToken(Parser,
+    TTokenKind.eRParent));
+  If Not Result Then
+  Begin
+    Exit;
+  End;
+  Ast := TLiteralNode_Create(TLiteralType.eInteger,
+    PToken(TList_Get(Parser.FTokenList, Parser.FCurrentToken)).Value);
 End;
 
 End.

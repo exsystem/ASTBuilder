@@ -27,8 +27,6 @@ Var
 Begin
   Result := TAstNode_Create($1);
   New(mData);
-  mData.LeftNode := nil;
-  mData.RightNode := nil;
   Result.Data := mData;
 End;
 
