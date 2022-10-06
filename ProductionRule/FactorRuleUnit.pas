@@ -9,22 +9,22 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function FactorRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function FactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 
-Function FactorExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function FactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
   TermRuleUnit, TypeDef, BinaryOpNode;
 
-Function FactorRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function FactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   Result := TParser_Prod(Parser, Ast, [@FactorExpression1]);
     //Result := FactorExpression1(Parser, Ast);
 End;
 
-Function FactorExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function FactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePoint: TSize;
   mHeadNode: PAstNode;

@@ -12,9 +12,9 @@ Uses
 Type
   PParser = ^TParser;
 
-  TSymbolFunc = Function(Parser: PParser; Out Ast: PAstNode): Boolean;
+  TSymbolFunc = Function(Parser: PParser; Var Ast: PAstNode): Boolean;
 
-  TExpressionFunc = Function(Parser: PParser; Out Ast: PAstNode): Boolean;
+  TExpressionFunc = Function(Parser: PParser; Var Ast: PAstNode): Boolean;
 
   TParser = Record
     FLexer: PLexer;
@@ -36,7 +36,7 @@ Function TParser_GetCurrentToken(Self: PParser): PToken;
 
 Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
 
-Function TParser_Prod(Self: PParser; Out Ast: PAstNode; Rules: TArray<
+Function TParser_Prod(Self: PParser; Var Ast: PAstNode; Rules: TArray<
   TExpressionFunc>): Boolean;
 
 Procedure TParser_Destroy(Self: PParser);
@@ -123,7 +123,7 @@ Begin
   Result := (TParser_GetCurrentToken(Self).Kind = TokenKind);
 End;
 
-Function TParser_Prod(Self: PParser; Out Ast: PAstNode; Rules: TArray<
+Function TParser_Prod(Self: PParser; Var Ast: PAstNode; Rules: TArray<
   TExpressionFunc>): Boolean;
 Var
   I: Byte;
