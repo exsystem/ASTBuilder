@@ -1,4 +1,5 @@
 Unit Parser;
+
 {$IFDEF FPC}
 {$MODE DELPHI}
 {$ENDIF}
@@ -36,8 +37,8 @@ Function TParser_GetCurrentToken(Self: PParser): PToken;
 
 Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
 
-Function TParser_Prod(Self: PParser; Var Ast: PAstNode; Rules: TArray<
-  TExpressionFunc>): Boolean;
+Function TParser_Prod(Self: PParser; Var Ast: PAstNode;
+  Rules: TArray<  TExpressionFunc>): Boolean;
 
 Procedure TParser_Destroy(Self: PParser);
 
@@ -50,8 +51,8 @@ Uses
 
 Function TParser_Parse(Self: PParser): Boolean;
 Begin
-  Result := Self.MainProductionRule(Self, Self.Ast) And TParser_Term(Self,
-    TTokenKind.eEof);
+  Result := Self.MainProductionRule(Self, Self.Ast) And
+    TParser_Term(Self, TTokenKind.eEof);
 End;
 
 Function TParser_Create(Lexer: PLexer; ProductionRule: TSymbolFunc): PParser;
@@ -123,8 +124,8 @@ Begin
   Result := (TParser_GetCurrentToken(Self).Kind = TokenKind);
 End;
 
-Function TParser_Prod(Self: PParser; Var Ast: PAstNode; Rules: TArray<
-  TExpressionFunc>): Boolean;
+Function TParser_Prod(Self: PParser; Var Ast: PAstNode;
+  Rules: TArray<  TExpressionFunc>): Boolean;
 Var
   I: Byte;
   mRule: TExpressionFunc;
@@ -151,30 +152,33 @@ Var
   t: String;
   n: PBinaryOpNode;
 Begin
+  If P = nil Then
+  Begin
+    Exit;
+  End;
   Write(' ( ');
   Case P.NodeType Of
     $1:
-      Begin
-        n := PBinaryOpNode(P.Data);
+    Begin
+      n := PBinaryOpNode(P.Data);
       {$IFDEF FPC}
         WriteStr(t, n.OpType);
       {$ELSE}
-        t := TRttiEnumerationType.GetName(n.OpType);
+      t := TRttiEnumerationType.GetName(n.OpType);
       {$ENDIF}
-        Write(t, ' ');
-        If n.LeftNode <> nil Then
-          OutputAST(n.LeftNode);
-        Write(' ');
-        If n.RightNode <> nil Then
-          OutputAST(n.RightNode);
-      End;
+      Write(t, ' ');
+      If n.LeftNode <> nil Then
+        OutputAST(n.LeftNode);
+      Write(' ');
+      If n.RightNode <> nil Then
+        OutputAST(n.RightNode);
+    End;
     $2:
-      Begin
-        Write(PLiteralNode(P.Data).Value);
-      End;
+    Begin
+      Write(PLiteralNode(P.Data).Value);
+    End;
   End;
   Write(' ) ');
 End;
 
 End.
-
