@@ -1,6 +1,8 @@
-Unit FactorRule;
+Unit FactorRuleUnit;
 
+{$IFDEF FPC}
 {$MODE DELPHI}
+{$ENDIF}
 
 Interface
 
@@ -8,61 +10,63 @@ Uses
   Parser, Lexer, ASTNode;
 
 Function FactorRule(Parser: PParser; Out Ast: PAstNode): Boolean;
-Function FactorExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
 
+Function FactorExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
-  TermRule, TypeDef, BinaryOpNode;
+  TermRuleUnit, TypeDef, BinaryOpNode;
 
 Function FactorRule(Parser: PParser; Out Ast: PAstNode): Boolean;
 Begin
-  Result := FactorExpression1(Parser, Ast);
+  Result := TParser_Prod(Parser, Ast, [@FactorExpression1]);
+    //Result := FactorExpression1(Parser, Ast);
 End;
 
 Function FactorExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
 Var
-  mTemp: TSize;
+  mSavePoint: TSize;
   mHeadNode: PAstNode;
   mHeadNodeData: PBinaryOpNode;
   mCurrNode: PAstNode;
   mCurrNodeData: PBinaryOpNode;
   mNewNode: PAstNode;
   mNewNodeData: PBinaryOpNode;
+  mResult: Boolean;
 Begin
   mHeadNode := TBinaryOpNode_Create();
   mHeadNodeData := PBinaryOpNode(mHeadNode.Data);
   mCurrNode := mHeadNode;
   mCurrNodeData := mHeadNodeData;
 
-  Result := TermRule.TermRule(Parser, mCurrNodeData.RightNode);
+  Result := TermRuleUnit.TermRule(Parser, mCurrNodeData.RightNode);
   If Result = False Then
   Begin
     TAstNode_Destroy(mHeadNode);
     Exit;
   End;
-  While Not TParser_MatchNextToken(Parser, TTokenKind.eEof) Do
+  While Not TParser_Term(Parser, TTokenKind.eEof) Do
   Begin
     mNewNode := TBinaryOpNode_Create();
     mNewNodeData := PBinaryOpNode(mNewNode.Data);
 
-    mTemp := Parser.FCurrentToken;
-    If TParser_MatchNextToken(Parser, TTokenKind.eMul) Then
+    mSavePoint := Parser.FCurrentToken;
+    mResult := False;
+    If TParser_Term(Parser, TTokenKind.eMul) Then
     Begin
       mNewNodeData.OpType := TOpType.eMultiply;
-      Result := True;
+      mResult := True;
     End
-    Else If TParser_MatchNextToken(Parser, TTokenKind.eDiv) Then
+    Else If TParser_Term(Parser, TTokenKind.eDiv) Then
     Begin
       mNewNodeData.OpType := TOpType.eDivide;
-      Result := True;
+      mResult := True;
     End;
-    Result := Result And TermRule.TermRule(Parser, mCurrNodeData.RightNode);
-    If Not Result Then
+    mResult := mResult And TermRuleUnit.TermRule(Parser, mNewNodeData.RightNode);
+    If Not mResult Then
     Begin
-      Parser.FCurrentToken := mTemp;
-      Result := True;
+      Parser.FCurrentToken := mSavePoint;
       TAstNode_Destroy(mNewNode);
       Break;
     End;
@@ -73,8 +77,9 @@ Begin
   End;
 
   Ast := mHeadNodeData.RightNode;
-  mHeadNodeData.RightNode := Nil;
+  mHeadNodeData.RightNode := nil;
   TAstNode_Destroy(mHeadNode);
 End;
 
 End.
+

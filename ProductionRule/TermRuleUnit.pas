@@ -1,6 +1,8 @@
-Unit TermRule;
+Unit TermRuleUnit;
 
+{$IFDEF FPC}
 {$MODE DELPHI}
+{$ENDIF}
 
 Interface
 
@@ -14,35 +16,34 @@ Function TermExpression2(Parser: PParser; Out Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  ExprRule, LiteralNode, List;
+  ExprRuleUnit, LiteralNode, List;
 
 Function TermExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
 Begin
-  Result := TParser_MatchNextToken(Parser, TTokenKind.eNum);
+  Result := TParser_Term(Parser, TTokenKind.eNum);
   If Not Result Then
   Begin
     Exit;
   End;
   Ast := TLiteralNode_Create(TLiteralType.eInteger,
-    PToken(TList_Get(Parser.FTokenList, Parser.FCurrentToken)).Value);
+    TParser_GetCurrentToken(Parser).Value);
 End;
 
 Function TermRule(Parser: PParser; Out Ast: PAstNode): Boolean;
 Begin
-  Result := TermExpression1(Parser, Ast) Or TermExpression2(Parser, Ast);
+  Result := TParser_Prod(Parser, Ast, [@TermExpression1, @TermExpression2]);
+  //Result := TermExpression1(Parser, Ast) Or TermExpression2(Parser, Ast);
 End;
 
 Function TermExpression2(Parser: PParser; Out Ast: PAstNode): Boolean;
 Begin
-  Result := (TParser_MatchNextToken(Parser, TTokenKind.eLParent) And
-    ExprRule.ExprRule(Parser, Ast) And TParser_MatchNextToken(Parser,
-    TTokenKind.eRParent));
+  Result := (TParser_Term(Parser, TTokenKind.eLParent) And
+    ExprRuleUnit.ExprRule(Parser, Ast) And TParser_Term(Parser, TTokenKind.eRParent));
   If Not Result Then
   Begin
     Exit;
   End;
-  Ast := TLiteralNode_Create(TLiteralType.eInteger,
-    PToken(TList_Get(Parser.FTokenList, Parser.FCurrentToken)).Value);
+  // Ast := Ast; // Ast => Expr's Ast
 End;
 
 End.

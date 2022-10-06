@@ -1,6 +1,8 @@
-
 Unit StringUtils;
+
+{$IFDEF FPC}
 {$MODE DELPHI}
+{$ENDIF}
 
 Interface
 
