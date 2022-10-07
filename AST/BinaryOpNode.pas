@@ -1,5 +1,9 @@
 Unit BinaryOpNode;
 
+{$IFDEF FPC}
+{$MODE DELPHI}
+{$ENDIF}
+
 Interface
 
 Uses

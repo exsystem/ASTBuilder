@@ -1,5 +1,9 @@
 Unit LParentRule;
 
+{$IFDEF FPC}
+{$MODE DELPHI}
+{$ENDIF}
+
 Interface
 
 Uses

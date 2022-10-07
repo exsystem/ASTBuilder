@@ -1,5 +1,9 @@
 Unit ASTNode;
 
+{$IFDEF FPC}
+{$MODE DELPHI}
+{$ENDIF}
+
 Interface
 
 Type

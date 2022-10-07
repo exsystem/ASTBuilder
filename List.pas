@@ -1,5 +1,9 @@
 Unit List;
 
+{$IFDEF FPC}
+{$MODE DELPHI}
+{$ENDIF}
+
 Interface
 
 Uses

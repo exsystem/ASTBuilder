@@ -1,5 +1,9 @@
 Unit SubRule;
 
+{$IFDEF FPC}
+{$MODE DELPHI}
+{$ENDIF}
+
 Interface
 
 Uses

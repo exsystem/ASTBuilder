@@ -1,5 +1,9 @@
 Unit LiteralNode;
 
+{$IFDEF FPC}
+{$MODE DELPHI}
+{$ENDIF}
+
 Interface
 
 Uses

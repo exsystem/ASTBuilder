@@ -17,6 +17,8 @@ Type
 
   TExpressionFunc = Function(Parser: PParser; Var Ast: PAstNode): Boolean;
 
+  TExpressionFuncArray = Array Of TExpressionFunc;
+
   TParser = Record
     FLexer: PLexer;
     FTokenList: PList;
@@ -38,7 +40,7 @@ Function TParser_GetCurrentToken(Self: PParser): PToken;
 Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
 
 Function TParser_Prod(Self: PParser; Var Ast: PAstNode;
-  Rules: TArray<TExpressionFunc>): Boolean;
+  Rules: TExpressionFuncArray): Boolean;
 
 Procedure TParser_Destroy(Self: PParser);
 
@@ -125,7 +127,7 @@ Begin
 End;
 
 Function TParser_Prod(Self: PParser; Var Ast: PAstNode;
-  Rules: TArray<TExpressionFunc>): Boolean;
+  Rules: TExpressionFuncArray): Boolean;
 Var
   I: Byte;
   mRule: TExpressionFunc;
