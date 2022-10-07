@@ -40,14 +40,17 @@ Begin
       Lexer.CurrentToken.Value :=
         Copy(Lexer.Source, Lexer.CurrentToken.StartPos, Lexer.CurrentPos -
         Lexer.CurrentToken.StartPos + 1);
-      Exit(True);
+      Result := True;
+      Exit;
     End;
     Lexer.CurrentToken.Kind := eNum;
     Lexer.CurrentToken.Value :=
       Copy(Lexer.Source, Lexer.CurrentToken.StartPos, Lexer.CurrentPos -
       Lexer.CurrentToken.StartPos + 1);
-    Exit(True);
+    Result := True;
+    Exit;
   End;
+  Result := False;
 End;
 
 Function Compose(): TLexerRule;

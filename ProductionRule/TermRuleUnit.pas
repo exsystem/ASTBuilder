@@ -19,14 +19,24 @@ Uses
   ExprRuleUnit, LiteralNode, List;
 
 Function TermExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Var
+  mValue: String;
 Begin
+  If TParser_Term(Parser, TTokenKind.eAdd) Or TParser_Term(Parser, TTokenKind.eSub) Then
+  Begin
+    If TParser_IsToken(Parser, TTokenKind.eSub) Then
+    Begin
+      mValue := '-';
+      // mValue := TParser_GetCurrentToken(Parser).Value; // it must be '-' actually.
+    End;
+  End;
   Result := TParser_Term(Parser, TTokenKind.eNum);
   If Not Result Then
   Begin
     Exit;
   End;
-  Ast := TLiteralNode_Create(TLiteralType.eInteger,
-    TParser_GetCurrentToken(Parser).Value);
+  mValue := mValue + TParser_GetCurrentToken(Parser).Value;
+  Ast := TLiteralNode_Create(TLiteralType.eInteger, mValue);
 End;
 
 Function TermRule(Parser: PParser; Var Ast: PAstNode): Boolean;
