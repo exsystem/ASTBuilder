@@ -21,7 +21,7 @@ Uses
 Function FactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   Result := TParser_Prod(Parser, Ast, [@FactorExpression1]);
-    //Result := FactorExpression1(Parser, Ast);
+  //Result := FactorExpression1(Parser, Ast);
 End;
 
 Function FactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
@@ -82,4 +82,3 @@ Begin
 End;
 
 End.
-

@@ -38,7 +38,7 @@ Function TParser_GetCurrentToken(Self: PParser): PToken;
 Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
 
 Function TParser_Prod(Self: PParser; Var Ast: PAstNode;
-  Rules: TArray<  TExpressionFunc>): Boolean;
+  Rules: TArray<TExpressionFunc>): Boolean;
 
 Procedure TParser_Destroy(Self: PParser);
 
@@ -95,13 +95,12 @@ Var
   t: String;
 {$ENDIF}
 Begin
-  Inc(Self.FCurrentToken);
-  Result := True;
-  If Self.FCurrentToken - 1 = Self.FTokenList.Size Then
+  If Self.FCurrentToken = Self.FTokenList.Size Then
   Begin
     Result := TLexer_GetNextToken(Self.FLexer);
     If Result Then
     Begin
+      Inc(Self.FCurrentToken);
       TList_PushBack(Self.FTokenList, @(Self.FLexer.CurrentToken));
       {$IFDEF DEBUG}
       {$IFDEF FPC}
@@ -110,12 +109,13 @@ Begin
       t := TRttiEnumerationType.GetName(TParser_GetCurrentToken(Self).Kind);
       {$ENDIF}
       Writeln('> TOKEN: [' + TParser_GetCurrentToken(Self).Value + '] is ' + t);
-        {$ENDIF}
-    End
-    Else
-    Begin
-      Dec(Self.FCurrentToken);
+      {$ENDIF}
     End;
+  End
+  Else
+  Begin
+    Result := True;
+    Inc(Self.FCurrentToken);
   End;
 End;
 
@@ -125,7 +125,7 @@ Begin
 End;
 
 Function TParser_Prod(Self: PParser; Var Ast: PAstNode;
-  Rules: TArray<  TExpressionFunc>): Boolean;
+  Rules: TArray<TExpressionFunc>): Boolean;
 Var
   I: Byte;
   mRule: TExpressionFunc;
@@ -162,7 +162,7 @@ Begin
     Begin
       n := PBinaryOpNode(P.Data);
       {$IFDEF FPC}
-        WriteStr(t, n.OpType);
+      WriteStr(t, n.OpType);
       {$ELSE}
       t := TRttiEnumerationType.GetName(n.OpType);
       {$ENDIF}
