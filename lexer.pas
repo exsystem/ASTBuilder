@@ -7,7 +7,7 @@ Unit Lexer;
 Interface
 
 Uses
-  List;
+  List, TypeDef;
 
 Type
   TTokenKind = (eUndefined, eAdd, eSub, eMul, eDiv, eLParent, eRParent, eNum,
@@ -18,7 +18,7 @@ Type
   TToken = Record
     Kind: TTokenKind;
     Value: String;
-    StartPos: UInt32;
+    StartPos: TSize;
   End;
 
   PLexer = ^TLexer;
@@ -26,7 +26,7 @@ Type
   TLexer = Record
     RuleList: PList;
     Source: String;
-    CurrentPos: UInt32;
+    CurrentPos: TSize;
     CurrentChar: Char;
     CurrentToken: TToken;
   End;
@@ -60,7 +60,7 @@ Function TLexer_PeekNextChar(Var Self: PLexer): Char;
 Implementation
 
 Uses
-  StringUtils, TypeDef;
+  StringUtils;
 
 Function TLexer_Create(Const Source: String): PLexer;
 Begin

@@ -51,7 +51,15 @@ Procedure OutputAST(P: PAstNode);
 Implementation
 
 Uses
-  LiteralNode, BinaryOpNode {$IFNDEF FPC}, System.Rtti{$ENDIF};
+  LiteralNode, BinaryOpNode
+  {$IFNDEF FPC},
+  {$IFDEF VER150}
+  TypInfo
+  {$ELSE}
+  System.Rtti
+  {$ENDIF}
+  {$ENDIF}
+  ;
 
 Function TParser_Parse(Self: PParser): Boolean;
 Begin
@@ -165,6 +173,9 @@ Procedure OutputAST(P: PAstNode);
 Var
   t: String;
   n: PBinaryOpNode;
+  {$IFDEF VER150}
+  tInfo: PTypeInfo;
+  {$ENDIF}
 Begin
   If P = nil Then
   Begin
@@ -178,7 +189,12 @@ Begin
       {$IFDEF FPC}
       WriteStr(t, n.OpType);
       {$ELSE}
+      {$IFDEF VER150}
+      tInfo := TypeInfo(TOpType);
+      t := GetEnumName(tInfo, Ord(n.OpType));
+      {$ELSE}
       t := TRttiEnumerationType.GetName(n.OpType);
+      {$ENDIF}
       {$ENDIF}
       Write(t, ' ');
       If n.LeftNode <> nil Then

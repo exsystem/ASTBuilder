@@ -11,7 +11,12 @@ Procedure Test1();
 Implementation
 
 Uses {$IFNDEF FPC}
-  System.Rtti, {$ENDIF}
+  {$IFDEF VER150}
+  TypInfo
+  {$ELSE}
+  System.Rtti
+  {$ENDIF}
+  , {$ENDIF}
   SysUtils,
   Lexer,
   Parser,
@@ -31,6 +36,9 @@ Var
   mLexer: PLexer;
   mParser: PParser;
   mKind: String;
+  {$IFDEF VER150}
+  tInfo: PTypeInfo;
+  {$ENDIF}
 
 Label
   TestLexer, TestParser;
@@ -61,7 +69,12 @@ Begin
         {$IFDEF FPC}
         WriteStr(mKind, mLexer.CurrentToken.Kind);
         {$ELSE}
+          {$IFDEF VER150}
+          tInfo := TypeInfo(TTokenKind);
+          mKind := GetEnumName(tInfo, Ord(mLexer.CurrentToken.Kind));
+          {$ELSE}
           mKind := TRttiEnumerationType.GetName(mLexer.CurrentToken.Kind);
+          {$ENDIF}
         {$ENDIF}
           Writeln(Format('token kind = %s: %s @ pos = %d',
           [mKind, mLexer.CurrentToken.Value, mLexer.CurrentToken.StartPos]));
