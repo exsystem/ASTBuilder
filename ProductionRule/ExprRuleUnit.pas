@@ -19,8 +19,8 @@ Uses
 
 Function ExprRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
-  Result := TParser_Prod(Parser, Ast, [@ExprExpression1]);
-  //Result := ExprExpression1(Parser, Ast);
+  //Result := TParser_Prod(Parser, Ast, [@ExprExpression1]);
+  Result := ExprExpression1(Parser, Ast);
 End;
 
 // Expr -> Factor ( opExpr Factor )*
@@ -29,7 +29,6 @@ Var
   mSavePoint: TSize;
   mHeadNode: PAstNode;
   mHeadNodeData: PBinaryOpNode;
-  mCurrNode: PAstNode;
   mCurrNodeData: PBinaryOpNode;
   mNewNode: PAstNode;
   mNewNodeData: PBinaryOpNode;
@@ -37,7 +36,6 @@ Var
 Begin
   mHeadNode := TBinaryOpNode_Create();
   mHeadNodeData := PBinaryOpNode(mHeadNode.Data);
-  mCurrNode := mHeadNode;
   mCurrNodeData := mHeadNodeData;
 
   Result := FactorRuleUnit.FactorRule(Parser, mCurrNodeData.RightNode);
@@ -47,21 +45,21 @@ Begin
     Exit;
   End;
   // the loop: ( opExpr Factor ) * 
-  While Not TParser_Term(Parser, TTokenKind.eEof) Do
+  While Not TParser_Term(Parser, eEof) Do
   Begin
     mNewNode := TBinaryOpNode_Create();
     mNewNodeData := PBinaryOpNode(mNewNode.Data);
 
     mSavePoint := Parser.FCurrentToken;
     mResult := False;
-    If TParser_Term(Parser, TTokenKind.eAdd) Then
+    If TParser_Term(Parser, eAdd) Then
     Begin
-      mNewNodeData.OpType := TOpType.ePlus;
+      mNewNodeData.OpType := ePlus;
       mResult := True;
     End
-    Else If TParser_Term(Parser, TTokenKind.eSub) Then
+    Else If TParser_Term(Parser, eSub) Then
     Begin
-      mNewNodeData.OpType := TOpType.eMinus;
+      mNewNodeData.OpType := eMinus;
       mResult := True;
     End;
     mResult := mResult And FactorRuleUnit.FactorRule(Parser, mNewNodeData.RightNode);
@@ -74,7 +72,6 @@ Begin
 
     mNewNodeData.LeftNode := mCurrNodeData.RightNode;
     mCurrNodeData.RightNode := mNewNode;
-    mCurrNode := mNewNode;
   End;
 
   Ast := mHeadNodeData.RightNode;

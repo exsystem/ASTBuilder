@@ -39,8 +39,10 @@ Function TParser_GetCurrentToken(Self: PParser): PToken;
 
 Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
 
-Function TParser_Prod(Self: PParser; Var Ast: PAstNode;
+{
+  Function TParser_Prod(Self: PParser; Var Ast: PAstNode;
   Rules: TExpressionFuncArray): Boolean;
+}
 
 Procedure TParser_Destroy(Self: PParser);
 
@@ -53,8 +55,7 @@ Uses
 
 Function TParser_Parse(Self: PParser): Boolean;
 Begin
-  Result := Self.MainProductionRule(Self, Self.Ast) And
-    TParser_Term(Self, TTokenKind.eEof);
+  Result := Self.MainProductionRule(Self, Self.Ast) And TParser_Term(Self, eEof);
 End;
 
 Function TParser_Create(Lexer: PLexer; ProductionRule: TSymbolFunc): PParser;
@@ -79,6 +80,15 @@ End;
 
 Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
 Begin
+  If (Self.FLexer.CurrentPos > 0) And (Self.FLexer.CurrentToken.Kind = eUndefined) Then
+  Begin
+    // Low effeciency! Should stopped the parser immediately! 
+    // * Consider `E -> Term(A) or Term(B) or Term(C) ...`
+    // * If an undefined token tested out during `Term(A)` with `False` returned, not because of not matching the `A`, you can not stop parsing E with this pattern of chaining terms together by `or`.
+    // OR (BETTER CHOICE): Assuming the lexer has preprocessed already, so that it is guaranteed no incorrect tokens during parsing. So this IF-THEN code block should be completely removed!
+    Result := False;
+    Exit;
+  End;
   If TParser_GetNextToken(Self) Then
   Begin
     Result := TParser_IsToken(Self, TokenKind);
@@ -88,7 +98,7 @@ Begin
     End;
     Exit;
   End;
-  Result := (TokenKind = TTokenKind.eEof);
+  Result := (TokenKind = eEof);
 End;
 
 Function TParser_GetNextToken(Self: PParser): Boolean;
@@ -126,6 +136,7 @@ Begin
   Result := (TParser_GetCurrentToken(Self).Kind = TokenKind);
 End;
 
+{
 Function TParser_Prod(Self: PParser; Var Ast: PAstNode;
   Rules: TExpressionFuncArray): Boolean;
 Var
@@ -143,6 +154,7 @@ Begin
   End;
   Result := False;
 End;
+}
 
 Function TParser_GetCurrentToken(Self: PParser): PToken;
 Begin

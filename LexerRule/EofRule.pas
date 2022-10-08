@@ -16,14 +16,13 @@ Implementation
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  If Lexer.CurrentChar = #0 Then
+  Result := (Lexer.CurrentChar = #0);
+  If Result Then
   Begin
     Lexer.CurrentToken.Kind := eEof;
     Lexer.CurrentToken.Value := 'EOF';
     Lexer.CurrentToken.StartPos := Lexer.CurrentPos;
-    Exit(True);
   End;
-  Exit(False);
 End;
 
 Function Compose(): TLexerRule;

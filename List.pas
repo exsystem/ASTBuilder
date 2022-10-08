@@ -40,7 +40,7 @@ End;
 
 Function TList_IsEmpty(Self: PList): Boolean;
 Begin
-  Result := Self.Size = 0;
+  Result := (Self.Size = 0);
 End;
 
 Procedure TList_Clear(Self: PList);

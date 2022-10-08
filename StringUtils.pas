@@ -8,6 +8,7 @@ Interface
 
 Function IsSpace(Const Ch: Char): Boolean;
 Function IsDigit(Const Ch: Char): Boolean;
+Function IsHexDigit(Const Ch: Char): Boolean;
 
 Implementation
 
@@ -19,6 +20,11 @@ End;
 Function IsDigit(Const Ch: Char): Boolean;
 Begin
   Result := Ch In ['0' .. '9'];
+End;
+
+Function IsHexDigit(Const Ch: Char): Boolean;
+Begin
+  Result := Ch In (['0' .. '9'] + ['a' .. 'f'] + ['A'..'F']);
 End;
 
 End.

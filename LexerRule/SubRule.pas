@@ -16,14 +16,13 @@ Implementation
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  If Lexer.CurrentChar = '-' Then
+  Result := (Lexer.CurrentChar = '-');
+  If Result Then
   Begin
     Lexer.CurrentToken.Kind := eSub;
     Lexer.CurrentToken.Value := Lexer.CurrentChar;
     Lexer.CurrentToken.StartPos := Lexer.CurrentPos;
-    Exit(True);
   End;
-  Exit(False);
 End;
 
 Function Compose(): TLexerRule;

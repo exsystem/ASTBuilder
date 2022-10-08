@@ -1,4 +1,5 @@
 Unit Lexer;
+
 {$IFDEF FPC}
 {$MODE DELPHI}
 {$ENDIF}
@@ -49,8 +50,8 @@ Function TLexer_GetNextToken(Var Self: PLexer): Boolean;
 
 Function TLexer_IsToken(Var Self: PLexer; Const TokenKind: TTokenKind): Boolean;
 
-Function TLexer_CompareNextToken(Var Self: PLexer; Const TokenKind: TTokenKind):
-  Boolean;
+Function TLexer_CompareNextToken(Var Self: PLexer;
+  Const TokenKind: TTokenKind): Boolean;
 
 Procedure TLexer_MoveNextChar(Var Self: PLexer);
 
@@ -68,14 +69,14 @@ Begin
   Result.Source := Source + #0;
   Result.CurrentPos := 0;
   Result.CurrentChar := '#';
-  Result.CurrentToken.Kind := TTokenKind.eUndefined;
+  Result.CurrentToken.Kind := eUndefined;
 End;
 
 Function TLexer_GetNextToken(Var Self: PLexer): Boolean;
 Var
   I: TSize;
 Begin
-  If Self.CurrentToken.Kind = TTokenKind.eEof Then
+  If Self.CurrentToken.Kind = eEof Then
   Begin
     Result := False;
     Exit;
@@ -89,19 +90,20 @@ Begin
   Begin
     If PLexerRule(TList_Get(Self.RuleList, I)).Parser(Self) Then
     Begin
-      Exit(Self.CurrentToken.Kind <> TTokenKind.eUndefined);
+      Result := (Self.CurrentToken.Kind <> eUndefined);
+      Exit;
     End;
   End;
 
   Self.CurrentToken.StartPos := Self.CurrentPos;
-  While (Not IsSpace(TLexer_PeekNextChar(Self))) And (TLexer_PeekNextChar(Self)
-    <> #0) Do
+  While (Not IsSpace(TLexer_PeekNextChar(Self))) And
+    (TLexer_PeekNextChar(Self) <> #0) Do
   Begin
     TLexer_MoveNextChar(Self);
   End;
   Self.CurrentToken.Kind := eUndefined;
-  Self.CurrentToken.Value := Copy(Self.Source, Self.CurrentToken.StartPos, Self.CurrentPos
-    - Self.CurrentToken.StartPos + 1);
+  Self.CurrentToken.Value := Copy(Self.Source, Self.CurrentToken.StartPos,
+    Self.CurrentPos - Self.CurrentToken.StartPos + 1);
   Result := False;
 End;
 
@@ -133,12 +135,11 @@ Begin
   Result := (Self.CurrentToken.Kind = TokenKind);
 End;
 
-Function TLexer_CompareNextToken(Var Self: PLexer; Const TokenKind: TTokenKind):
-  Boolean;
+Function TLexer_CompareNextToken(Var Self: PLexer;
+  Const TokenKind: TTokenKind): Boolean;
 Begin
   TLexer_GetNextToken(Self);
   Result := TLexer_IsToken(Self, TokenKind);
 End;
 
 End.
-

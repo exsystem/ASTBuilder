@@ -20,8 +20,8 @@ Uses
 
 Function FactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
-  Result := TParser_Prod(Parser, Ast, [@FactorExpression1]);
-  //Result := FactorExpression1(Parser, Ast);
+  //Result := TParser_Prod(Parser, Ast, [@FactorExpression1]);
+  Result := FactorExpression1(Parser, Ast);
 End;
 
 Function FactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
@@ -29,7 +29,6 @@ Var
   mSavePoint: TSize;
   mHeadNode: PAstNode;
   mHeadNodeData: PBinaryOpNode;
-  mCurrNode: PAstNode;
   mCurrNodeData: PBinaryOpNode;
   mNewNode: PAstNode;
   mNewNodeData: PBinaryOpNode;
@@ -37,7 +36,6 @@ Var
 Begin
   mHeadNode := TBinaryOpNode_Create();
   mHeadNodeData := PBinaryOpNode(mHeadNode.Data);
-  mCurrNode := mHeadNode;
   mCurrNodeData := mHeadNodeData;
 
   Result := TermRuleUnit.TermRule(Parser, mCurrNodeData.RightNode);
@@ -46,21 +44,21 @@ Begin
     TAstNode_Destroy(mHeadNode);
     Exit;
   End;
-  While Not TParser_Term(Parser, TTokenKind.eEof) Do
+  While Not TParser_Term(Parser, eEof) Do
   Begin
     mNewNode := TBinaryOpNode_Create();
     mNewNodeData := PBinaryOpNode(mNewNode.Data);
 
     mSavePoint := Parser.FCurrentToken;
     mResult := False;
-    If TParser_Term(Parser, TTokenKind.eMul) Then
+    If TParser_Term(Parser, eMul) Then
     Begin
-      mNewNodeData.OpType := TOpType.eMultiply;
+      mNewNodeData.OpType := eMultiply;
       mResult := True;
     End
-    Else If TParser_Term(Parser, TTokenKind.eDiv) Then
+    Else If TParser_Term(Parser, eDiv) Then
     Begin
-      mNewNodeData.OpType := TOpType.eDivide;
+      mNewNodeData.OpType := eDivide;
       mResult := True;
     End;
     mResult := mResult And TermRuleUnit.TermRule(Parser, mNewNodeData.RightNode);
@@ -73,7 +71,6 @@ Begin
 
     mNewNodeData.LeftNode := mCurrNodeData.RightNode;
     mCurrNodeData.RightNode := mNewNode;
-    mCurrNode := mNewNode;
   End;
 
   Ast := mHeadNodeData.RightNode;
