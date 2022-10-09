@@ -15,32 +15,30 @@ Type
   PLiteralNode = ^TLiteralNode;
 
   TLiteralNode = Record
+    Parent: TAstNode;
     NodeType: TLiteralType;
     Value: String;
   End;
 
-Function TLiteralNode_Create(NodeType: TLiteralType; Value: String): PAstNode;
+Procedure TLiteralNode_Create(Self: PLiteralNode; NodeType: TLiteralType;
+  Value: String);
 Procedure TLiteralNode_Destroy(Self: PAstNode);
 
 Implementation
 
-Function TLiteralNode_Create(NodeType: TLiteralType; Value: String): PAstNode;
-Var
-  mData: PLiteralNode;
+Procedure TLiteralNode_Create(Self: PLiteralNode; NodeType: TLiteralType;
+  Value: String);
 Begin
-  Result := TAstNode_Create($2);
-  New(mData);
-  mData.NodeType := NodeType;
-  mData.Value := Value;
-  Result.Data := mData;
+  TAstNode_Create(PAstNode(Self), $2);
+  Self.Parent.VMT.Destory := TLiteralNode_Destroy;
+
+  Self.NodeType := NodeType;
+  Self.Value := Value;
 End;
 
 Procedure TLiteralNode_Destroy(Self: PAstNode);
-Var
-  mData: PLiteralNode;
 Begin
-  mData := PLiteralNode(Self.Data);
-  Dispose(mData);
+  TAstNode_Destroy(Self);
 End;
 
 

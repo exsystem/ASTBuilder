@@ -27,55 +27,56 @@ End;
 Function FactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePoint: TSize;
-  mHeadNode: PAstNode;
-  mHeadNodeData: PBinaryOpNode;
-  mCurrNodeData: PBinaryOpNode;
-  mNewNode: PAstNode;
-  mNewNodeData: PBinaryOpNode;
+  mHeadNode: PBinaryOpNode;
+  mCurrNode: PBinaryOpNode;
+  mNewNode: PBinaryOpNode;
   mResult: Boolean;
 Begin
-  mHeadNode := TBinaryOpNode_Create();
-  mHeadNodeData := PBinaryOpNode(mHeadNode.Data);
-  mCurrNodeData := mHeadNodeData;
+  New(mHeadNode);
+  TBinaryOpNode_Create(mHeadNode);
+  mCurrNode := mHeadNode;
 
-  Result := TermRuleUnit.TermRule(Parser, mCurrNodeData.RightNode);
+  Result := TermRuleUnit.TermRule(Parser, mCurrNode.RightNode);
   If Result = False Then
   Begin
-    TAstNode_Destroy(mHeadNode);
+    TBinaryOpNode_Destroy(PAstNode(mHeadNode));
+    Dispose(mHeadNode);
     Exit;
   End;
   While Not TParser_Term(Parser, eEof) Do
   Begin
-    mNewNode := TBinaryOpNode_Create();
-    mNewNodeData := PBinaryOpNode(mNewNode.Data);
+    New(mNewNode);
+    TBinaryOpNode_Create(mNewNode);
 
     mSavePoint := Parser.FCurrentToken;
     mResult := False;
     If TParser_Term(Parser, eMul) Then
     Begin
-      mNewNodeData.OpType := eMultiply;
+      mNewNode.OpType := eMultiply;
       mResult := True;
     End
     Else If TParser_Term(Parser, eDiv) Then
     Begin
-      mNewNodeData.OpType := eDivide;
+      mNewNode.OpType := eDivide;
       mResult := True;
     End;
-    mResult := mResult And TermRuleUnit.TermRule(Parser, mNewNodeData.RightNode);
+    mResult := mResult And TermRuleUnit.TermRule(Parser, mNewNode.RightNode);
     If Not mResult Then
     Begin
       Parser.FCurrentToken := mSavePoint;
-      TAstNode_Destroy(mNewNode);
+      TBinaryOpNode_Destroy(PAstNode(mNewNode));
+      Dispose(mNewNode);
       Break;
     End;
 
-    mNewNodeData.LeftNode := mCurrNodeData.RightNode;
-    mCurrNodeData.RightNode := mNewNode;
+    mNewNode.LeftNode := mCurrNode.RightNode;
+    mCurrNode.RightNode := PAstNode(mNewNode);
   End;
 
-  Ast := mHeadNodeData.RightNode;
-  mHeadNodeData.RightNode := nil;
-  TAstNode_Destroy(mHeadNode);
+  Ast := mHeadNode.RightNode;
+  mHeadNode.RightNode := nil;
+  TBinaryOpNode_Destroy(PAstNode(mHeadNode));
+  Dispose(mHeadNode);
 End;
 
 End.

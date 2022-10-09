@@ -15,37 +15,38 @@ Type
   PBinaryOpNode = ^TBinaryOpNode;
 
   TBinaryOpNode = Record
+    Parent: TAstNode;
     OpType: TOpType;
     LeftNode: PASTNode;
     RightNode: PASTNode;
   End;
 
-Function TBinaryOpNode_Create(): PAstNode;
+Procedure TBinaryOpNode_Create(Self: PBinaryOpNode);
 Procedure TBinaryOpNode_Destroy(Self: PAstNode);
 
 Implementation
 
-Function TBinaryOpNode_Create(): PAstNode;
-Var
-  mData: PBinaryOpNode;
+Procedure TBinaryOpNode_Create(Self: PBinaryOpNode);
 Begin
-  Result := TAstNode_Create($1);
-  New(mData);
-  mData.LeftNode := nil;
-  mData.RightNode := nil;
-  Result.Data := mData;
+  TAstNode_Create(PAstNode(Self), $1);
+  Self.Parent.VMT.Destory := TBinaryOpNode_Destroy;
+  Self.LeftNode := nil;
+  Self.RightNode := nil;
 End;
 
 Procedure TBinaryOpNode_Destroy(Self: PAstNode);
-Var
-  mData: PBinaryOpNode;
 Begin
-  mData := PBinaryOpNode(Self.Data);
-  If mData.LeftNode <> nil Then
-    TAstNode_Destroy(mData.LeftNode);
-  If mData.RightNode <> nil Then
-    TAstNode_Destroy(mData.RightNode);
-  Dispose(mData);
+  If PBinaryOpNode(Self).LeftNode <> nil Then
+  Begin
+    PBinaryOpNode(Self).LeftNode.VMT.Destory(PBinaryOpNode(Self).LeftNode);
+    Dispose(PBinaryOpNode(Self).LeftNode);
+  End;
+  If PBinaryOpNode(Self).RightNode <> nil Then
+  Begin
+    PBinaryOpNode(Self).RightNode.VMT.Destory(PBinaryOpNode(Self).RightNode);
+    Dispose(PBinaryOpNode(Self).RightNode);
+  End;
+  TAstNode_Destroy(Self);
 End;
 
 End.
