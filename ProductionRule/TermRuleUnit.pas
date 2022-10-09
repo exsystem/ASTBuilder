@@ -36,7 +36,9 @@ Begin
     Exit;
   End;
   mValue := mValue + TParser_GetCurrentToken(Parser).Value;
-  Ast := TLiteralNode_Create(eInteger, mValue);
+
+  New(PLiteralNode(Ast)); 
+  TLiteralNode_Create(PLiteralNode(Ast), eInteger, mValue);
 End;
 
 Function TermRule(Parser: PParser; Var Ast: PAstNode): Boolean;

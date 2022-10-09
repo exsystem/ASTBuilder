@@ -81,7 +81,8 @@ Begin
   TList_Destroy(Self.FTokenList);
   If Self.Ast <> nil Then
   Begin
-    TAstNode_Destroy(Self.Ast);
+    Self.Ast.VMT.Destory(Self.Ast);
+    Dispose(Self.Ast);
   End;
   Dispose(Self);
 End;
@@ -185,7 +186,7 @@ Begin
   Case P.NodeType Of
     $1:
     Begin
-      n := PBinaryOpNode(P.Data);
+      n := PBinaryOpNode(P);
       {$IFDEF FPC}
       WriteStr(t, n.OpType);
       {$ELSE}
@@ -205,7 +206,7 @@ Begin
     End;
     $2:
     Begin
-      Write(PLiteralNode(P.Data).Value);
+      Write(PLiteralNode(P).Value);
     End;
   End;
   Write(' ) ');

@@ -9,34 +9,35 @@ Interface
 Type
   PAstNode = ^TAstNode;
 
-  TAstNode = Record
-    NodeType: Byte;
-    Data: Pointer;
+  TAstNode_Destroy_Proc= Procedure(Self: PAstNode);
+
+  PAstNode_VMT = ^TAstNode_VMT;
+
+  TAstNode_VMT = Record
+    Destory: TAstNode_Destroy_Proc;
   End;
 
-Function TAstNode_Create(NodeType: Byte): PAstNode;
+  TAstNode = Record
+    VMT: PAstNode_VMT;
+    NodeType: Byte;
+  End;
+
+Procedure TAstNode_Create(Self: PAstNode; NodeType: Byte);
 Procedure TAstNode_Destroy(Self: PAstNode);
 
 Implementation
 
-Uses
-  BinaryOpNode, LiteralNode;
-
-Function TAstNode_Create(NodeType: Byte): PAstNode;
+Procedure TAstNode_Create(Self: PAstNode; NodeType: Byte);
 Begin
-  New(Result);
-  Result.NodeType := NodeType;
+  New(Self.VMT);
+  Self.VMT.Destory := TAstNode_Destroy;
+
+  Self.NodeType := NodeType;
 End;
 
 Procedure TAstNode_Destroy(Self: PAstNode);
 Begin
-  Case Self.NodeType Of
-    $1:
-      TBinaryOpNode_Destroy(Self);
-    $2:
-      TLiteralNode_Destroy(Self);
-  End;
-  Dispose(Self);
+  Dispose(Self.VMT);
 End;
 
 End.
