@@ -1,4 +1,4 @@
-Unit MulRule;
+Unit SlashRule;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -16,7 +16,7 @@ Implementation
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := (TLexer_PeekNextChar(Lexer) = '*');
+  Result := (TLexer_PeekNextChar(Lexer) = '/');
   If Result Then
   Begin
     Lexer.CurrentToken.Value := TLexer_PeekNextChar(Lexer); 
@@ -27,7 +27,7 @@ End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eMul;
+  Result.TokenKind := eSlash;
   Result.Parser := Parse;
 End;
 

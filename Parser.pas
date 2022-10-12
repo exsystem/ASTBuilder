@@ -25,6 +25,7 @@ Type
     FCurrentToken: TSize;
     MainProductionRule: TSymbolFunc;
     Ast: PAstNode;
+    Error: String;
   End;
 
 Function TParser_Create(Lexer: PLexer; ProductionRule: TSymbolFunc): PParser;
@@ -58,8 +59,7 @@ Uses
   {$ELSE}
   System.Rtti
   {$ENDIF}
-  {$ENDIF}
-  ;
+  {$ENDIF}  ;
 
 Function TParser_Parse(Self: PParser): Boolean;
 Begin
@@ -89,7 +89,7 @@ End;
 
 Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
 Begin
-  If (Self.FLexer.CurrentPos > 0) And (Self.FLexer.CurrentToken.Kind = eUndefined) Then
+  If (Self.FLexer.NextPos > 1) And (Self.FLexer.CurrentToken.Kind = eUndefined) Then
   Begin
     // Low effeciency! Should stopped the parser immediately! 
     // * Consider `E -> Term(A) or Term(B) or Term(C) ...`

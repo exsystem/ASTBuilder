@@ -15,7 +15,7 @@ Uses {$IFNDEF FPC}
   FactorRuleUnit In 'ProductionRule/FactorRuleUnit.pas',
   TermRuleUnit In 'ProductionRule/TermRuleUnit.pas',
   AddRule In 'LexerRule/AddRule.pas',
-  DivRule In 'LexerRule/DivRule.pas',
+  SlashRule In 'LexerRule/SlashRule.pas',
   EofRule In 'LexerRule/EofRule.pas',
   LParentRule In 'LexerRule/LParentRule.pas',
   MulRule In 'LexerRule/MulRule.pas',

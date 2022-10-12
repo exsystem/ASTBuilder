@@ -6,7 +6,7 @@
 
 Uses {$IFNDEF FPC}
   System.SysUtils,
-  System.Rtti, {$ENDIF}
+  System.Rtti, {$ENDIF }
   ASTNode In 'ASTNode.pas',
   Lexer In 'Lexer.pas',
   List In 'List.pas',
@@ -26,7 +26,8 @@ Uses {$IFNDEF FPC}
   SubRule In 'LexerRule\SubRule.pas',
   BinaryOpNode In 'AST\BinaryOpNode.pas',
   LiteralNode In 'AST\LiteralNode.pas',
-  Test In 'Test\Test.pas';
+  Test In 'Test\Test.pas',
+  NotRule In 'LexerRule\NotRule.pas';
 
 Begin
   Test1();

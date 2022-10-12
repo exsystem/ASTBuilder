@@ -41,6 +41,7 @@ Begin
   Begin
     TBinaryOpNode_Destroy(PAstNode(mHeadNode));
     Dispose(mHeadNode);
+    Parser.Error := 'Expression expected.';
     Exit;
   End;
   // the loop: ( opExpr Factor ) * 
@@ -67,6 +68,7 @@ Begin
       Parser.FCurrentToken := mSavePoint;
       TBinaryOpNode_Destroy(PAstNode(mNewNode));
       Dispose(mNewNode);
+      Parser.Error := 'Expression expected.';
       Break;
     End;
 

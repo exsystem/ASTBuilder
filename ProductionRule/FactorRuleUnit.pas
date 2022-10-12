@@ -41,6 +41,7 @@ Begin
   Begin
     TBinaryOpNode_Destroy(PAstNode(mHeadNode));
     Dispose(mHeadNode);
+    Parser.Error := 'Expression expected.';
     Exit;
   End;
   While Not TParser_Term(Parser, eEof) Do
@@ -55,7 +56,7 @@ Begin
       mNewNode.OpType := eMultiply;
       mResult := True;
     End
-    Else If TParser_Term(Parser, eDiv) Then
+    Else If TParser_Term(Parser, eSlash) Then
     Begin
       mNewNode.OpType := eDivide;
       mResult := True;
@@ -66,6 +67,7 @@ Begin
       Parser.FCurrentToken := mSavePoint;
       TBinaryOpNode_Destroy(PAstNode(mNewNode));
       Dispose(mNewNode);
+      Parser.Error := 'Expression expected.';
       Break;
     End;
 

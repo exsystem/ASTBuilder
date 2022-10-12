@@ -20,48 +20,48 @@ Uses
 Function Parse(Lexer: PLexer): Boolean;
 Begin
   // look self, case 1: $...
-  If Lexer.CurrentChar = '$' Then
+  If TLexer_PeekNextChar(Lexer) = '$' Then
   Begin
     Result := True;
-    Lexer.CurrentToken.StartPos := Lexer.CurrentPos;
+    Lexer.CurrentToken.StartPos := Lexer.NextPos;
+    TLexer_Forward(Lexer);
     If IsHexDigit(TLexer_PeekNextChar(Lexer)) Then
     Begin
-      Lexer.CurrentToken.Kind := eNum;
-      TLexer_MoveNextChar(Lexer);
+      TLexer_Forward(Lexer);
       While IsHexDigit(TLexer_PeekNextChar(Lexer)) Do
       Begin
-        TLexer_MoveNextChar(Lexer);
+        TLexer_Forward(Lexer);
       End;
     End
     Else
     Begin
-      Lexer.CurrentToken.Kind := eUndefined;
+      Lexer.CurrentToken.Error := 'Illegal hex number.';
     End;
   End
   // look self, case 2: d..., start with a digit.
-  Else If IsDigit(Lexer.CurrentChar) Then
+  Else If IsDigit(TLexer_PeekNextChar(Lexer)) Then
   Begin
     Result := True;
-    Lexer.CurrentToken.Kind := eNum;
-    Lexer.CurrentToken.StartPos := Lexer.CurrentPos;
+    Lexer.CurrentToken.StartPos := Lexer.NextPos;
+    TLexer_Forward(Lexer);
     While IsDigit(TLexer_PeekNextChar(Lexer)) Do
     Begin
-      TLexer_MoveNextChar(Lexer);
+      TLexer_Forward(Lexer);
     End;
     If TLexer_PeekNextChar(Lexer) = '.' Then
     Begin
-      TLexer_MoveNextChar(Lexer);
+      TLexer_Forward(Lexer);
       While IsDigit(TLexer_PeekNextChar(Lexer)) Do
       Begin
-        TLexer_MoveNextChar(Lexer);
+        TLexer_Forward(Lexer);
       End;
     End;
     If TLexer_PeekNextChar(Lexer) In ['e', 'E'] Then
     Begin
-      TLexer_MoveNextChar(Lexer);
+      TLexer_Forward(Lexer);
       If TLexer_PeekNextChar(Lexer) In ['+', '-'] Then
       Begin
-        TLexer_MoveNextChar(Lexer);
+        TLexer_Forward(Lexer);
         If Not IsDigit(TLexer_PeekNextChar(Lexer)) Then
         Begin
           Lexer.CurrentToken.Kind := eUndefined;
@@ -69,7 +69,7 @@ Begin
       End;
       While IsDigit(TLexer_PeekNextChar(Lexer)) Do
       Begin
-        TLexer_MoveNextChar(Lexer);
+        TLexer_Forward(Lexer);
       End;
     End;
   End
@@ -79,23 +79,25 @@ Begin
     Exit;
   End;
   // look after...
-  If (Lexer.CurrentToken.Kind = eNum) And
+(*
+  If (Lexer.CurrentToken.Error = '') And
     (Not (TLexer_PeekNextChar(Lexer) In [' ', '+', '-', '*', '/',
     ')', {'.',} #0])) Then
   Begin
-    Lexer.CurrentToken.Kind := eUndefined;
-    TLexer_MoveNextChar(Lexer);
+    Lexer.CurrentToken.Error := 'Illegal number.';
+    TLexer_Forward(Lexer);
     While (Not IsSpace(TLexer_PeekNextChar(Lexer))) And
       (TLexer_PeekNextChar(Lexer) <> #0) Do
     Begin
-      TLexer_MoveNextChar(Lexer);
+      TLexer_Forward(Lexer);
     End;
     Result := True;
   End;
+*)
 
   Lexer.CurrentToken.Value :=
-    Copy(Lexer.Source, Lexer.CurrentToken.StartPos, Lexer.CurrentPos -
-    Lexer.CurrentToken.StartPos + 1);
+    Copy(Lexer.Source, Lexer.CurrentToken.StartPos, Lexer.NextPos -
+    Lexer.CurrentToken.StartPos);
 End;
 
 Function Compose(): TLexerRule;
