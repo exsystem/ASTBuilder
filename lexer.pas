@@ -11,7 +11,7 @@ Uses
 
 Type
   TTokenKind = (eUndefined, eNot, eAnd, eOr, eXor, eAdd, eSub, eMul,
-    eSlash, eMod, eShl, eShr, eEqual, eNotEqual, eLT, eLE, eGT, eGE,
+    eSlash, eDiv, eMod, eShl, eShr, eEqual, eNotEqual, eLT, eLE, eGT, eGE,
     eLParent, eRParent, eAs, eIs, eIn, eAt, eCaret, eNum, eEof);
 
   PToken = ^TToken;
@@ -70,7 +70,7 @@ Begin
   New(Result);
   Result.RuleList := TList_Create(SizeOf(TLexerRule), 10);
   Result.Source := Source + #0;
-  Result.NextPos:= 1;
+  Result.NextPos := 1;
   Result.CurrentToken.Kind := eUndefined;
 End;
 
@@ -85,11 +85,11 @@ Begin
     Exit;
   End;
 
-  while IsSpace(TLexer_PeekNextChar(Self)) do
-  begin
+  While IsSpace(TLexer_PeekNextChar(Self)) Do
+  Begin
     TLexer_Forward(Self);
-  end;
-  
+  End;
+
   For I := 0 To Pred(Self.RuleList.Size) Do
   Begin
     mRule := PLexerRule(TList_Get(Self.RuleList, I));
@@ -140,8 +140,23 @@ Begin
 End;
 
 Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: String): Boolean;
+Var
+  I: TSize;
 Begin
   Result := CompareMem(@Self.Source[Self.NextPos], @NextWord[1], Length(NextWord));
+  If Result Then
+  Begin
+    Exit;
+  End;
+  For I := Low(NextWord) To High(NextWord) Do
+  Begin
+    If Lower(NextWord[I]) <> Lower(Self.Source[Self.NextPos + I - Low(NextWord)]) Then
+    Begin
+      Result := False;
+      Exit;
+    End;
+  End;
+  Result := True;
 End;
 
 Procedure TLexer_AddRule(Var Self: PLexer; Const Rule: TLexerRule);
