@@ -14,15 +14,12 @@ Function Compose(): TLexerRule;
 
 Implementation
 
+Uses
+  SymbolRule;
+
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := (TLexer_PeekNextChar(Lexer) = '/');
-  If Result Then
-  Begin
-    Lexer.CurrentToken.Value := TLexer_PeekNextChar(Lexer); 
-    Lexer.CurrentToken.StartPos := Lexer.NextPos;
-    TLexer_Forward(Lexer);
-  End;
+  Result := SymbolRule.Parse(Lexer, '/');
 End;
 
 Function Compose(): TLexerRule;

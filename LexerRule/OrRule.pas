@@ -1,4 +1,4 @@
-Unit EofRule;
+Unit OrRule;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -15,16 +15,16 @@ Function Compose(): TLexerRule;
 Implementation
 
 Uses
-  SymbolRule;
+  KeywordRule;
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := SymbolRule.Parse(Lexer, #0);
+  Result := KeywordRule.Parse(Lexer, 'Or');
 End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eEof;
+  Result.TokenKind := eOr;
   Result.Parser := Parse;
 End;
 

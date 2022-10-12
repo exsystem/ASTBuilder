@@ -14,18 +14,12 @@ Function Compose(): TLexerRule;
 
 Implementation
 
+Uses
+  KeywordRule;
+
 Function Parse(Lexer: PLexer): Boolean;
-Const
-  CToken: String = 'Not';
 Begin
-  Result := TLexer_PeekNextWord(Lexer, CToken) {And
-    (TLexer_PeekNextChar(Lexer) In [' ', '('])};
-  If Result Then
-  Begin
-    Lexer.CurrentToken.Value := CToken;
-    Lexer.CurrentToken.StartPos := Lexer.NextPos;
-    TLexer_Forward(Lexer, Length(CToken));
-  End;
+  Result := KeywordRule.Parse(Lexer, 'Not');
 End;
 
 Function Compose(): TLexerRule;

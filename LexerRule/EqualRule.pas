@@ -1,4 +1,4 @@
-Unit EofRule;
+Unit EqualRule;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -19,12 +19,12 @@ Uses
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := SymbolRule.Parse(Lexer, #0);
+  Result := SymbolRule.Parse(Lexer, '=');
 End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eEof;
+  Result.TokenKind := eEqual;
   Result.Parser := Parse;
 End;
 
