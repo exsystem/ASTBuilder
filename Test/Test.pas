@@ -22,13 +22,14 @@ Uses {$IFNDEF FPC}
   Parser,
   ExprRuleUnit,
   AddRule,
-  DivRule,
+  SlashRule,
   EofRule,
   LParentRule,
   MulRule,
   NumRule,
   RParentRule,
-  SubRule;
+  SubRule,
+  NotRule;
 
 Procedure Test1();
 Var
@@ -59,10 +60,11 @@ Begin
       TLexer_AddRule(mLexer, AddRule.Compose());
       TLexer_AddRule(mLexer, SubRule.Compose());
       TLexer_AddRule(mLexer, MulRule.Compose());
-      TLexer_AddRule(mLexer, DivRule.Compose());
+      TLexer_AddRule(mLexer, SlashRule.Compose());
       TLexer_AddRule(mLexer, LParentRule.Compose());
       TLexer_AddRule(mLexer, RParentRule.Compose());
       TLexer_AddRule(mLexer, NumRule.Compose());
+      TLexer_AddRule(mLexer, NotRule.Compose());
       Repeat
         If TLexer_GetNextToken(mLexer) Then
         Begin
@@ -82,7 +84,7 @@ Begin
         End;
         Writeln(Format('[ERROR] Illegal token "%s" found at pos %d.',
         [mLexer.CurrentToken.Value, mLexer.CurrentToken.StartPos]));
-      Until mLexer.CurrentChar = #0;
+      Until TLexer_PeekNextChar(mLexer) = #0;
       TLexer_Destroy(mLexer);
     End;
   TestParser:
@@ -104,15 +106,19 @@ Begin
       TLexer_AddRule(mLexer, AddRule.Compose());
       TLexer_AddRule(mLexer, SubRule.Compose());
       TLexer_AddRule(mLexer, MulRule.Compose());
-      TLexer_AddRule(mLexer, DivRule.Compose());
+      TLexer_AddRule(mLexer, SlashRule.Compose());
       TLexer_AddRule(mLexer, LParentRule.Compose());
       TLexer_AddRule(mLexer, RParentRule.Compose());
       TLexer_AddRule(mLexer, NumRule.Compose());
       mParser := TParser_Create(mLexer, ExprRuleUnit.ExprRule);
       If TParser_Parse(mParser) Then
-        Writeln('ACCEPTED')
+        WriteLn('ACCEPTED')
       Else
-        Writeln('ERROR');
+      Begin
+        WriteLn(Format('ERROR: Parser Message: %s', [mParser.Error]));
+        WriteLn(Format('ERROR: Current Token at Pos = %d, Value = [%s], Message: %s',
+        [mLexer.CurrentToken.StartPos, mLexer.CurrentToken.Value, mLexer.CurrentToken.Error]));
+      End;
       OutputAST(mParser.Ast);
       Writeln;
       TParser_Destroy(mParser);

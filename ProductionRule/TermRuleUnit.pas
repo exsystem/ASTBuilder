@@ -33,11 +33,12 @@ Begin
   Result := TParser_Term(Parser, eNum);
   If Not Result Then
   Begin
+    Parser.Error := 'Number expected.';
     Exit;
   End;
   mValue := mValue + TParser_GetCurrentToken(Parser).Value;
 
-  New(PLiteralNode(Ast)); 
+  New(PLiteralNode(Ast));
   TLiteralNode_Create(PLiteralNode(Ast), eInteger, mValue);
 End;
 
@@ -53,6 +54,7 @@ Begin
     TParser_Term(Parser, eRParent));
   If Not Result Then
   Begin
+    Parser.Error := 'Expression expected.';
     Exit;
   End;
   // Ast := Ast; // Ast => Expr's Ast

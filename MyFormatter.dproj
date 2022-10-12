@@ -194,6 +194,8 @@
         <DCCReference Include="LexerRule\SubRule.pas"/>
         <DCCReference Include="AST\BinaryOpNode.pas"/>
         <DCCReference Include="AST\LiteralNode.pas"/>
+        <DCCReference Include="Test\Test.pas"/>
+        <DCCReference Include="LexerRule\NotRule.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

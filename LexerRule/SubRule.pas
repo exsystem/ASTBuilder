@@ -16,12 +16,12 @@ Implementation
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := (Lexer.CurrentChar = '-');
+  Result := (TLexer_PeekNextChar(Lexer) = '-');
   If Result Then
   Begin
-    Lexer.CurrentToken.Kind := eSub;
-    Lexer.CurrentToken.Value := Lexer.CurrentChar;
-    Lexer.CurrentToken.StartPos := Lexer.CurrentPos;
+    Lexer.CurrentToken.Value := TLexer_PeekNextChar(Lexer); 
+    Lexer.CurrentToken.StartPos := Lexer.NextPos;
+    TLexer_Forward(Lexer);
   End;
 End;
 
