@@ -10,7 +10,7 @@ Uses
   ASTNode;
 
 Type
-  TLiteralType = (eInteger);
+  TLiteralType = (eNumber);
 
   PLiteralNode = ^TLiteralNode;
 

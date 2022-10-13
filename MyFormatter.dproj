@@ -184,7 +184,9 @@
         <DCCReference Include="AST\BinaryOpNode.pas"/>
         <DCCReference Include="AST\LiteralNode.pas"/>
         <DCCReference Include="Test\Test.pas"/>
-        <DCCReference Include="LexerRule\AddRule.pas"/>
+        <DCCReference Include="LexerRule\Template\KeywordRule.pas"/>
+        <DCCReference Include="LexerRule\Template\SymbolRule.pas"/>
+        <DCCReference Include="AST\UnaryOpNode.pas"/>
         <DCCReference Include="LexerRule\AndRule.pas"/>
         <DCCReference Include="LexerRule\AsRule.pas"/>
         <DCCReference Include="LexerRule\DivRule.pas"/>
@@ -197,20 +199,19 @@
         <DCCReference Include="LexerRule\LERule.pas"/>
         <DCCReference Include="LexerRule\LParentRule.pas"/>
         <DCCReference Include="LexerRule\LTRule.pas"/>
+        <DCCReference Include="LexerRule\MinusRule.pas"/>
         <DCCReference Include="LexerRule\ModRule.pas"/>
         <DCCReference Include="LexerRule\MulRule.pas"/>
         <DCCReference Include="LexerRule\NotEqualRule.pas"/>
         <DCCReference Include="LexerRule\NotRule.pas"/>
         <DCCReference Include="LexerRule\NumRule.pas"/>
         <DCCReference Include="LexerRule\OrRule.pas"/>
+        <DCCReference Include="LexerRule\PlusRule.pas"/>
         <DCCReference Include="LexerRule\RParentRule.pas"/>
         <DCCReference Include="LexerRule\ShlRule.pas"/>
         <DCCReference Include="LexerRule\ShrRule.pas"/>
         <DCCReference Include="LexerRule\SlashRule.pas"/>
-        <DCCReference Include="LexerRule\SubRule.pas"/>
         <DCCReference Include="LexerRule\XorRule.pas"/>
-        <DCCReference Include="LexerRule\Template\KeywordRule.pas"/>
-        <DCCReference Include="LexerRule\Template\SymbolRule.pas"/>
         <DCCReference Include="ProductionRule\AddFactorRuleUnit.pas"/>
         <DCCReference Include="ProductionRule\AddOpRuleUnit.pas"/>
         <DCCReference Include="ProductionRule\ExprRuleUnit.pas"/>
@@ -218,7 +219,6 @@
         <DCCReference Include="ProductionRule\RelFactorRuleUnit.pas"/>
         <DCCReference Include="ProductionRule\RelOpRuleUnit.pas"/>
         <DCCReference Include="ProductionRule\TermRuleUnit.pas"/>
-        <DCCReference Include="AST\UnaryOpNode.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

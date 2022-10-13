@@ -1,4 +1,4 @@
-Unit SubRule;
+Unit PlusRule;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -19,12 +19,12 @@ Uses
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := SymbolRule.Parse(Lexer, '-');
+  Result := SymbolRule.Parse(Lexer, '+');
 End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eSub;
+  Result.TokenKind := ePlus;
   Result.Parser := Parse;
 End;
 

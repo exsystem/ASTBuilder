@@ -104,10 +104,6 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="LexerRule/AddRule.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
         <Filename Value="LexerRule/DivRule.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
@@ -129,10 +125,6 @@
       </Unit>
       <Unit>
         <Filename Value="LexerRule/RParentRule.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="LexerRule/SubRule.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
@@ -265,6 +257,14 @@
       </Unit>
       <Unit>
         <Filename Value="ProductionRule/RelOpRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="LexerRule/MinusRule.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="LexerRule/PlusRule.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
