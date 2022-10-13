@@ -1,4 +1,4 @@
-Unit ExprRuleUnit;
+Unit RelFactorRuleUnit;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -9,22 +9,21 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function ExprRule(Parser: PParser; Var Ast: PAstNode): Boolean;
-Function ExprExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function RelFactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+
+Function RelFactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
-  RelFactorRuleUnit, TypeDef, BinaryOpNode, RelOpRuleUnit;
+  AddFactorRuleUnit, TypeDef, BinaryOpNode, AddOpRuleUnit;
 
-Function ExprRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function RelFactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
-  //Result := TParser_Prod(Parser, Ast, [@ExprExpression1]);
-  Result := ExprExpression1(Parser, Ast);
+  Result := RelFactorExpression1(Parser, Ast);
 End;
 
-// Expr -> RelFactor ( RelOpExpr RelFactor )*
-Function ExprExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function RelFactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePoint: TSize;
   mHeadNode: PBinaryOpNode;
@@ -36,21 +35,20 @@ Begin
   TBinaryOpNode_Create(mHeadNode);
   mCurrNode := mHeadNode;
 
-  Result := RelFactorRule(Parser, mCurrNode.RightNode);
+  Result := AddFactorRule(Parser, mCurrNode.RightNode);
   If Result = False Then
   Begin
     TBinaryOpNode_Destroy(PAstNode(mHeadNode));
     Dispose(mHeadNode);
-    Parser.Error := 'Relational expression expected.';
+    Parser.Error := 'Add expression expected.';
     Exit;
   End;
-  // the loop: ( RelOpExpr RelFactor ) * 
   While Not TParser_Term(Parser, eEof) Do
   Begin
     mSavePoint := Parser.FCurrentToken;
     mNewNode := nil;
-    mResult := RelOpRule(Parser, PAstNode(mNewNode)) And
-      RelFactorRule(Parser, mNewNode.RightNode);
+    mResult := AddOpRule(Parser, PAstNode(mNewNode)) And
+      AddFactorRule(Parser, mNewNode.RightNode);
     If Not mResult Then
     Begin
       Parser.FCurrentToken := mSavePoint;
@@ -59,7 +57,7 @@ Begin
         TBinaryOpNode_Destroy(PAstNode(mNewNode));
         Dispose(mNewNode);
       End;
-      Parser.Error := 'Relational expression expected.';
+      Parser.Error := 'Add expression expected.';
       Break;
     End;
 

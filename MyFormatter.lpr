@@ -12,7 +12,7 @@ Uses {$IFNDEF FPC}
   StringUtils In 'StringUtils.pas',
   TypeDef In 'TypeDef.pas',
   ExprRuleUnit In 'ProductionRule/ExprRuleUnit.pas',
-  FactorRuleUnit In 'ProductionRule/FactorRuleUnit.pas',
+  AddFactorRuleUnit In 'ProductionRule/AddFactorRuleUnit.pas',
   TermRuleUnit In 'ProductionRule/TermRuleUnit.pas',
   AddRule In 'LexerRule/AddRule.pas',
   SlashRule In 'LexerRule/SlashRule.pas',

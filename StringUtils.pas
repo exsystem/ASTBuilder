@@ -32,7 +32,7 @@ Function Lower(Const Ch: Char): Char;
 Begin
   If (Ord(Ch) >= Ord('A')) And (Ord(Ch) <= Ord('Z')) Then
   Begin
-    Result := Chr(Ord(Ch) - Ord('A'));
+    Result := Chr(Ord(Ch) - Ord('A') + Ord('a'));
   End
   Else
   Begin

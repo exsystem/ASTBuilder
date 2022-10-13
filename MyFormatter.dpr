@@ -1,9 +1,6 @@
 ﻿Program MyFormatter;
-
 {$APPTYPE CONSOLE}
-
 {$R *.res}
-
 uses
   {$IFNDEF FPC}
   System.SysUtils,
@@ -15,9 +12,6 @@ uses
   Parser in 'Parser.pas',
   StringUtils in 'StringUtils.pas',
   TypeDef in 'TypeDef.pas',
-  ExprRuleUnit in 'ProductionRule\ExprRuleUnit.pas',
-  FactorRuleUnit in 'ProductionRule\FactorRuleUnit.pas',
-  TermRuleUnit in 'ProductionRule\TermRuleUnit.pas',
   BinaryOpNode in 'AST\BinaryOpNode.pas',
   LiteralNode in 'AST\LiteralNode.pas',
   Test in 'Test\Test.pas',
@@ -47,7 +41,15 @@ uses
   SubRule in 'LexerRule\SubRule.pas',
   XorRule in 'LexerRule\XorRule.pas',
   KeywordRule in 'LexerRule\Template\KeywordRule.pas',
-  SymbolRule in 'LexerRule\Template\SymbolRule.pas';
+  SymbolRule in 'LexerRule\Template\SymbolRule.pas',
+  AddFactorRuleUnit in 'ProductionRule\AddFactorRuleUnit.pas',
+  AddOpRuleUnit in 'ProductionRule\AddOpRuleUnit.pas',
+  ExprRuleUnit in 'ProductionRule\ExprRuleUnit.pas',
+  MulOpRuleUnit in 'ProductionRule\MulOpRuleUnit.pas',
+  RelFactorRuleUnit in 'ProductionRule\RelFactorRuleUnit.pas',
+  RelOpRuleUnit in 'ProductionRule\RelOpRuleUnit.pas',
+  TermRuleUnit in 'ProductionRule\TermRuleUnit.pas',
+  UnaryOpNode in 'AST\UnaryOpNode.pas';
 
 Begin
   Test1();

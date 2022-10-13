@@ -181,9 +181,6 @@
         <DCCReference Include="Parser.pas"/>
         <DCCReference Include="StringUtils.pas"/>
         <DCCReference Include="TypeDef.pas"/>
-        <DCCReference Include="ProductionRule\ExprRuleUnit.pas"/>
-        <DCCReference Include="ProductionRule\FactorRuleUnit.pas"/>
-        <DCCReference Include="ProductionRule\TermRuleUnit.pas"/>
         <DCCReference Include="AST\BinaryOpNode.pas"/>
         <DCCReference Include="AST\LiteralNode.pas"/>
         <DCCReference Include="Test\Test.pas"/>
@@ -214,6 +211,14 @@
         <DCCReference Include="LexerRule\XorRule.pas"/>
         <DCCReference Include="LexerRule\Template\KeywordRule.pas"/>
         <DCCReference Include="LexerRule\Template\SymbolRule.pas"/>
+        <DCCReference Include="ProductionRule\AddFactorRuleUnit.pas"/>
+        <DCCReference Include="ProductionRule\AddOpRuleUnit.pas"/>
+        <DCCReference Include="ProductionRule\ExprRuleUnit.pas"/>
+        <DCCReference Include="ProductionRule\MulOpRuleUnit.pas"/>
+        <DCCReference Include="ProductionRule\RelFactorRuleUnit.pas"/>
+        <DCCReference Include="ProductionRule\RelOpRuleUnit.pas"/>
+        <DCCReference Include="ProductionRule\TermRuleUnit.pas"/>
+        <DCCReference Include="AST\UnaryOpNode.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
