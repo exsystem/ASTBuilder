@@ -24,9 +24,9 @@ Var
   mValue: String;
 Begin
   mValue := '';
-  If TParser_Term(Parser, eAdd) Or TParser_Term(Parser, eSub) Then
+  If TParser_Term(Parser, ePlus) Or TParser_Term(Parser, eMinus) Then
   Begin
-    If TParser_IsToken(Parser, eSub) Then
+    If TParser_IsToken(Parser, eMinus) Then
     Begin
       mValue := '-';
       // mValue := TParser_GetCurrentToken(Parser).Value; // it must be '-' actually.
@@ -41,7 +41,7 @@ Begin
   mValue := mValue + TParser_GetCurrentToken(Parser).Value;
 
   New(PLiteralNode(Ast));
-  TLiteralNode_Create(PLiteralNode(Ast), eInteger, mValue);
+  TLiteralNode_Create(PLiteralNode(Ast), eNumber, mValue);
 End;
 
 Function TermRule(Parser: PParser; Var Ast: PAstNode): Boolean;

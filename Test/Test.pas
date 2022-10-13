@@ -21,14 +21,14 @@ Uses {$IFNDEF FPC}
   Lexer,
   Parser,
   ExprRuleUnit,
-  AddRule,
+  PlusRule,
   SlashRule,
   EofRule,
   LParentRule,
   MulRule,
   NumRule,
   RParentRule,
-  SubRule,
+  MinusRule,
   NotRule,
   DivRule,
   ModRule,
@@ -74,8 +74,8 @@ Begin
       mLexer := TLexer_Create(mSource);
       TLexer_AddRule(mLexer, EofRule.Compose());
       TLexer_AddRule(mLexer, NotRule.Compose());
-      TLexer_AddRule(mLexer, AddRule.Compose());
-      TLexer_AddRule(mLexer, SubRule.Compose());
+      TLexer_AddRule(mLexer, PlusRule.Compose());
+      TLexer_AddRule(mLexer, MinusRule.Compose());
       TLexer_AddRule(mLexer, MulRule.Compose());
       TLexer_AddRule(mLexer, SlashRule.Compose());
       TLexer_AddRule(mLexer, DivRule.Compose());
@@ -136,8 +136,8 @@ Begin
       mLexer := TLexer_Create(mSource);
       TLexer_AddRule(mLexer, EofRule.Compose());
       TLexer_AddRule(mLexer, NotRule.Compose());
-      TLexer_AddRule(mLexer, AddRule.Compose());
-      TLexer_AddRule(mLexer, SubRule.Compose());
+      TLexer_AddRule(mLexer, PlusRule.Compose());
+      TLexer_AddRule(mLexer, MinusRule.Compose());
       TLexer_AddRule(mLexer, MulRule.Compose());
       TLexer_AddRule(mLexer, SlashRule.Compose());
       TLexer_AddRule(mLexer, DivRule.Compose());

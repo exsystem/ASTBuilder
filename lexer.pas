@@ -10,7 +10,7 @@ Uses
   List, TypeDef;
 
 Type
-  TTokenKind = (eUndefined, eNot, eAnd, eOr, eXor, eAdd, eSub, eMul,
+  TTokenKind = (eUndefined, eNot, eAnd, eOr, eXor, ePlus, eMinus, eMul,
     eSlash, eDiv, eMod, eShl, eShr, eEqual, eNotEqual, eLT, eLE, eGT, eGE,
     eLParent, eRParent, eAs, eIs, eIn, eAt, eCaret, eNum, eEof);
 

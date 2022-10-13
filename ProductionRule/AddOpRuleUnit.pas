@@ -19,20 +19,20 @@ Uses
 
 Function AddOpExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
-  If TParser_Term(Parser, eAdd) Or TParser_Term(Parser, eSub) Or
+  If TParser_Term(Parser, ePlus) Or TParser_Term(Parser, eMinus) Or
     TParser_Term(Parser, TTokenKind.eOr) Or TParser_Term(Parser, TTokenKind.eXor) Then
   Begin
     Result := True;
     New(PBinaryOpNode(Ast));
     TBinaryOpNode_Create(PBinaryOpNode(Ast));
-    If TParser_IsToken(Parser, eAdd) Then
+    If TParser_IsToken(Parser, ePlus) Then
     Begin
-      PBinaryOpNode(Ast).OpType := ePlus;
+      PBinaryOpNode(Ast).OpType := eAnd;
     End
     Else
-    If TParser_IsToken(Parser, eSub) Then
+    If TParser_IsToken(Parser, eMinus) Then
     Begin
-      PBinaryOpNode(Ast).OpType := eMinus;
+      PBinaryOpNode(Ast).OpType := eSubtract;
     End
     Else
     If TParser_IsToken(Parser, TTokenKind.eOr) Then
