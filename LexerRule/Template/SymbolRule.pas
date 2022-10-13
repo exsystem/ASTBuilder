@@ -18,7 +18,7 @@ Begin
   Result := (TLexer_PeekNextChar(Lexer) = Ch);
   If Result Then
   Begin
-    Lexer.CurrentToken.Value := TLexer_PeekNextChar(Lexer); 
+    Lexer.CurrentToken.Value := TLexer_PeekNextChar(Lexer);
     Lexer.CurrentToken.StartPos := Lexer.NextPos;
     TLexer_Forward(Lexer);
   End;

@@ -10,7 +10,9 @@ Uses
   ASTNode;
 
 Type
-  TOpType = (ePlus, eMinus, eMultiply, eDivide);
+  TOpType = (eMultiply, eRealDivide, eIntDivide, eModulo, eAnd, eShiftLeft,
+    eShiftRight, eAs, ePlus, eMinus, eOr, eXor, eEqual, eNotEqual, eLT,
+    eGT, eLE, eGE, eIn, eIs);
 
   PBinaryOpNode = ^TBinaryOpNode;
 

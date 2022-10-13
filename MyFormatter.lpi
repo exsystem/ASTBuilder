@@ -160,10 +160,6 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="ProductionRule/FactorRuleUnit.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
         <Filename Value="ProductionRule/TermRuleUnit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
@@ -245,6 +241,30 @@
       </Unit>
       <Unit>
         <Filename Value="LexerRule/XorRule.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="AST/UnaryOpNode.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ProductionRule/AddFactorRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ProductionRule/AddOpRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ProductionRule/MulOpRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ProductionRule/RelFactorRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ProductionRule/RelOpRuleUnit.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

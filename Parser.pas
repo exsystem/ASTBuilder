@@ -52,7 +52,7 @@ Procedure OutputAST(P: PAstNode);
 Implementation
 
 Uses
-  LiteralNode, BinaryOpNode
+  LiteralNode, BinaryOpNode, UnaryOpNode
   {$IFNDEF FPC},
   {$IFDEF VER150}
   TypInfo
@@ -174,6 +174,7 @@ Procedure OutputAST(P: PAstNode);
 Var
   t: String;
   n: PBinaryOpNode;
+  m: PUnaryOpNode;
   {$IFDEF VER150}
   tInfo: PTypeInfo;
   {$ENDIF}
@@ -207,6 +208,22 @@ Begin
     $2:
     Begin
       Write(PLiteralNode(P).Value);
+    End;
+    $3:
+    Begin
+      m := PUnaryOpNode(P);
+      {$IFDEF FPC}
+      WriteStr(t, m.OpType);
+      {$ELSE}
+      {$IFDEF VER150}
+      tInfo := TypeInfo(TOpType);
+      t := GetEnumName(tInfo, Ord(m.OpType));
+      {$ELSE}
+      t := TRttiEnumerationType.GetName(m.OpType);
+      {$ENDIF}
+      {$ENDIF}
+      Write(t, ' ');
+      OutputAST(m.Value);
     End;
   End;
   Write(' ) ');
