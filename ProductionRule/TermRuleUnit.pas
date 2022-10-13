@@ -23,6 +23,7 @@ Function TermExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mValue: String;
 Begin
+  mValue := '';
   If TParser_Term(Parser, eAdd) Or TParser_Term(Parser, eSub) Then
   Begin
     If TParser_IsToken(Parser, eSub) Then
