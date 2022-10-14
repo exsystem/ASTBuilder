@@ -13,9 +13,9 @@ Uses
 Type
   PParser = ^TParser;
 
-  TSymbolFunc = Function(Parser: PParser; Var Ast: PAstNode): Boolean;
+  TSymbolFunc = Function(Parser: PParser; Out Ast: PAstNode): Boolean;
 
-  TExpressionFunc = Function(Parser: PParser; Var Ast: PAstNode): Boolean;
+  TExpressionFunc = Function(Parser: PParser; Out Ast: PAstNode): Boolean;
 
   TExpressionFuncArray = Array Of TExpressionFunc;
 

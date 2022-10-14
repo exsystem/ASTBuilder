@@ -9,59 +9,58 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function RelFactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function RelFactorRule(Parser: PParser; Out Ast: PAstNode): Boolean;
 
-Function RelFactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function RelFactorExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
   AddFactorRuleUnit, TypeDef, BinaryOpNode, AddOpRuleUnit;
 
-Function RelFactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function RelFactorRule(Parser: PParser; Out Ast: PAstNode): Boolean;
 Begin
   Result := RelFactorExpression1(Parser, Ast);
 End;
 
-Function RelFactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function RelFactorExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
 Var
   mSavePoint: TSize;
+  mRightNode: PAstNode;
   mHeadNode: PBinaryOpNode;
   mCurrNode: PBinaryOpNode;
   mNewNode: PBinaryOpNode;
-  mResult: Boolean;
 Begin
+  If Not AddFactorRule(Parser, mRightNode) Then
+  Begin
+    Parser.Error := 'Additive expression expected.';
+    Ast := nil;
+    Result := False;
+    Exit;
+  End;
+
   New(mHeadNode);
   TBinaryOpNode_Create(mHeadNode);
   mCurrNode := mHeadNode;
+  mCurrNode.RightNode := mRightNode;
 
-  Result := AddFactorRule(Parser, mCurrNode.RightNode);
-  If Result = False Then
-  Begin
-    TBinaryOpNode_Destroy(PAstNode(mHeadNode));
-    Dispose(mHeadNode);
-    Parser.Error := 'Add expression expected.';
-    Exit;
-  End;
+  Result := True;
   While Not TParser_Term(Parser, eEof) Do
   Begin
     mSavePoint := Parser.FCurrentToken;
-    mNewNode := nil;
-    mResult := AddOpRule(Parser, PAstNode(mNewNode)) And
-      AddFactorRule(Parser, mNewNode.RightNode);
-    If Not mResult Then
+    If Not AddOpRule(Parser, PAstNode(mNewNode)) Then
     Begin
       Parser.FCurrentToken := mSavePoint;
-      If mNewNode <> nil Then
-      Begin
-        TBinaryOpNode_Destroy(PAstNode(mNewNode));
-        Dispose(mNewNode);
-      End;
-      Parser.Error := 'Add expression expected.';
+      Break;
+    End;
+    If Not AddFactorRule(Parser, mRightNode) Then
+    Begin
+      Parser.FCurrentToken := mSavePoint;
       Break;
     End;
 
     mNewNode.LeftNode := mCurrNode.RightNode;
+    mNewNode.RightNode := mRightNode;
     mCurrNode.RightNode := PAstNode(mNewNode);
   End;
 
