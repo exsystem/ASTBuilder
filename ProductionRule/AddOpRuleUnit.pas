@@ -9,54 +9,47 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function AddOpRule(Parser: PParser; Var Ast: PAstNode): Boolean;
-Function AddOpExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function AddOpRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function AddOpExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
   BinaryOpNode;
 
-Function AddOpExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function AddOpExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
 Begin
-  If TParser_Term(Parser, ePlus) Or TParser_Term(Parser, eMinus) Or
-    TParser_Term(Parser, TTokenKind.eOr) Or TParser_Term(Parser, TTokenKind.eXor) Then
+  Result := True;
+  New(PBinaryOpNode(Ast));
+  TBinaryOpNode_Create(PBinaryOpNode(Ast));
+  If TParser_Term(Parser, ePlus) Then
   Begin
-    Result := True;
-    New(PBinaryOpNode(Ast));
-    TBinaryOpNode_Create(PBinaryOpNode(Ast));
-    If TParser_IsToken(Parser, ePlus) Then
-    Begin
-      PBinaryOpNode(Ast).OpType := eAnd;
-    End
-    Else
-    If TParser_IsToken(Parser, eMinus) Then
-    Begin
-      PBinaryOpNode(Ast).OpType := eSubtract;
-    End
-    Else
-    If TParser_IsToken(Parser, TTokenKind.eOr) Then
-    Begin
-      PBinaryOpNode(Ast).OpType := eOr;
-    End
-    Else
-    If TParser_IsToken(Parser, TTokenKind.eXor) Then
-    Begin
-      PBinaryOpNode(Ast).OpType := eXor;
-    End;
-  End
-  Else
-  Begin
-    Result := False;
-  End;
-  If Not Result Then
-  Begin
-    Parser.Error := 'Add binary operand expected.';
+    PBinaryOpNode(Ast).OpType := eAnd;
     Exit;
   End;
+  If TParser_Term(Parser, eMinus) Then
+  Begin
+    PBinaryOpNode(Ast).OpType := eSubtract;
+    Exit;
+  End;
+  If TParser_Term(Parser, TTokenKind.eOr) Then
+  Begin
+    PBinaryOpNode(Ast).OpType := eOr;
+    Exit;
+  End;
+  If TParser_Term(Parser, TTokenKind.eXor) Then
+  Begin
+    PBinaryOpNode(Ast).OpType := eXor;
+    Exit;
+  End;
+  TBinaryOpNode_Destroy(Ast);
+  Dispose(PBinaryOpNode(Ast));
+  Ast := nil;
+  Parser.Error := 'Additive operator expected.';
+  Result := False;
 End;
 
-Function AddOpRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function AddOpRule(Parser: PParser; Out Ast: PAstNode): Boolean;
 Begin
   Result := AddOpExpression1(Parser, Ast);
 End;
