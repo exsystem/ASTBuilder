@@ -1,6 +1,6 @@
 # AST Generation Code Pattern
 ## `E -> A B C ...`
-### Psudo code
+### Pseudo code
 ```pascal
 Function E(): Boolean;
 Begin
@@ -44,7 +44,7 @@ Ast := mNewNode;
 Result := True;
 ```
 ## `E -> A | B | C ...`
-### Psudo code
+### Pseudo code
 ```pascal
 Function E(): Boolean;
 Begin
@@ -83,6 +83,20 @@ Parser.Error := 'Multiplicative operator expected.';
 Result := False;
 ```
 ## `E -> X ( A B ) *`
+### Pseudo code
+```pascal
+Function E();
+Begin
+  Result := X();
+  If Not Result Then
+  Begin
+    Exit;
+  End;
+  While A() And B() Do
+  Begin
+  End;
+End;
+```
 ### Actual pattern example
 ```pascal
 // PREPARE NODE FOR X
