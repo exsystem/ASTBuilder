@@ -19,42 +19,48 @@ Uses
 
 Function MulOpExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
 Begin
-  Result := True;
   New(PBinaryOpNode(Ast));
   TBinaryOpNode_Create(PBinaryOpNode(Ast));
   If TParser_Term(Parser, eMul) Then
   Begin
     PBinaryOpNode(Ast).OpType := eMultiply;
+    Result := True;
     Exit;
   End;
   If TParser_Term(Parser, eSlash) Then
   Begin
     PBinaryOpNode(Ast).OpType := eRealDivide;
+    Result := True;
     Exit;
   End;
   If TParser_Term(Parser, eDiv) Then
   Begin
     PBinaryOpNode(Ast).OpType := eIntDivide;
+    Result := True;
     Exit;
   End;
   If TParser_Term(Parser, eMod) Then
   Begin
     PBinaryOpNode(Ast).OpType := eModulo;
+    Result := True;
     Exit;
   End;
   If TParser_Term(Parser, TTokenKind.eAnd) Then
   Begin
     PBinaryOpNode(Ast).OpType := eAnd;
+    Result := True;
     Exit;
   End;
   If TParser_Term(Parser, eShl) Then
   Begin
     PBinaryOpNode(Ast).OpType := eShiftLeft;
+    Result := True;
     Exit;
   End;
   If TParser_Term(Parser, eShr) Then
   Begin
     PBinaryOpNode(Ast).OpType := eShiftRight;
+    Result := True;
     Exit;
   End;
   TBinaryOpNode_Destroy(Ast);
