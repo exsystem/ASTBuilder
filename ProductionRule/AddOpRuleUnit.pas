@@ -19,27 +19,30 @@ Uses
 
 Function AddOpExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
 Begin
-  Result := True;
   New(PBinaryOpNode(Ast));
   TBinaryOpNode_Create(PBinaryOpNode(Ast));
   If TParser_Term(Parser, ePlus) Then
   Begin
     PBinaryOpNode(Ast).OpType := eAnd;
+    Result := True;
     Exit;
   End;
   If TParser_Term(Parser, eMinus) Then
   Begin
     PBinaryOpNode(Ast).OpType := eSubtract;
+    Result := True;
     Exit;
   End;
   If TParser_Term(Parser, TTokenKind.eOr) Then
   Begin
     PBinaryOpNode(Ast).OpType := eOr;
+    Result := True;
     Exit;
   End;
   If TParser_Term(Parser, TTokenKind.eXor) Then
   Begin
     PBinaryOpNode(Ast).OpType := eXor;
+    Result := True;
     Exit;
   End;
   TBinaryOpNode_Destroy(Ast);
