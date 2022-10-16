@@ -24,6 +24,7 @@ If Not ExprRuleUnit.ExprRule(Parser, mNewNode) Then
 Begin
   // IF FALSE on 2:
   Parser.Error := 'Expression expected.';
+  Ast := nil;
   // RETURN FALSE:
   Result := False;
   Exit;

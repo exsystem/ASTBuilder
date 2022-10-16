@@ -23,7 +23,7 @@ Begin
   TBinaryOpNode_Create(PBinaryOpNode(Ast));
   If TParser_Term(Parser, ePlus) Then
   Begin
-    PBinaryOpNode(Ast).OpType := eAnd;
+    PBinaryOpNode(Ast).OpType := eAdd;
     Result := True;
     Exit;
   End;
