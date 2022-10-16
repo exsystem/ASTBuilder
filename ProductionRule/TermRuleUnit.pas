@@ -29,8 +29,11 @@ Begin
   If Not TParser_Term(Parser, eNum) Then
   Begin
     Parser.Error := 'Number expected.';
-    TUnaryOpNode_Destroy(PAstNode(mSignNode));
-    Dispose(mSignNode);
+    If mSignNode <> nil Then
+    Begin
+      TUnaryOpNode_Destroy(PAstNode(mSignNode));
+      Dispose(mSignNode);
+    End;
     Ast := nil;
     Result := False;
     Exit;
