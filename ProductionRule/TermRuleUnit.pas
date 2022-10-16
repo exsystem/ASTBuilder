@@ -17,32 +17,37 @@ Function TermExpression3(Parser: PParser; Out Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  ExprRuleUnit, LiteralNode, UnaryOpNode;
+  ExprRuleUnit, SignOpRuleUnit, LiteralNode, UnaryOpNode;
 
 Function TermExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
 Var
-  mValue: String;
+  mSignNode: PAstNode;
+  mLiteralNode: PAstNode;
 Begin
-  mValue := '';
-  If TParser_Term(Parser, ePlus) Or TParser_Term(Parser, eMinus) Then
-  Begin
-    If TParser_IsToken(Parser, eMinus) Then
-    Begin
-      mValue := '-';
-      // mValue := TParser_GetCurrentToken(Parser).Value; // it must be '-' actually.
-    End;
-  End;
-  Result := TParser_Term(Parser, eNum);
-  If Not Result Then
+  mSignNode := nil;
+  SignOpRule(Parser, mSignNode);
+  If Not TParser_Term(Parser, eNum) Then
   Begin
     Parser.Error := 'Number expected.';
+    TUnaryOpNode_Destroy(PAstNode(mSignNode));
+    Dispose(mSignNode);
     Ast := nil;
+    Result := False;
     Exit;
   End;
-  mValue := mValue + TParser_GetCurrentToken(Parser).Value;
-
-  New(PLiteralNode(Ast));
-  TLiteralNode_Create(PLiteralNode(Ast), eNumber, mValue);
+  New(PLiteralNode(mLiteralNode));
+  TLiteralNode_Create(PLiteralNode(mLiteralNode), eNumber,
+    TParser_GetCurrentToken(Parser).Value);
+  If mSignNode = nil Then
+  Begin
+    Ast := mLiteralNode;
+  End
+  Else
+  Begin
+    PUnaryOpNode(mSignNode).Value := mLiteralNode;
+    Ast := mSignNode;
+  End;
+  Result := True;
 End;
 
 Function TermRule(Parser: PParser; Out Ast: PAstNode): Boolean;
