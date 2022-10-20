@@ -7,6 +7,8 @@ Unit ASTNode;
 Interface
 
 Type
+  PPAstNode = ^PAstNode;
+
   PAstNode = ^TAstNode;
 
   TAstNode_Destroy_Proc= Procedure(Self: PAstNode);

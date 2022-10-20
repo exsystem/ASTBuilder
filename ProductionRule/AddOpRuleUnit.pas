@@ -9,15 +9,15 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function AddOpRule(Parser: PParser; Out Ast: PAstNode): Boolean;
-Function AddOpExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function AddOpRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function AddOpExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
   BinaryOpNode;
 
-Function AddOpExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function AddOpExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   New(PBinaryOpNode(Ast));
   TBinaryOpNode_Create(PBinaryOpNode(Ast));
@@ -52,7 +52,7 @@ Begin
   Result := False;
 End;
 
-Function AddOpRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function AddOpRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   Result := AddOpExpression1(Parser, Ast);
 End;

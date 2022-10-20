@@ -6,6 +6,9 @@ Unit Test;
 
 Interface
 
+Type
+  PPInteger = ^PInteger;
+
 Procedure Test1();
 
 Implementation
@@ -20,7 +23,7 @@ Uses {$IFNDEF FPC}
   SysUtils,
   Lexer,
   Parser,
-  ExprRuleUnit,
+  VarRuleUnit,
   PlusRule,
   SlashRule,
   EofRule,
@@ -45,7 +48,16 @@ Uses {$IFNDEF FPC}
   LERule,
   GERule,
   InRule,
-  IsRule;
+  IsRule,
+  IdRule,
+  AtRule,
+  LBrackRule,
+  RBrackRule,
+  LBrack2Rule,
+  RBrack2Rule,
+  CommaRule,
+  DotRule,
+  PointerRule;
 
 Procedure Test1();
 Var
@@ -56,10 +68,8 @@ Var
   {$IFDEF VER150}
   tInfo: PTypeInfo;
   {$ENDIF}
-
 Label
   TestLexer, TestParser;
-
 Begin
   Goto TestParser;
 
@@ -73,29 +83,38 @@ Begin
       End;
       mLexer := TLexer_Create(mSource);
       TLexer_AddRule(mLexer, EofRule.Compose());
-      TLexer_AddRule(mLexer, NotRule.Compose());
+      TLexer_AddRule(mLexer, IdRule.Compose());
+      TLexer_AddRule(mLexer, AtRule.Compose());
+      TLexer_AddRule(mLexer, PointerRule.Compose());
+      TLexer_AddRule(mLexer, NotRule.Compose(mLexer));
       TLexer_AddRule(mLexer, PlusRule.Compose());
       TLexer_AddRule(mLexer, MinusRule.Compose());
       TLexer_AddRule(mLexer, MulRule.Compose());
       TLexer_AddRule(mLexer, SlashRule.Compose());
-      TLexer_AddRule(mLexer, DivRule.Compose());
-      TLexer_AddRule(mLexer, ModRule.Compose());
-      TLexer_AddRule(mLexer, AndRule.Compose());
-      TLexer_AddRule(mLexer, ShlRule.Compose());
-      TLexer_AddRule(mLexer, ShrRule.Compose());
-      TLexer_AddRule(mLexer, AsRule.Compose());
-      TLexer_AddRule(mLexer, OrRule.Compose());
-      TLexer_AddRule(mLexer, XorRule.Compose());
+      TLexer_AddRule(mLexer, DivRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, ModRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, AndRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, ShlRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, ShrRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, AsRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, OrRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, XorRule.Compose(mLexer));
       TLexer_AddRule(mLexer, EqualRule.Compose());
       TLexer_AddRule(mLexer, NotEqualRule.Compose());
-      TLexer_AddRule(mLexer, LTRule.Compose());
-      TLexer_AddRule(mLexer, GTRule.Compose());
       TLexer_AddRule(mLexer, LERule.Compose());
       TLexer_AddRule(mLexer, GERule.Compose());
-      TLexer_AddRule(mLexer, InRule.Compose());
-      TLexer_AddRule(mLexer, IsRule.Compose());
+      TLexer_AddRule(mLexer, LTRule.Compose());
+      TLexer_AddRule(mLexer, GTRule.Compose());
+      TLexer_AddRule(mLexer, InRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, IsRule.Compose(mLexer));
       TLexer_AddRule(mLexer, LParentRule.Compose());
       TLexer_AddRule(mLexer, RParentRule.Compose());
+      TLexer_AddRule(mLexer, LBrackRule.Compose());
+      TLexer_AddRule(mLexer, RBrackRule.Compose());
+      TLexer_AddRule(mLexer, LBrack2Rule.Compose());
+      TLexer_AddRule(mLexer, RBrack2Rule.Compose());
+      TLexer_AddRule(mLexer, CommaRule.Compose());
+      TLexer_AddRule(mLexer, DotRule.Compose());
       TLexer_AddRule(mLexer, NumRule.Compose());
       Repeat
         If TLexer_GetNextToken(mLexer) Then
@@ -135,31 +154,40 @@ Begin
       End;
       mLexer := TLexer_Create(mSource);
       TLexer_AddRule(mLexer, EofRule.Compose());
-      TLexer_AddRule(mLexer, NotRule.Compose());
+      TLexer_AddRule(mLexer, IdRule.Compose());
+      TLexer_AddRule(mLexer, AtRule.Compose());
+      TLexer_AddRule(mLexer, PointerRule.Compose());
+      TLexer_AddRule(mLexer, NotRule.Compose(mLexer));
       TLexer_AddRule(mLexer, PlusRule.Compose());
       TLexer_AddRule(mLexer, MinusRule.Compose());
       TLexer_AddRule(mLexer, MulRule.Compose());
       TLexer_AddRule(mLexer, SlashRule.Compose());
-      TLexer_AddRule(mLexer, DivRule.Compose());
-      TLexer_AddRule(mLexer, ModRule.Compose());
-      TLexer_AddRule(mLexer, AndRule.Compose());
-      TLexer_AddRule(mLexer, ShlRule.Compose());
-      TLexer_AddRule(mLexer, ShrRule.Compose());
-      TLexer_AddRule(mLexer, AsRule.Compose());
-      TLexer_AddRule(mLexer, OrRule.Compose());
-      TLexer_AddRule(mLexer, XorRule.Compose());
+      TLexer_AddRule(mLexer, DivRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, ModRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, AndRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, ShlRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, ShrRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, AsRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, OrRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, XorRule.Compose(mLexer));
       TLexer_AddRule(mLexer, EqualRule.Compose());
       TLexer_AddRule(mLexer, NotEqualRule.Compose());
-      TLexer_AddRule(mLexer, LTRule.Compose());
-      TLexer_AddRule(mLexer, GTRule.Compose());
       TLexer_AddRule(mLexer, LERule.Compose());
       TLexer_AddRule(mLexer, GERule.Compose());
-      TLexer_AddRule(mLexer, InRule.Compose());
-      TLexer_AddRule(mLexer, IsRule.Compose());
+      TLexer_AddRule(mLexer, LTRule.Compose());
+      TLexer_AddRule(mLexer, GTRule.Compose());
+      TLexer_AddRule(mLexer, InRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, IsRule.Compose(mLexer));
       TLexer_AddRule(mLexer, LParentRule.Compose());
       TLexer_AddRule(mLexer, RParentRule.Compose());
+      TLexer_AddRule(mLexer, LBrackRule.Compose());
+      TLexer_AddRule(mLexer, RBrackRule.Compose());
+      TLexer_AddRule(mLexer, LBrack2Rule.Compose());
+      TLexer_AddRule(mLexer, RBrack2Rule.Compose());
+      TLexer_AddRule(mLexer, CommaRule.Compose());
+      TLexer_AddRule(mLexer, DotRule.Compose());
       TLexer_AddRule(mLexer, NumRule.Compose());
-      mParser := TParser_Create(mLexer, ExprRuleUnit.ExprRule);
+      mParser := TParser_Create(mLexer, VarRule);
       If TParser_Parse(mParser) Then
         WriteLn('ACCEPTED')
       Else

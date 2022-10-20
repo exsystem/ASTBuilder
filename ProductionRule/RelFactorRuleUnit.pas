@@ -9,21 +9,21 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function RelFactorRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function RelFactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 
-Function RelFactorExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function RelFactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
   AddFactorRuleUnit, TypeDef, BinaryOpNode, AddOpRuleUnit;
 
-Function RelFactorRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function RelFactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   Result := RelFactorExpression1(Parser, Ast);
 End;
 
-Function RelFactorExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function RelFactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePoint: TSize;
   mRightNode: PAstNode;

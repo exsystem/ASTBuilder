@@ -9,15 +9,15 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function MulOpRule(Parser: PParser; Out Ast: PAstNode): Boolean;
-Function MulOpExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function MulOpRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function MulOpExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
   BinaryOpNode;
 
-Function MulOpExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function MulOpExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   New(PBinaryOpNode(Ast));
   TBinaryOpNode_Create(PBinaryOpNode(Ast));
@@ -70,7 +70,7 @@ Begin
   Result := False;
 End;
 
-Function MulOpRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function MulOpRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   Result := MulOpExpression1(Parser, Ast);
 End;
