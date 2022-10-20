@@ -162,7 +162,6 @@
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>(None)</Manifest_File>
-        <DCC_DebugDCUs>false</DCC_DebugDCUs>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -177,25 +176,33 @@
         </DelphiCompile>
         <DCCReference Include="ASTNode.pas"/>
         <DCCReference Include="Lexer.pas"/>
-        <DCCReference Include="List.pas"/>
         <DCCReference Include="Parser.pas"/>
-        <DCCReference Include="StringUtils.pas"/>
-        <DCCReference Include="TypeDef.pas"/>
-        <DCCReference Include="AST\BinaryOpNode.pas"/>
-        <DCCReference Include="AST\LiteralNode.pas"/>
         <DCCReference Include="Test\Test.pas"/>
         <DCCReference Include="LexerRule\Template\KeywordRule.pas"/>
         <DCCReference Include="LexerRule\Template\SymbolRule.pas"/>
+        <DCCReference Include="AST\ArrayAccessNode.pas"/>
+        <DCCReference Include="AST\BinaryOpNode.pas"/>
+        <DCCReference Include="AST\DerefNode.pas"/>
+        <DCCReference Include="AST\IdNode.pas"/>
+        <DCCReference Include="AST\LiteralNode.pas"/>
+        <DCCReference Include="AST\MemberRefNode.pas"/>
         <DCCReference Include="AST\UnaryOpNode.pas"/>
         <DCCReference Include="LexerRule\AndRule.pas"/>
         <DCCReference Include="LexerRule\AsRule.pas"/>
+        <DCCReference Include="LexerRule\AtRule.pas"/>
+        <DCCReference Include="LexerRule\ColonRule.pas"/>
+        <DCCReference Include="LexerRule\CommaRule.pas"/>
         <DCCReference Include="LexerRule\DivRule.pas"/>
+        <DCCReference Include="LexerRule\DotRule.pas"/>
         <DCCReference Include="LexerRule\EofRule.pas"/>
         <DCCReference Include="LexerRule\EqualRule.pas"/>
         <DCCReference Include="LexerRule\GERule.pas"/>
         <DCCReference Include="LexerRule\GTRule.pas"/>
+        <DCCReference Include="LexerRule\IdRule.pas"/>
         <DCCReference Include="LexerRule\InRule.pas"/>
         <DCCReference Include="LexerRule\IsRule.pas"/>
+        <DCCReference Include="LexerRule\LBrack2Rule.pas"/>
+        <DCCReference Include="LexerRule\LBrackRule.pas"/>
         <DCCReference Include="LexerRule\LERule.pas"/>
         <DCCReference Include="LexerRule\LParentRule.pas"/>
         <DCCReference Include="LexerRule\LTRule.pas"/>
@@ -207,6 +214,9 @@
         <DCCReference Include="LexerRule\NumRule.pas"/>
         <DCCReference Include="LexerRule\OrRule.pas"/>
         <DCCReference Include="LexerRule\PlusRule.pas"/>
+        <DCCReference Include="LexerRule\PointerRule.pas"/>
+        <DCCReference Include="LexerRule\RBrack2Rule.pas"/>
+        <DCCReference Include="LexerRule\RBrackRule.pas"/>
         <DCCReference Include="LexerRule\RParentRule.pas"/>
         <DCCReference Include="LexerRule\ShlRule.pas"/>
         <DCCReference Include="LexerRule\ShrRule.pas"/>
@@ -218,7 +228,14 @@
         <DCCReference Include="ProductionRule\MulOpRuleUnit.pas"/>
         <DCCReference Include="ProductionRule\RelFactorRuleUnit.pas"/>
         <DCCReference Include="ProductionRule\RelOpRuleUnit.pas"/>
+        <DCCReference Include="ProductionRule\SignOpRuleUnit.pas"/>
         <DCCReference Include="ProductionRule\TermRuleUnit.pas"/>
+        <DCCReference Include="ProductionRule\VarRuleUnit.pas"/>
+        <DCCReference Include="Util\List.pas"/>
+        <DCCReference Include="Util\StringUtils.pas"/>
+        <DCCReference Include="Util\Trie.pas"/>
+        <DCCReference Include="Util\TypeDef.pas"/>
+        <DCCReference Include="ProductionRule\SignFactorRuleUnit.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

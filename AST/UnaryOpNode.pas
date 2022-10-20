@@ -10,7 +10,7 @@ Uses
   ASTNode;
 
 Type
-  TOpType = (eNot, ePositive, eNegative);
+  TOpType = (eAddress, eNot, ePositive, eNegative);
 
   PUnaryOpNode = ^TUnaryOpNode;
 

@@ -9,15 +9,15 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function SignOpRule(Parser: PParser; Out Ast: PAstNode): Boolean;
-Function SignOpExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function SignOpRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function SignOpExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
   UnaryOpNode;
 
-Function SignOpExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function SignOpExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   New(PUnaryOpNode(Ast));
   TUnaryOpNode_Create(PUnaryOpNode(Ast));
@@ -40,7 +40,7 @@ Begin
   Result := False;
 End;
 
-Function SignOpRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function SignOpRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   Result := SignOpExpression1(Parser, Ast);
 End;

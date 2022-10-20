@@ -10,7 +10,7 @@ Uses
   Lexer;
 
 Function Parse(Lexer: PLexer): Boolean;
-Function Compose(): TLexerRule;
+Function Compose(Lexer: PLexer): TLexerRule;
 
 Implementation
 
@@ -22,10 +22,9 @@ Begin
   Result := KeywordRule.Parse(Lexer, 'In');
 End;
 
-Function Compose(): TLexerRule;
+Function Compose(Lexer: PLexer): TLexerRule;
 Begin
-  Result.TokenKind := eIn;
-  Result.Parser := Parse;
+  Result := KeywordRule.Compose(Lexer, Parse, eIn, 'In');
 End;
 
 End.

@@ -7,13 +7,14 @@ Unit Lexer;
 Interface
 
 Uses
-  List, TypeDef;
+  List, TypeDef, Trie;
 
 Type
+  PTokenKind = ^TTokenKind;
   TTokenKind = (eUndefined, eNot, eAnd, eOr, eXor, ePlus, eMinus, eMul,
     eSlash, eDiv, eMod, eShl, eShr, eEqual, eNotEqual, eLT, eLE, eGT, eGE,
-    eLParent, eRParent, eAs, eIs, eIn, eAt, eCaret, eNum, eEof);
-
+    eLParent, eRParent, eAs, eIs, eIn, eAt, ePointer, eNum, eId, eColon,
+    eLBrack, eRBrack, eLBrack2, eRBrack2, eComma, eDot, eEof);
   PToken = ^TToken;
 
   TToken = Record
@@ -22,18 +23,16 @@ Type
     Value: String;
     StartPos: TSize;
   End;
-
   PLexer = ^TLexer;
 
   TLexer = Record
     RuleList: PList;
+    Keywords: PTrie; // of <String, TTokenKind>  
     Source: String;
     NextPos: TSize;
     CurrentToken: TToken;
   End;
-
   TLexerRuleParser = Function(Lexer: PLexer): Boolean;
-
   PLexerRule = ^TLexerRule;
 
   TLexerRule = Record
@@ -42,22 +41,14 @@ Type
   End;
 
 Function TLexer_Create(Const Source: String): PLexer;
-
 Procedure TLexer_Destroy(Var Self: PLexer);
-
 Procedure TLexer_AddRule(Var Self: PLexer; Const Rule: TLexerRule);
-
 Function TLexer_GetNextToken(Var Self: PLexer): Boolean;
-
 Function TLexer_IsToken(Var Self: PLexer; Const TokenKind: TTokenKind): Boolean;
-
 Function TLexer_CompareNextToken(Var Self: PLexer;
   Const TokenKind: TTokenKind): Boolean;
-
 Procedure TLexer_Forward(Var Self: PLexer; Const Step: TSize = 1);
-
 Function TLexer_PeekNextChar(Var Self: PLexer): Char;
-
 Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: String): Boolean;
 
 Implementation
@@ -69,6 +60,7 @@ Function TLexer_Create(Const Source: String): PLexer;
 Begin
   New(Result);
   Result.RuleList := TList_Create(SizeOf(TLexerRule), 10);
+  Result.Keywords := TTrie_Create(SizeOf(TTokenKind));
   Result.Source := Source + #0;
   Result.NextPos := 1;
   Result.CurrentToken.Kind := eUndefined;
@@ -78,18 +70,17 @@ Function TLexer_GetNextToken(Var Self: PLexer): Boolean;
 Var
   I: TSize;
   mRule: PLexerRule;
+  mKeyword: PTokenKind;
 Begin
   If Self.CurrentToken.Kind = eEof Then
   Begin
     Result := False;
     Exit;
   End;
-
   While IsSpace(TLexer_PeekNextChar(Self)) Do
   Begin
     TLexer_Forward(Self);
   End;
-
   For I := 0 To Pred(Self.RuleList.Size) Do
   Begin
     mRule := PLexerRule(TList_Get(Self.RuleList, I));
@@ -99,7 +90,15 @@ Begin
       Result := (Self.CurrentToken.Error = '');
       If Result Then
       Begin
-        Self.CurrentToken.Kind := mRule.TokenKind;
+        mKeyword := PTokenKind(TTrie_Get(Self.Keywords, Self.CurrentToken.Value));
+        If mKeyword <> nil Then
+        Begin
+          Self.CurrentToken.Kind := mKeyword^;
+        End
+        Else
+        Begin
+          Self.CurrentToken.Kind := mRule.TokenKind;
+        End;
       End
       Else
       Begin
@@ -108,7 +107,6 @@ Begin
       Exit;
     End;
   End;
-
   Self.CurrentToken.StartPos := Self.NextPos;
   While (Not IsSpace(TLexer_PeekNextChar(Self))) And
     (TLexer_PeekNextChar(Self) <> #0) Do
@@ -125,6 +123,7 @@ End;
 Procedure TLexer_Destroy(Var Self: PLexer);
 Begin
   Dispose(Self.RuleList);
+  Dispose(Self.Keywords);
   Dispose(Self);
   Self := nil;
 End;
@@ -143,7 +142,13 @@ Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: String): Boolean;
 Var
   I: TSize;
 Begin
-  Result := CompareMem(@Self.Source[Self.NextPos], @NextWord[1], Length(NextWord));
+  If Self.NextPos + Length(NextWord) > Length(Self.Source) Then
+  Begin
+    Result := False;
+    Exit;
+  End;
+  Result := CompareMem(@Self.Source[Self.NextPos], @NextWord[1],
+    Length(NextWord) * SizeOf(Char));
   If Result Then
   Begin
     Exit;

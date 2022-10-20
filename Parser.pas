@@ -13,9 +13,9 @@ Uses
 Type
   PParser = ^TParser;
 
-  TSymbolFunc = Function(Parser: PParser; Out Ast: PAstNode): Boolean;
+  TSymbolFunc = Function(Parser: PParser; Var Ast: PAstNode): Boolean;
 
-  TExpressionFunc = Function(Parser: PParser; Out Ast: PAstNode): Boolean;
+  TExpressionFunc = Function(Parser: PParser; Var Ast: PAstNode): Boolean;
 
   TExpressionFuncArray = Array Of TExpressionFunc;
 
@@ -52,7 +52,8 @@ Procedure OutputAST(P: PAstNode);
 Implementation
 
 Uses
-  LiteralNode, BinaryOpNode, UnaryOpNode
+  LiteralNode, BinaryOpNode, UnaryOpNode, IdNode, ArrayAccessNode,
+  MemberRefNode, DerefNode
   {$IFNDEF FPC},
   {$IFDEF VER150}
   TypInfo
@@ -63,6 +64,10 @@ Uses
 
 Function TParser_Parse(Self: PParser): Boolean;
 Begin
+  // NOTICE:
+  // Since the main entry is here, the production rule procedural type must accepting the AST parameter with the `Var` modifier, not `Out`!
+  // Or resulting here with Self.Ast be assigned with $5555.... eventually if no parsing rule matched, with is not Nil($0000....), at least for 
+  // freepascal compilers with automatically initializing the Out parameters with non-Nil ($5555....) values.
   Result := Self.MainProductionRule(Self, Self.Ast) And TParser_Term(Self, eEof);
 End;
 
@@ -175,6 +180,10 @@ Var
   t: String;
   n: PBinaryOpNode;
   m: PUnaryOpNode;
+  a: PArrayAccessNode;
+  d: PMemberRefNode;
+  c: PDerefNode;
+  I: Integer;
   {$IFDEF VER150}
   tInfo: PTypeInfo;
   {$ENDIF}
@@ -224,6 +233,43 @@ Begin
       {$ENDIF}
       Write(t, ' ');
       OutputAST(m.Value);
+    End;
+    $4:
+    Begin
+      Write('Id ( ', PIdNode(P).Value, ' )');
+    End;
+    $5:
+    Begin
+      a := PArrayAccessNode(P);
+      Write('ArrayAccess ( ');
+      OutputAST(a.ArrayExpression);
+      Write('[');
+      For I := 0 To a.Indices.Size - 1 Do
+      Begin
+        OutputAST(PPAstNode(TList_Get(a.Indices, I))^);
+        If I = a.Indices.Size - 1 Then
+        Begin
+          Break;
+        End;
+        Write(', ');
+      End;
+      Write(']');
+      Write(' )');
+    End;
+    $6:
+    Begin
+      d := PMemberRefNode(P);
+      Write('MemberRef (');
+      OutputAST(d.Qualifier);
+      Write(' . ', d.Member);
+      Write(' )');
+    End;
+    $7:
+    Begin
+      c := PDerefNode(P);
+      Write('Deref (');
+      OutputAST(c.Expression);
+      Write(' )');
     End;
   End;
   Write(' ) ');

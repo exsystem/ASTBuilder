@@ -9,58 +9,53 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function TermRule(Parser: PParser; Out Ast: PAstNode): Boolean;
-Function TermExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
-Function TermExpression2(Parser: PParser; Out Ast: PAstNode): Boolean;
-Function TermExpression3(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function TermRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermExpression2(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermExpression3(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermExpression4(Parser: PParser; Var Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
-  ExprRuleUnit, SignOpRuleUnit, LiteralNode, UnaryOpNode;
+  ExprRuleUnit, LiteralNode, UnaryOpNode, VarRuleUnit;
 
-Function TermExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
-Var
-  mSignNode: PAstNode;
-  mLiteralNode: PAstNode;
+// Term -> Var
+Function TermExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
-  mSignNode := nil;
-  SignOpRule(Parser, mSignNode);
-  If Not TParser_Term(Parser, eNum) Then
+  If Not VarRule(Parser, Ast) Then
   Begin
     Parser.Error := 'Number expected.';
-    If mSignNode <> nil Then
-    Begin
-      TUnaryOpNode_Destroy(PAstNode(mSignNode));
-      Dispose(mSignNode);
-    End;
-    Ast := nil;
     Result := False;
     Exit;
-  End;
-  New(PLiteralNode(mLiteralNode));
-  TLiteralNode_Create(PLiteralNode(mLiteralNode), eNumber,
-    TParser_GetCurrentToken(Parser).Value);
-  If mSignNode = nil Then
-  Begin
-    Ast := mLiteralNode;
-  End
-  Else
-  Begin
-    PUnaryOpNode(mSignNode).Value := mLiteralNode;
-    Ast := mSignNode;
   End;
   Result := True;
 End;
 
-Function TermRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+// Term -> number 
+Function TermExpression4(Parser: PParser; Var Ast: PAstNode): Boolean;
+Begin
+  If Not TParser_Term(Parser, eNum) Then
+  Begin
+    Parser.Error := 'Number expected.';
+    Result := False;
+    Exit;
+  End;
+  New(PLiteralNode(Ast));
+  TLiteralNode_Create(PLiteralNode(Ast), eNumber,
+    TParser_GetCurrentToken(Parser).Value);
+  Result := True;
+End;
+
+Function TermRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   //Result := TParser_Prod(Parser, Ast, [@TermExpression1, @TermExpression2]);
   Result := TermExpression1(Parser, Ast) Or TermExpression2(Parser, Ast) Or
-    TermExpression3(Parser, Ast);
+    TermExpression3(Parser, Ast) Or TermExpression4(Parser, Ast);
 End;
 
-Function TermExpression2(Parser: PParser; Out Ast: PAstNode): Boolean;
+// Term -> LParent Expr RParent
+Function TermExpression2(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   If Not TParser_Term(Parser, eLParent) Then
   Begin
@@ -87,7 +82,8 @@ Begin
   // Ast := Ast; // Ast => Expr's Ast
 End;
 
-Function TermExpression3(Parser: PParser; Out Ast: PAstNode): Boolean;
+// Term -> Not Term
+Function TermExpression3(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mValue: PAstNode;
 Begin

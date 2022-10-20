@@ -9,7 +9,7 @@ End;
 ```
 ### Actual pattern example
 ```pascal
-// OR 1:
+// AND 1:
 If Not TParser_Term(Parser, eLParent) Then
 Begin
   // IF FALSE on 1:
@@ -19,7 +19,7 @@ Begin
   Result := False;
   Exit;
 End;
-// OR 2:
+// AND 2:
 If Not ExprRuleUnit.ExprRule(Parser, mNewNode) Then
 Begin
   // IF FALSE on 2:
@@ -29,7 +29,7 @@ Begin
   Result := False;
   Exit;
 End;
-// OR 3:
+// AND 3:
 If Not TParser_Term(Parser, eRParent) Then
 Begin
   // IF FALSE on 3:

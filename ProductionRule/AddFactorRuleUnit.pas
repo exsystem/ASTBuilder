@@ -9,21 +9,21 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function AddFactorRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function AddFactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 
-Function AddFactorExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function AddFactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
-  TermRuleUnit, TypeDef, BinaryOpNode, MulOpRuleUnit;
+  SignFactorRuleUnit, TypeDef, BinaryOpNode, MulOpRuleUnit;
 
-Function AddFactorRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function AddFactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   Result := AddFactorExpression1(Parser, Ast);
 End;
 
-Function AddFactorExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function AddFactorExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePoint: TSize;
   mRightNode: PAstNode;
@@ -31,7 +31,7 @@ Var
   mCurrNode: PBinaryOpNode;
   mNewNode: PBinaryOpNode;
 Begin
-  If Not TermRule(Parser, mRightNode) Then
+  If Not SignFactorRule(Parser, mRightNode) Then
   Begin
     Parser.Error := 'Term expression expected.';
     Ast := nil;
@@ -53,7 +53,7 @@ Begin
       Parser.FCurrentToken := mSavePoint;
       Break;
     End;
-    If Not TermRule(Parser, mRightNode) Then
+    If Not SignFactorRule(Parser, mRightNode) Then
     Begin
       Parser.FCurrentToken := mSavePoint;
       Break;

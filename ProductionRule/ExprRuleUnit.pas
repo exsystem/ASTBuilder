@@ -9,22 +9,22 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function ExprRule(Parser: PParser; Out Ast: PAstNode): Boolean;
-Function ExprExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function ExprRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function ExprExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
   RelFactorRuleUnit, TypeDef, BinaryOpNode, RelOpRuleUnit;
 
-Function ExprRule(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function ExprRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   //Result := TParser_Prod(Parser, Ast, [@ExprExpression1]);
   Result := ExprExpression1(Parser, Ast);
 End;
 
 // Expr -> RelFactor ( RelOpExpr RelFactor )*
-Function ExprExpression1(Parser: PParser; Out Ast: PAstNode): Boolean;
+Function ExprExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePoint: TSize;
   mRightNode: PAstNode;
