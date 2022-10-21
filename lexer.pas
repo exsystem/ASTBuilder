@@ -14,7 +14,7 @@ Type
   TTokenKind = (eUndefined, eNot, eAnd, eOr, eXor, ePlus, eMinus, eMul,
     eSlash, eDiv, eMod, eShl, eShr, eEqual, eNotEqual, eLT, eLE, eGT, eGE,
     eLParent, eRParent, eAs, eIs, eIn, eAt, ePointer, eNum, eId, eColon,
-    eLBrack, eRBrack, eLBrack2, eRBrack2, eComma, eDot, eEof);
+    eLBrack, eRBrack, eLBrack2, eRBrack2, eComma, eDot, eAssign, eEof);
   PToken = ^TToken;
 
   TToken = Record
@@ -50,6 +50,8 @@ Function TLexer_CompareNextToken(Var Self: PLexer;
 Procedure TLexer_Forward(Var Self: PLexer; Const Step: TSize = 1);
 Function TLexer_PeekNextChar(Var Self: PLexer): Char;
 Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: String): Boolean;
+Function TLexer_GetNextChar(Var Self: PLexer): Char;
+Procedure TLexer_Retract(Var Self: PLexer);
 
 Implementation
 
@@ -138,6 +140,12 @@ Begin
   Result := Self.Source[Self.NextPos];
 End;
 
+Function TLexer_GetNextChar(Var Self: PLexer): Char;
+Begin
+  Result := TLexer_PeekNextChar(Self);
+  TLexer_Forward(Self);
+End;
+
 Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: String): Boolean;
 Var
   I: TSize;
@@ -179,6 +187,11 @@ Function TLexer_CompareNextToken(Var Self: PLexer;
 Begin
   TLexer_GetNextToken(Self);
   Result := TLexer_IsToken(Self, TokenKind);
+End;
+
+Procedure TLexer_Retract(Var Self: PLexer);
+Begin
+  Dec(Self.NextPos);
 End;
 
 End.

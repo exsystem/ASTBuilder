@@ -53,7 +53,7 @@ Implementation
 
 Uses
   LiteralNode, BinaryOpNode, UnaryOpNode, IdNode, ArrayAccessNode,
-  MemberRefNode, DerefNode
+  MemberRefNode, DerefNode, AssignNode
   {$IFNDEF FPC},
   {$IFDEF VER150}
   TypInfo
@@ -269,6 +269,14 @@ Begin
       c := PDerefNode(P);
       Write('Deref (');
       OutputAST(c.Expression);
+      Write(' )');
+    End;
+    $8:
+    Begin
+      Write('Assignment (');
+      OutputAST(PAssignNode(P).LeftHandSide);
+      Write(' := ');
+      OutputAST(PAssignNode(P).RightHandSide);
       Write(' )');
     End;
   End;

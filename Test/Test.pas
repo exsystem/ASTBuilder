@@ -23,7 +23,7 @@ Uses {$IFNDEF FPC}
   SysUtils,
   Lexer,
   Parser,
-  VarRuleUnit,
+  AssignStmtRuleUnit,
   PlusRule,
   SlashRule,
   EofRule,
@@ -57,7 +57,8 @@ Uses {$IFNDEF FPC}
   RBrack2Rule,
   CommaRule,
   DotRule,
-  PointerRule;
+  PointerRule,
+  AssignRule;
 
 Procedure Test1();
 Var
@@ -107,14 +108,15 @@ Begin
       TLexer_AddRule(mLexer, GTRule.Compose());
       TLexer_AddRule(mLexer, InRule.Compose(mLexer));
       TLexer_AddRule(mLexer, IsRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, LBrack2Rule.Compose());
+      TLexer_AddRule(mLexer, RBrack2Rule.Compose());
       TLexer_AddRule(mLexer, LParentRule.Compose());
       TLexer_AddRule(mLexer, RParentRule.Compose());
       TLexer_AddRule(mLexer, LBrackRule.Compose());
       TLexer_AddRule(mLexer, RBrackRule.Compose());
-      TLexer_AddRule(mLexer, LBrack2Rule.Compose());
-      TLexer_AddRule(mLexer, RBrack2Rule.Compose());
       TLexer_AddRule(mLexer, CommaRule.Compose());
       TLexer_AddRule(mLexer, DotRule.Compose());
+      TLexer_AddRule(mLexer, AssignRule.Compose());
       TLexer_AddRule(mLexer, NumRule.Compose());
       Repeat
         If TLexer_GetNextToken(mLexer) Then
@@ -178,16 +180,17 @@ Begin
       TLexer_AddRule(mLexer, GTRule.Compose());
       TLexer_AddRule(mLexer, InRule.Compose(mLexer));
       TLexer_AddRule(mLexer, IsRule.Compose(mLexer));
+      TLexer_AddRule(mLexer, LBrack2Rule.Compose());
+      TLexer_AddRule(mLexer, RBrack2Rule.Compose());
       TLexer_AddRule(mLexer, LParentRule.Compose());
       TLexer_AddRule(mLexer, RParentRule.Compose());
       TLexer_AddRule(mLexer, LBrackRule.Compose());
       TLexer_AddRule(mLexer, RBrackRule.Compose());
-      TLexer_AddRule(mLexer, LBrack2Rule.Compose());
-      TLexer_AddRule(mLexer, RBrack2Rule.Compose());
       TLexer_AddRule(mLexer, CommaRule.Compose());
       TLexer_AddRule(mLexer, DotRule.Compose());
+      TLexer_AddRule(mLexer, AssignRule.Compose());
       TLexer_AddRule(mLexer, NumRule.Compose());
-      mParser := TParser_Create(mLexer, VarRule);
+      mParser := TParser_Create(mLexer, AssignStmtRule());
       If TParser_Parse(mParser) Then
         WriteLn('ACCEPTED')
       Else

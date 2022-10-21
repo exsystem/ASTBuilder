@@ -11,7 +11,7 @@ Type
 
   PAstNode = ^TAstNode;
 
-  TAstNode_Destroy_Proc= Procedure(Self: PAstNode);
+  TAstNode_Destroy_Proc = Procedure(Self: PAstNode);
 
   PAstNode_VMT = ^TAstNode_VMT;
 
