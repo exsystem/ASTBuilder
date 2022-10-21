@@ -25,7 +25,7 @@ Function TermExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
   If Not VarRule(Parser, Ast) Then
   Begin
-    Parser.Error := 'Number expected.';
+    Parser.Error := 'Variable expected.';
     Result := False;
     Exit;
   End;

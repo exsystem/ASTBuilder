@@ -21,7 +21,7 @@ Uses
 // Var -> (AT Id | Id) (LBRACK Expr (COMMA Expr)* RBRACK | RBRACK2 Expr (COMMA Expr)* RBRACK2 | DOT Id | POINTER)*
 Function VarExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Label
-  S1, S2, S3, S4, S5, S6, S7, S51;
+  S1, S2, S3, S4, S5, S6, S7, S51, S52;
 Var
   mSavePoint: TSize;
   mSavePoint2: TSize;
@@ -152,17 +152,18 @@ Begin
       If Not TParser_Term(Parser, eComma) Then
       Begin
         Parser.FCurrentToken := mSavePoint2;
-        Goto S6;
+        Goto S52;
       End;
       If Not ExprRule(Parser, mExpr) Then
       Begin
         Parser.FCurrentToken := mSavePoint2;
-        Goto S6;
+        Goto S52;
       End;
       // IF TRUE:
       TList_PushBack(PArrayAccessNode(mNewNode).Indices, @mExpr);
     End;
 
+    S52:
     If Not TParser_Term(Parser, eRBrack2) Then
     Begin
       Parser.FCurrentToken := mSavePoint;
