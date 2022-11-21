@@ -53,7 +53,7 @@ Implementation
 
 Uses
   LiteralNode, BinaryOpNode, UnaryOpNode, IdNode, ArrayAccessNode,
-  MemberRefNode, DerefNode, AssignNode
+  MemberRefNode, DerefNode, AssignNode, GotoNode, LabelledStmtNode
   {$IFNDEF FPC},
   {$IFDEF VER150}
   TypInfo
@@ -194,7 +194,7 @@ Begin
   End;
   Write(' ( ');
   Case P.NodeType Of
-    $1:
+    BinaryOpNode.CNodeType:
     Begin
       n := PBinaryOpNode(P);
       {$IFDEF FPC}
@@ -214,11 +214,11 @@ Begin
       If n.RightNode <> nil Then
         OutputAST(n.RightNode);
     End;
-    $2:
+    LiteralNode.CNodeType:
     Begin
       Write(PLiteralNode(P).Value);
     End;
-    $3:
+    UnaryOpNode.CNodeType:
     Begin
       m := PUnaryOpNode(P);
       {$IFDEF FPC}
@@ -234,11 +234,11 @@ Begin
       Write(t, ' ');
       OutputAST(m.Value);
     End;
-    $4:
+    IdNode.CNodeType:
     Begin
       Write('Id ( ', PIdNode(P).Value, ' )');
     End;
-    $5:
+    ArrayAccessNode.CNodeType:
     Begin
       a := PArrayAccessNode(P);
       Write('ArrayAccess ( ');
@@ -256,7 +256,7 @@ Begin
       Write(']');
       Write(' )');
     End;
-    $6:
+    MemberRefNode.CNodeType:
     Begin
       d := PMemberRefNode(P);
       Write('MemberRef (');
@@ -264,19 +264,32 @@ Begin
       Write(' . ', d.Member);
       Write(' )');
     End;
-    $7:
+    DerefNode.CNodeType:
     Begin
       c := PDerefNode(P);
       Write('Deref (');
       OutputAST(c.Expression);
       Write(' )');
     End;
-    $8:
+    AssignNode.CNodeType:
     Begin
       Write('Assignment (');
       OutputAST(PAssignNode(P).LeftHandSide);
       Write(' := ');
       OutputAST(PAssignNode(P).RightHandSide);
+      Write(' )');
+    End;
+    GotoNode.CNodeType:
+    Begin
+      Write('Goto ');
+      Write(PGotoNode(P).LabelName);
+    End;
+    LabelledStmtNode.CNodeType:
+    Begin
+      Write('LablledStmt (');
+      Write(PLabelledStmtNode(P).LabelName);
+      Write(' : ');
+      OutputAST(PLabelledStmtNode(P).Stmt);
       Write(' )');
     End;
   End;

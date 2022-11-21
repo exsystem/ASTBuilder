@@ -9,6 +9,9 @@ Interface
 Uses
   ASTNode, List;
 
+Const
+  CNodeType = Byte($01);
+
 Type
   PArrayAccessNode = ^TArrayAccessNode;
 
@@ -28,7 +31,7 @@ Uses
 
 Procedure TArrayAccessNode_Create(Self: PArrayAccessNode; ArrayExpression: PAstNode);
 Begin
-  TAstNode_Create(PAstNode(Self), $5);
+  TAstNode_Create(PAstNode(Self), CNodeType);
   Self.Parent.VMT.Destory := TArrayAccessNode_Destroy;
 
   Self.ArrayExpression := ArrayExpression;

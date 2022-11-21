@@ -14,7 +14,7 @@ Type
   TTokenKind = (eUndefined, eNot, eAnd, eOr, eXor, ePlus, eMinus, eMul,
     eSlash, eDiv, eMod, eShl, eShr, eEqual, eNotEqual, eLT, eLE, eGT, eGE,
     eLParent, eRParent, eAs, eIs, eIn, eAt, ePointer, eNum, eId, eColon,
-    eLBrack, eRBrack, eLBrack2, eRBrack2, eComma, eDot, eAssign, eEof);
+    eLBrack, eRBrack, eLBrack2, eRBrack2, eComma, eDot, eAssign, eGoto, eEof);
   PToken = ^TToken;
 
   TToken = Record

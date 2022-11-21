@@ -9,6 +9,9 @@ Interface
 Uses
   ASTNode;
 
+Const
+  CNodeType = Byte($09);
+
 Type
   TOpType = (eAddress, eNot, ePositive, eNegative);
 
@@ -27,7 +30,7 @@ Implementation
 
 Procedure TUnaryOpNode_Create(Self: PUnaryOpNode);
 Begin
-  TAstNode_Create(PAstNode(Self), $3);
+  TAstNode_Create(PAstNode(Self), CNodeType);
   Self.Parent.VMT.Destory := TUnaryOpNode_Destroy;
   Self.Value := nil;
 End;
