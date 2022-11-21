@@ -9,6 +9,9 @@ Interface
 Uses
   ASTNode;
 
+Const
+  CNodeType = Byte($07);
+
 Type
   TLiteralType = (eNumber);
 
@@ -29,7 +32,7 @@ Implementation
 Procedure TLiteralNode_Create(Self: PLiteralNode; NodeType: TLiteralType;
   Value: String);
 Begin
-  TAstNode_Create(PAstNode(Self), $2);
+  TAstNode_Create(PAstNode(Self), CNodeType);
   Self.Parent.VMT.Destory := TLiteralNode_Destroy;
 
   Self.NodeType := NodeType;

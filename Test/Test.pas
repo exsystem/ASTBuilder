@@ -23,7 +23,7 @@ Uses {$IFNDEF FPC}
   SysUtils,
   Lexer,
   Parser,
-  AssignStmtRuleUnit,
+  StmtRuleUnit,
   PlusRule,
   SlashRule,
   EofRule,
@@ -58,7 +58,9 @@ Uses {$IFNDEF FPC}
   CommaRule,
   DotRule,
   PointerRule,
-  AssignRule;
+  AssignRule,
+  GotoRule,
+  ColonRule;
 
 Procedure Test1();
 Var
@@ -117,7 +119,9 @@ Begin
       TLexer_AddRule(mLexer, CommaRule.Compose());
       TLexer_AddRule(mLexer, DotRule.Compose());
       TLexer_AddRule(mLexer, AssignRule.Compose());
+      TLexer_AddRule(mLexer, ColonRule.Compose());
       TLexer_AddRule(mLexer, NumRule.Compose());
+      TLexer_AddRule(mLexer, GotoRule.Compose(mLexer));
       Repeat
         If TLexer_GetNextToken(mLexer) Then
         Begin
@@ -189,8 +193,10 @@ Begin
       TLexer_AddRule(mLexer, CommaRule.Compose());
       TLexer_AddRule(mLexer, DotRule.Compose());
       TLexer_AddRule(mLexer, AssignRule.Compose());
+      TLexer_AddRule(mLexer, ColonRule.Compose());
       TLexer_AddRule(mLexer, NumRule.Compose());
-      mParser := TParser_Create(mLexer, AssignStmtRule());
+      TLexer_AddRule(mLexer, GotoRule.Compose(mLexer));
+      mParser := TParser_Create(mLexer, StmtRule());
       If TParser_Parse(mParser) Then
         WriteLn('ACCEPTED')
       Else

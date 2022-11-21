@@ -9,6 +9,9 @@ Interface
 Uses
   ASTNode;
 
+Const
+  CNodeType = Byte($08);
+
 Type
   PMemberRefNode = ^TMemberRefNode;
 
@@ -27,7 +30,7 @@ Implementation
 Procedure TMemberRefNode_Create(Self: PMemberRefNode; Qualifier: PAstNode;
   Member: String);
 Begin
-  TAstNode_Create(PAstNode(Self), $6);
+  TAstNode_Create(PAstNode(Self), CNodeType);
   Self.Parent.VMT.Destory := TMemberRefNode_Destroy;
 
   Self.Qualifier := Qualifier;

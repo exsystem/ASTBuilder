@@ -9,6 +9,9 @@ Interface
 Uses
   ASTNode;
 
+Const
+  CNodeType = Byte($06);
+
 Type
   PIdNode = ^TIdNode;
 
@@ -24,7 +27,7 @@ Implementation
 
 Procedure TIdNode_Create(Self: PIdNode; Value: String);
 Begin
-  TAstNode_Create(PAstNode(Self), $4);
+  TAstNode_Create(PAstNode(Self), CNodeType);
   Self.Parent.VMT.Destory := TIdNode_Destroy;
 
   Self.Value := Value;

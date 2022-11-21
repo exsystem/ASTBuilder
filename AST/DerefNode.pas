@@ -9,6 +9,9 @@ Interface
 Uses
   ASTNode;
 
+Const
+  CNodeType = Byte($04);
+
 Type
   PDerefNode = ^TDerefNode;
 
@@ -24,7 +27,7 @@ Implementation
 
 Procedure TDerefNode_Create(Self: PDerefNode; Expression: PAstNode);
 Begin
-  TAstNode_Create(PAstNode(Self), $7);
+  TAstNode_Create(PAstNode(Self), CNodeType);
   Self.Parent.VMT.Destory := TDerefNode_Destroy;
 
   Self.Expression := Expression;

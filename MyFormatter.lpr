@@ -5,7 +5,7 @@ Program MyFormatter;
 Uses 
   Test In 'Test/Test.pas';
 
-{$R *.res}
+// {$R *.res}
 
 Begin
   Test1();
