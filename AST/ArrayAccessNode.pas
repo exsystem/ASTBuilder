@@ -9,9 +9,6 @@ Interface
 Uses
   ASTNode, List;
 
-Const
-  CNodeType = Byte($01);
-
 Type
   PArrayAccessNode = ^TArrayAccessNode;
 
@@ -23,6 +20,7 @@ Type
 
 Procedure TArrayAccessNode_Create(Self: PArrayAccessNode; ArrayExpression: PAstNode);
 Procedure TArrayAccessNode_Destroy(Self: PAstNode);
+Procedure TArrayAccessNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 
 Implementation
 
@@ -31,8 +29,9 @@ Uses
 
 Procedure TArrayAccessNode_Create(Self: PArrayAccessNode; ArrayExpression: PAstNode);
 Begin
-  TAstNode_Create(PAstNode(Self), CNodeType);
+  TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT.Destory := TArrayAccessNode_Destroy;
+  Self.Parent.VMT.Accept := TArrayAccessNode_Accept;
 
   Self.ArrayExpression := ArrayExpression;
   Self.Indices := TList_Create(SizeOf(PAstNode), 1);
@@ -57,6 +56,11 @@ Begin
   End;
   TList_Destroy(PArrayAccessNode(Self).Indices);
   TAstNode_Destroy(Self);
+End;
+
+Procedure TArrayAccessNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
+Begin
+  Visitor.VMT.VisitArrayAccess(Visitor, Self);
 End;
 
 End.

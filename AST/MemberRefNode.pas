@@ -9,9 +9,6 @@ Interface
 Uses
   ASTNode;
 
-Const
-  CNodeType = Byte($08);
-
 Type
   PMemberRefNode = ^TMemberRefNode;
 
@@ -24,14 +21,16 @@ Type
 Procedure TMemberRefNode_Create(Self: PMemberRefNode; Qualifier: PAstNode;
   Member: String);
 Procedure TMemberRefNode_Destroy(Self: PAstNode);
+Procedure TMemberRefNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 
 Implementation
 
 Procedure TMemberRefNode_Create(Self: PMemberRefNode; Qualifier: PAstNode;
   Member: String);
 Begin
-  TAstNode_Create(PAstNode(Self), CNodeType);
+  TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT.Destory := TMemberRefNode_Destroy;
+  Self.Parent.VMT.Accept := TMemberRefNode_Accept;
 
   Self.Qualifier := Qualifier;
   Self.Member := Member;
@@ -45,6 +44,11 @@ Begin
     Dispose(PMemberRefNode(Self).Qualifier);
   End;
   TAstNode_Destroy(Self);
+End;
+
+Procedure TMemberRefNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
+Begin
+  Visitor.VMT.VisitMemberRef(Visitor, Self);
 End;
 
 End.

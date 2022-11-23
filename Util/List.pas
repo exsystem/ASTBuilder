@@ -25,6 +25,7 @@ Procedure TList_Clear(Self: PList);
 Function TList_Get(Self: PList; Const Index: TSize): Pointer;
 Procedure TList_Set(Self: PList; Const Index: TSize; Value: Pointer);
 Procedure TList_PushBack(Self: PList; Element: Pointer);
+Function TList_EmplaceBack(Self: PList): Pointer;
 Procedure TList_Erase(Self: PList; Index: TSize); // todo: iterator??
 Procedure TList_Destroy(Self: PList);
 
@@ -65,6 +66,16 @@ Begin
     SetLength(Self.FList, Self.Size * Self.FElemSize * 2);
   End;
   Move(Element^, Self.FList[Self.Size * Self.FElemSize], Self.FElemSize);
+  Inc(Self.Size);
+End;
+
+Function TList_EmplaceBack(Self: PList): Pointer;
+Begin
+  If Self.Size * Self.FElemSize = Length(Self.FList) Then
+  Begin
+    SetLength(Self.FList, Self.Size * Self.FElemSize * 2);
+  End;
+  Result := @Self.FList[Self.Size * Self.FElemSize];
   Inc(Self.Size);
 End;
 

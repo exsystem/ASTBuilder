@@ -16,6 +16,7 @@ fi
 
 if $LAZBUILD $PROJECT; then
   if [ $1 = "test" ]; then
+    find "/Users/exsystem/DelphiProjects/MyFormatter" -type f -name "*.jcf.pas" | xargs rm -f 
     "/Users/exsystem/DelphiProjects/MyFormatter/MyFormatter" 
   fi
 fi

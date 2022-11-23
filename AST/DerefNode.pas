@@ -9,9 +9,6 @@ Interface
 Uses
   ASTNode;
 
-Const
-  CNodeType = Byte($04);
-
 Type
   PDerefNode = ^TDerefNode;
 
@@ -22,13 +19,15 @@ Type
 
 Procedure TDerefNode_Create(Self: PDerefNode; Expression: PAstNode);
 Procedure TDerefNode_Destroy(Self: PAstNode);
+Procedure TDerefNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 
 Implementation
 
 Procedure TDerefNode_Create(Self: PDerefNode; Expression: PAstNode);
 Begin
-  TAstNode_Create(PAstNode(Self), CNodeType);
+  TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT.Destory := TDerefNode_Destroy;
+  Self.Parent.VMT.Accept := TDerefNode_Accept;
 
   Self.Expression := Expression;
 End;
@@ -41,6 +40,11 @@ Begin
     Dispose(PDerefNode(Self).Expression);
   End;
   TAstNode_Destroy(Self);
+End;
+
+Procedure TDerefNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
+Begin
+  Visitor.VMT.VisitDeref(Visitor, Self);
 End;
 
 End.

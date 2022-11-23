@@ -15,7 +15,7 @@ Function AssignStmtExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  ExprRuleUnit, VarRuleUnit, AssignNode;
+  ExprRuleUnit, VarRuleUnit, AssignNode, IdNode;
 
 // AssignStmt -> Var ASSIGN Expr 
 Function AssignStmtExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;

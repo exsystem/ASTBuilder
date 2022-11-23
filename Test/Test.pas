@@ -23,6 +23,8 @@ Uses {$IFNDEF FPC}
   SysUtils,
   Lexer,
   Parser,
+  ASTNode,
+  ASTHanyu,
   StmtRuleUnit,
   PlusRule,
   SlashRule,
@@ -71,6 +73,7 @@ Var
   {$IFDEF VER150}
   tInfo: PTypeInfo;
   {$ENDIF}
+  mViewer: PAstViewer;
 Label
   TestLexer, TestParser;
 Begin
@@ -196,7 +199,7 @@ Begin
       TLexer_AddRule(mLexer, ColonRule.Compose());
       TLexer_AddRule(mLexer, NumRule.Compose());
       TLexer_AddRule(mLexer, GotoRule.Compose(mLexer));
-      mParser := TParser_Create(mLexer, StmtRule());
+      mParser := TParser_Create(mLexer, StmtRule);
       If TParser_Parse(mParser) Then
         WriteLn('ACCEPTED')
       Else
@@ -206,7 +209,14 @@ Begin
         [mLexer.CurrentToken.StartPos, mLexer.CurrentToken.Value,
         mLexer.CurrentToken.Error]));
       End;
-      OutputAST(mParser.Ast);
+      //OutputAST(mParser.Ast);
+
+      New(mViewer);
+      TAstViewer_Create(mViewer);
+      mParser.Ast.VMT.Accept(mParser.Ast, PAstVisitor(mViewer));
+      TAstViewer_Destroy(PAstVisitor(mViewer));
+      Dispose(mViewer);
+
       Writeln;
       TParser_Destroy(mParser);
       TLexer_Destroy(mLexer);
