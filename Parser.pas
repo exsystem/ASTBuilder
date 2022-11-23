@@ -47,8 +47,6 @@ Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
 
 Procedure TParser_Destroy(Self: PParser);
 
-Procedure OutputAST(P: PAstNode);
-
 Implementation
 
 Uses
@@ -115,11 +113,26 @@ Begin
   Result := (TokenKind = eEof);
 End;
 
+(*
+procedure InterlockedIncStringRefCount(p: pointer);
+asm
+  mov eax,[eax]
+  test eax,eax
+  jz @done
+  mov ecx,[eax-8]
+  inc ecx
+  jz @done //Do not touch constant strings.
+  lock inc dword ptr[eax-8];
+@done:
+end;
+*)
+
 Function TParser_GetNextToken(Self: PParser): Boolean;
-{$IFDEF DEBUG}
 Var
+{$IFDEF DEBUG}
   t: String;
 {$ENDIF}
+  mToken: PToken;
 Begin
   If Self.FCurrentToken = Self.FTokenList.Size Then
   Begin
@@ -127,7 +140,12 @@ Begin
     If Result Then
     Begin
       Inc(Self.FCurrentToken);
+      (*
+      InterlockedIncStringRefCount(@Self.FLexer.CurrentToken.Value);  // PATCHED LINE
       TList_PushBack(Self.FTokenList, @(Self.FLexer.CurrentToken));
+      *)
+      mToken := TList_EmplaceBack(Self.FTokenList); // USE EMPLACE
+      mToken^ := Self.FLexer.CurrentToken;
       {$IFDEF DEBUG}
       {$IFDEF FPC}
       WriteStr(t, TParser_GetCurrentToken(Self).Kind);
@@ -173,127 +191,6 @@ End;
 Function TParser_GetCurrentToken(Self: PParser): PToken;
 Begin
   Result := PToken(TList_Get(Self.FTokenList, Self.FCurrentToken - 1));
-End;
-
-Procedure OutputAST(P: PAstNode);
-Var
-  t: String;
-  n: PBinaryOpNode;
-  m: PUnaryOpNode;
-  a: PArrayAccessNode;
-  d: PMemberRefNode;
-  c: PDerefNode;
-  I: Integer;
-  {$IFDEF VER150}
-  tInfo: PTypeInfo;
-  {$ENDIF}
-Begin
-  If P = nil Then
-  Begin
-    Exit;
-  End;
-  Write(' ( ');
-  Case P.NodeType Of
-    BinaryOpNode.CNodeType:
-    Begin
-      n := PBinaryOpNode(P);
-      {$IFDEF FPC}
-      WriteStr(t, n.OpType);
-      {$ELSE}
-      {$IFDEF VER150}
-      tInfo := TypeInfo(TOpType);
-      t := GetEnumName(tInfo, Ord(n.OpType));
-      {$ELSE}
-      t := TRttiEnumerationType.GetName(n.OpType);
-      {$ENDIF}
-      {$ENDIF}
-      Write(t, ' ');
-      If n.LeftNode <> nil Then
-        OutputAST(n.LeftNode);
-      Write(' ');
-      If n.RightNode <> nil Then
-        OutputAST(n.RightNode);
-    End;
-    LiteralNode.CNodeType:
-    Begin
-      Write(PLiteralNode(P).Value);
-    End;
-    UnaryOpNode.CNodeType:
-    Begin
-      m := PUnaryOpNode(P);
-      {$IFDEF FPC}
-      WriteStr(t, m.OpType);
-      {$ELSE}
-      {$IFDEF VER150}
-      tInfo := TypeInfo(TOpType);
-      t := GetEnumName(tInfo, Ord(m.OpType));
-      {$ELSE}
-      t := TRttiEnumerationType.GetName(m.OpType);
-      {$ENDIF}
-      {$ENDIF}
-      Write(t, ' ');
-      OutputAST(m.Value);
-    End;
-    IdNode.CNodeType:
-    Begin
-      Write('Id ( ', PIdNode(P).Value, ' )');
-    End;
-    ArrayAccessNode.CNodeType:
-    Begin
-      a := PArrayAccessNode(P);
-      Write('ArrayAccess ( ');
-      OutputAST(a.ArrayExpression);
-      Write('[');
-      For I := 0 To a.Indices.Size - 1 Do
-      Begin
-        OutputAST(PPAstNode(TList_Get(a.Indices, I))^);
-        If I = a.Indices.Size - 1 Then
-        Begin
-          Break;
-        End;
-        Write(', ');
-      End;
-      Write(']');
-      Write(' )');
-    End;
-    MemberRefNode.CNodeType:
-    Begin
-      d := PMemberRefNode(P);
-      Write('MemberRef (');
-      OutputAST(d.Qualifier);
-      Write(' . ', d.Member);
-      Write(' )');
-    End;
-    DerefNode.CNodeType:
-    Begin
-      c := PDerefNode(P);
-      Write('Deref (');
-      OutputAST(c.Expression);
-      Write(' )');
-    End;
-    AssignNode.CNodeType:
-    Begin
-      Write('Assignment (');
-      OutputAST(PAssignNode(P).LeftHandSide);
-      Write(' := ');
-      OutputAST(PAssignNode(P).RightHandSide);
-      Write(' )');
-    End;
-    GotoNode.CNodeType:
-    Begin
-      Write('Goto ');
-      Write(PGotoNode(P).LabelName);
-    End;
-    LabelledStmtNode.CNodeType:
-    Begin
-      Write('LablledStmt (');
-      Write(PLabelledStmtNode(P).LabelName);
-      Write(' : ');
-      OutputAST(PLabelledStmtNode(P).Stmt);
-      Write(' )');
-    End;
-  End;
-  Write(' ) ');
 End;
 
 End.

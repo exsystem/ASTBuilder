@@ -9,9 +9,6 @@ Interface
 Uses
   ASTNode;
 
-Const
-  CNodeType = Byte($09);
-
 Type
   TOpType = (eAddress, eNot, ePositive, eNegative);
 
@@ -25,13 +22,15 @@ Type
 
 Procedure TUnaryOpNode_Create(Self: PUnaryOpNode);
 Procedure TUnaryOpNode_Destroy(Self: PAstNode);
+Procedure TUnaryOpNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 
 Implementation
 
 Procedure TUnaryOpNode_Create(Self: PUnaryOpNode);
 Begin
-  TAstNode_Create(PAstNode(Self), CNodeType);
+  TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT.Destory := TUnaryOpNode_Destroy;
+  Self.Parent.VMT.Accept := TUnaryOpNode_Accept;
   Self.Value := nil;
 End;
 
@@ -43,6 +42,11 @@ Begin
     Dispose(PUnaryOpNode(Self).Value);
   End;
   TAstNode_Destroy(Self);
+End;
+
+Procedure TUnaryOpNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
+Begin
+  Visitor.VMT.VisitUnaryOp(Visitor, Self);
 End;
 
 End.

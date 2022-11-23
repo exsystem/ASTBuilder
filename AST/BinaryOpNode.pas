@@ -9,9 +9,6 @@ Interface
 Uses
   ASTNode;
 
-Const
-  CNodeType = Byte($03);
-
 Type
   TOpType = (eMultiply, eRealDivide, eIntDivide, eModulo, eAnd, eShiftLeft,
     eShiftRight, eAs, eAdd, eSubtract, eOr, eXor, eEqual, eNotEqual, eLT,
@@ -28,13 +25,15 @@ Type
 
 Procedure TBinaryOpNode_Create(Self: PBinaryOpNode);
 Procedure TBinaryOpNode_Destroy(Self: PAstNode);
+Procedure TBinaryOpNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 
 Implementation
 
 Procedure TBinaryOpNode_Create(Self: PBinaryOpNode);
 Begin
-  TAstNode_Create(PAstNode(Self), CNodeType);
+  TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT.Destory := TBinaryOpNode_Destroy;
+  Self.Parent.VMT.Accept := TBinaryOpNode_Accept;
   Self.LeftNode := nil;
   Self.RightNode := nil;
 End;
@@ -54,4 +53,8 @@ Begin
   TAstNode_Destroy(Self);
 End;
 
+Procedure TBinaryOpNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
+Begin
+  Visitor.VMT.VisitBinaryOp(Visitor, Self);
+End;
 End.

@@ -9,9 +9,6 @@ Interface
 Uses
   ASTNode;
 
-Const
-  CNodeType = Byte($07);
-
 Type
   TLiteralType = (eNumber);
 
@@ -26,14 +23,16 @@ Type
 Procedure TLiteralNode_Create(Self: PLiteralNode; NodeType: TLiteralType;
   Value: String);
 Procedure TLiteralNode_Destroy(Self: PAstNode);
+Procedure TLiteralNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 
 Implementation
 
 Procedure TLiteralNode_Create(Self: PLiteralNode; NodeType: TLiteralType;
   Value: String);
 Begin
-  TAstNode_Create(PAstNode(Self), CNodeType);
+  TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT.Destory := TLiteralNode_Destroy;
+  Self.Parent.VMT.Accept := TLiteralNode_Accept;
 
   Self.NodeType := NodeType;
   Self.Value := Value;
@@ -44,5 +43,9 @@ Begin
   TAstNode_Destroy(Self);
 End;
 
+Procedure TLiteralNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
+Begin
+  Visitor.VMT.VisitLiteral(Visitor, Self);
+End;
 
 End.

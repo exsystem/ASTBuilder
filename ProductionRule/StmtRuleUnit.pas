@@ -16,14 +16,16 @@ Function StmtExpression2(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  UnlabelledStmtRuleUnit, LabelledStmtNode;
+  UnlabelledStmtRuleUnit, LabelledStmtNode, TypeDef;
 
 // Stmt -> Id : UnlabelledStmt 
 Function StmtExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mLabel: String;
   mStmt: PAstNode;
+  mSavePoint: TSize;
 Begin
+  mSavePoint := Parser.FCurrentToken;
   If Not TParser_Term(Parser, eId) Then
   Begin
     Parser.Error := 'Id expected.';
@@ -34,11 +36,13 @@ Begin
   If Not TParser_Term(Parser, eColon) Then
   Begin
     Parser.Error := ': expected.';
+    Parser.FCurrentToken := mSavePoint;
     Result := False;
     Exit;
   End;
   If Not UnlabelledStmtRule(Parser, mStmt) Then
   Begin
+    Parser.FCurrentToken := mSavePoint;
     Result := False;
     Exit;
   End;

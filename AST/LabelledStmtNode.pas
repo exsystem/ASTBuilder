@@ -9,9 +9,6 @@ Interface
 Uses
   ASTNode;
 
-Const
-  CNodeType = Byte($0A);
-
 Type
   PLabelledStmtNode = ^TLabelledStmtNode;
 
@@ -21,15 +18,19 @@ Type
     Stmt: PAstNode;
   End;
 
-Procedure TLabelledStmtNode_Create(Self: PLabelledStmtNode; LabelName: String; Stmt: PAstNode);
+Procedure TLabelledStmtNode_Create(Self: PLabelledStmtNode; LabelName: String;
+  Stmt: PAstNode);
 Procedure TLabelledStmtNode_Destroy(Self: PAstNode);
+Procedure TLabelledStmtNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 
 Implementation
 
-Procedure TLabelledStmtNode_Create(Self: PLabelledStmtNode; LabelName: String; Stmt: PAstNode);
+Procedure TLabelledStmtNode_Create(Self: PLabelledStmtNode; LabelName: String;
+  Stmt: PAstNode);
 Begin
-  TAstNode_Create(PAstNode(Self), CNodeType);
+  TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT.Destory := TLabelledStmtNode_Destroy;
+  Self.Parent.VMT.Accept := TLabelledStmtNode_Accept;
 
   Self.LabelName := LabelName;
   Self.Stmt := Stmt;
@@ -43,6 +44,11 @@ Begin
     Dispose(PLabelledStmtNode(Self).Stmt);
   End;
   TAstNode_Destroy(Self);
+End;
+
+Procedure TLabelledStmtNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
+Begin
+  Visitor.VMT.VisitLabelledStmt(Visitor, Self);
 End;
 
 End.

@@ -9,9 +9,6 @@ Interface
 Uses
   ASTNode;
 
-Const
-  CNodeType = Byte($02);
-
 Type
   PAssignNode = ^TAssignNode;
 
@@ -23,13 +20,15 @@ Type
 
 Procedure TAssignNode_Create(Self: PAssignNode);
 Procedure TAssignNode_Destroy(Self: PAstNode);
+Procedure TAssignNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 
 Implementation
 
 Procedure TAssignNode_Create(Self: PAssignNode);
 Begin
-  TAstNode_Create(PAstNode(Self), CNodeType);
+  TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT.Destory := TAssignNode_Destroy;
+  Self.Parent.VMT.Accept := TAssignNode_Accept;
   Self.LeftHandSide := nil;
   Self.RightHandSide := nil;
 End;
@@ -47,6 +46,11 @@ Begin
     Dispose(PAssignNode(Self).RightHandSide);
   End;
   TAstNode_Destroy(Self);
+End;
+
+Procedure TAssignNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
+Begin
+  Visitor.VMT.VisitAssign(Visitor, Self);
 End;
 
 End.
