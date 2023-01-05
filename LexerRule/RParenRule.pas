@@ -1,4 +1,4 @@
-Unit NotEqualRule;
+Unit RParenRule;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -15,16 +15,16 @@ Function Compose(): TLexerRule;
 Implementation
 
 Uses
-  KeywordRule;
+  SymbolRule;
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := KeywordRule.Parse(Lexer, '<>');
+  Result := SymbolRule.Parse(Lexer, ')');
 End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eNotEqual;
+  Result.TokenKind := eRParen;
   Result.Parser := Parse;
 End;
 

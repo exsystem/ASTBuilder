@@ -1,4 +1,4 @@
-Unit Trie;
+﻿Unit Trie;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -109,6 +109,7 @@ End;
 Procedure TTrie_Destroy(Self: PTrie);
 Begin
   TTrie_Clear(Self);
+  Dispose(Self.Root);
   Dispose(Self);
 End;
 

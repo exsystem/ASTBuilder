@@ -1,4 +1,4 @@
-Unit LBrack2Rule;
+Unit SemiRule;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -15,16 +15,16 @@ Function Compose(): TLexerRule;
 Implementation
 
 Uses
-  KeywordRule;
+  SymbolRule;
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := KeywordRule.Parse(Lexer, '(.');
+  Result := SymbolRule.Parse(Lexer, ';');
 End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eLBrack2;
+  Result.TokenKind := eSemi;
   Result.Parser := Parse;
 End;
 

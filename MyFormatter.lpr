@@ -2,7 +2,7 @@ Program MyFormatter;
 
 {$MODE DELPHI}
 
-Uses 
+Uses
   Test In 'Test/Test.pas';
 
 // {$R *.res}
