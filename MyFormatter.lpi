@@ -350,6 +350,13 @@
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
+    <Debugger>
+      <ClassConfig>
+        <Configs>
+          <Config ConfigName="New" ConfigClass="TFpDebugDebugger" Active="True" UID="{2894189C-42E6-1166-8D07-3681E4899565}"/>
+        </Configs>
+      </ClassConfig>
+    </Debugger>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>

@@ -1,4 +1,4 @@
-Unit AndRule;
+Unit RepeatRule;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -10,7 +10,7 @@ Uses
   Lexer;
 
 Function Parse(Lexer: PLexer): Boolean;
-Function Compose(Lexer: PLexer): TLexerRule;
+Function Compose(): TLexerRule;
 
 Implementation
 
@@ -19,12 +19,13 @@ Uses
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := KeywordRule.Parse(Lexer, 'And');
+  Result := KeywordRule.Parse(Lexer, '*');
 End;
 
-Function Compose(Lexer: PLexer): TLexerRule;
+Function Compose(): TLexerRule;
 Begin
-  Result := KeywordRule.Compose(Lexer, Parse, eAnd, 'And');
+  Result.TokenKind := eRepeat;
+  Result.Parser := Parse;
 End;
 
 End.

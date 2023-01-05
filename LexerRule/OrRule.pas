@@ -10,21 +10,22 @@ Uses
   Lexer;
 
 Function Parse(Lexer: PLexer): Boolean;
-Function Compose(Lexer: PLexer): TLexerRule;
+Function Compose(): TLexerRule;
 
 Implementation
 
 Uses
-  KeywordRule;
+  SymbolRule;
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := KeywordRule.Parse(Lexer, 'Or');
+  Result := SymbolRule.Parse(Lexer, '|');
 End;
 
-Function Compose(Lexer: PLexer): TLexerRule;
+Function Compose(): TLexerRule;
 Begin
-  Result := KeywordRule.Compose(Lexer, Parse, eOr, 'Or');
+  Result.TokenKind := eOr;
+  Result.Parser := Parse;
 End;
 
 End.
