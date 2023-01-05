@@ -109,6 +109,7 @@ End;
 Procedure TTrie_Destroy(Self: PTrie);
 Begin
   TTrie_Clear(Self);
+  Dispose(Self.Root);
   Dispose(Self);
 End;
 

@@ -124,8 +124,8 @@ End;
 
 Procedure TLexer_Destroy(Var Self: PLexer);
 Begin
-  Dispose(Self.RuleList);
-  Dispose(Self.Keywords);
+  TList_Destroy(Self.RuleList);
+  TTrie_Destroy(Self.Keywords);
   Dispose(Self);
   Self := nil;
 End;
