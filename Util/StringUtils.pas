@@ -12,6 +12,8 @@ Function IsHexDigit(Const Ch: Char): Boolean;
 Function IsIdInitialChar(Const Ch: Char): Boolean;
 Function IsIdChar(Const Ch: Char): Boolean;
 Function Lower(Const Ch: Char): Char;
+Function IsTermIdInitialChar(Const Ch: Char): Boolean;
+Function IsNonTermIdInitialChar(Const Ch: Char): Boolean;
 
 Implementation
 
@@ -50,6 +52,16 @@ Begin
   Begin
     Result := Ch;
   End;
+End;
+
+Function IsTermIdInitialChar(Const Ch: Char): Boolean;
+Begin
+  Result := Ch In ['A' .. 'Z'];
+End;
+
+Function IsNonTermIdInitialChar(Const Ch: Char): Boolean;
+Begin
+  Result := Ch In ['a' .. 'z'];
 End;
 
 End.

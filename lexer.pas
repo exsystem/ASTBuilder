@@ -11,7 +11,7 @@ Uses
 
 Type
   PTokenKind = ^TTokenKind;
-  TTokenKind = (eUndefined, eEof, eRoot, eOr, eLParen, eRParen, eRepeat, eProduce, eSemi, eId);
+  TTokenKind = (eUndefined, eEof, eRoot, eOr, eLParen, eRParen, eQuestionMark, eAsterisk, eColon, eSemi, eId, eTerm);
   PToken = ^TToken;
 
   TToken = Record

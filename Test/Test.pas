@@ -22,8 +22,8 @@ Uses {$IFNDEF FPC}
   , {$ENDIF}
   SysUtils,
   Lexer,
-  EofRule, IdRule, LParenRule, OrRule, ProduceRule, RepeatRule, RootRule,
-  RParenRule, SemiRule;
+  EofRule, IdRule, TermRule, LParenRule, OrRule, ColonRule, AsteriskRule, QuestionMarkRule, 
+  RParenRule, SemiRule, GrammarViewer, Parser, GrammarRuleUnit, ASTNode;
 
 Procedure Test1();
 Var
@@ -33,10 +33,12 @@ Var
   {$IFDEF VER150}
   tInfo: PTypeInfo;
   {$ENDIF}
+  mParser: PParser;
+  mViewer: PAstViewer;
 Label
   TestLexer, TestParser;
 Begin
-  Goto TestLexer;
+  Goto TestParser;
 
   TestLexer:
     While True Do
@@ -49,11 +51,12 @@ Begin
       mLexer := TLexer_Create(mSource);
       TLexer_AddRule(mLexer, EofRule.Compose());
       TLexer_AddRule(mLexer, IdRule.Compose());
+      TLexer_AddRule(mLexer, TermRule.Compose());
       TLexer_AddRule(mLexer, LParenRule.Compose());
       TLexer_AddRule(mLexer, OrRule.Compose());
-      TLexer_AddRule(mLexer, ProduceRule.Compose());
-      TLexer_AddRule(mLexer, RepeatRule.Compose());
-      TLexer_AddRule(mLexer, RootRule.Compose());
+      TLexer_AddRule(mLexer, ColonRule.Compose());
+      TLexer_AddRule(mLexer, AsteriskRule.Compose());
+      TLexer_AddRule(mLexer, QuestionMarkRule.Compose());
       TLexer_AddRule(mLexer, RParenRule.Compose());
       TLexer_AddRule(mLexer, SemiRule.Compose());
       Repeat
@@ -80,7 +83,45 @@ Begin
     End;
 
   TestParser:
-    Exit;
+    While True Do
+    Begin
+      Readln(mSource);
+      //mSource := '(1)';
+      If mSource = '' Then
+      Begin
+        Goto TestLexer;
+      End;
+      mLexer := TLexer_Create(mSource);
+      TLexer_AddRule(mLexer, EofRule.Compose());
+      TLexer_AddRule(mLexer, IdRule.Compose());
+      TLexer_AddRule(mLexer, TermRule.Compose());
+      TLexer_AddRule(mLexer, LParenRule.Compose());
+      TLexer_AddRule(mLexer, OrRule.Compose());
+      TLexer_AddRule(mLexer, ColonRule.Compose());
+      TLexer_AddRule(mLexer, AsteriskRule.Compose());
+      TLexer_AddRule(mLexer, QuestionMarkRule.Compose());
+      TLexer_AddRule(mLexer, RParenRule.Compose());
+      TLexer_AddRule(mLexer, SemiRule.Compose());
+      mParser := TParser_Create(mLexer, GrammarRule);
+      If TParser_Parse(mParser) Then
+        WriteLn('ACCEPTED')
+      Else
+      Begin
+        WriteLn(Format('ERROR: Parser Message: %s', [mParser.Error]));
+        WriteLn(Format('ERROR: Current Token at Pos = %d, Value = [%s], Message: %s',
+        [mLexer.CurrentToken.StartPos, mLexer.CurrentToken.Value,
+        mLexer.CurrentToken.Error]));
+      End;
+
+      TAstViewer_Create(mViewer);
+      mParser.Ast.VMT.Accept(mParser.Ast, PAstVisitor(mViewer));
+      TAstViewer_Destroy(PAstVisitor(mViewer));
+      Dispose(mViewer);
+
+      Writeln;
+      TParser_Destroy(mParser);
+      TLexer_Destroy(mLexer);
+    End;
 End;
 
 End.

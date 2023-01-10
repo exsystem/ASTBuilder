@@ -1,0 +1,187 @@
+Unit FactorRuleUnit;
+
+{$IFDEF FPC}
+{$MODE DELPHI}
+{$ENDIF}
+
+Interface
+
+Uses
+  Parser, Lexer, ASTNode;
+
+Function FactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function FactorRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function FactorRuleExpression2(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function FactorRuleExpression3(Parser: PParser; Var Ast: PAstNode): Boolean;
+
+Implementation
+
+Uses
+  TypeDef, List, ClassUtils, IdNode, TermNode, GroupNode, ExprRuleUnit;
+
+// factor -> id ( QuestionMark | Asterisk ) ?
+// DFA: (S1)--[id]->((S2))--[?, *]->((S3))
+Function FactorRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Var
+  mSavePointS2: TSize;
+  mIdNode: PAstNode;
+Label
+  S1, S2, S3;
+Begin
+  S1:
+    If TParser_Term(Parser, eId) Then
+    Begin
+      TIdNode_Create(PIdNode(mIdNode), TParser_GetCurrentToken(Parser).Value);
+    End
+    Else
+    Begin
+      Result := False; // S1 is a Non-Accepted State Node in DFA.
+      Exit;
+    End;
+  S2:
+    mSavePointS2 := Parser.FCurrentToken;
+  If TParser_Term(Parser, eQuestionMark) Then
+  Begin
+    TGroupNode_Create(PGroupNode(Ast));
+    TList_PushBack(PGroupNode(Ast).Terms, @mIdNode);
+    PGroupNode(Ast).GroupType := TGroupType.eOptional;
+  End
+  Else
+  If TParser_Term(Parser, eAsterisk) Then
+  Begin
+    TGroupNode_Create(PGroupNode(Ast));
+    TList_PushBack(PGroupNode(Ast).Terms, @mIdNode);
+    PGroupNode(Ast).GroupType := TGroupType.eMultiple;
+  End
+  Else
+  Begin
+    Parser.FCurrentToken := mSavePointS2;
+    Ast := mIdNode;
+    Result := True; // S2 is a accpeted state node in DFA.
+    Exit;
+  End;
+  S3:
+    Result := True;
+End;
+
+// factor -> term ( QuestionMark | Asterisk ) ?
+// DFA: (S1)--[id]->((S2))--[?, *]->((S3))
+Function FactorRuleExpression2(Parser: PParser; Var Ast: PAstNode): Boolean;
+Var
+  mSavePointS2: TSize;
+  mTermNode: PAstNode;
+Label
+  S1, S2, S3;
+Begin
+  S1:
+    If TParser_Term(Parser, eTerm) Then
+    Begin
+      TTermNode_Create(PTermNode(mTermNode), TParser_GetCurrentToken(Parser).Value);
+    End
+    Else
+    Begin
+      Result := False; // S1 is a Non-Accepted State Node in DFA.
+      Exit;
+    End;
+  S2:
+    mSavePointS2 := Parser.FCurrentToken;
+  If TParser_Term(Parser, eQuestionMark) Then
+  Begin
+    TGroupNode_Create(PGroupNode(Ast));
+    TList_PushBack(PGroupNode(Ast).Terms, @mTermNode);
+    PGroupNode(Ast).GroupType := TGroupType.eOptional;
+  End
+  Else
+  If TParser_Term(Parser, eAsterisk) Then
+  Begin
+    TGroupNode_Create(PGroupNode(Ast));
+    TList_PushBack(PGroupNode(Ast).Terms, @mTermNode);
+    PGroupNode(Ast).GroupType := TGroupType.eMultiple;
+  End
+  Else
+  Begin
+    Parser.FCurrentToken := mSavePointS2;
+    Ast := mTermNode;
+    Result := True; // S2 is a accpeted state node in DFA.
+    Exit;
+  End;
+  S3:
+    Result := True;
+End;
+
+// factor -> LParen expr RParen ( QuestionMark | Asterisk ) ?
+Function FactorRuleExpression3(Parser: PParser; Var Ast: PAstNode): Boolean;
+Var
+  mSavePointS4: TSize;
+Label
+  S1, S2, S3, S4, S5;
+Var
+  mExprNode: PAstNode;
+Begin
+  S1:
+    If TParser_Term(Parser, eLParen) Then
+    Begin
+      // NOP
+    End
+    Else
+    Begin
+      Result := False;
+      Exit;
+    End;
+  S2:
+    If ExprRule(Parser, mExprNode) Then
+    Begin
+      // NOP
+    End
+    Else
+    Begin
+      Result := False;
+      Exit;
+    End;
+  S3:
+    If TParser_Term(Parser, eRParen) Then
+    Begin
+      If InstanceOf(mExprNode, @mTGroupNode_VMT) Then
+      Begin
+        Ast := mExprNode;
+      End
+      Else
+      Begin
+        TGroupNode_Create(PGroupNode(Ast));
+        TList_PushBack(PGroupNode(Ast).Terms, @mExprNode);
+      End;
+    End
+    Else
+    Begin
+      Result := False;
+      Exit;
+    End;
+  S4:
+    mSavePointS4 := Parser.FCurrentToken;
+  If TParser_Term(Parser, eQuestionMark) Then
+  Begin
+    PGroupNode(Ast).GroupType := TGroupType.eOptional;
+  End
+  Else
+  If TParser_Term(Parser, eAsterisk) Then
+  Begin
+    PGroupNode(Ast).GroupType := TGroupType.eMultiple;
+  End
+  Else
+  Begin
+    Parser.FCurrentToken := mSavePointS4;
+    PGroupNode(Ast).GroupType := TGroupType.eGroup;
+    Result := True;
+    Exit;
+  End;
+  S5:
+    Result := True;
+End;
+
+Function FactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Begin
+  Result := FactorRuleExpression1(Parser, Ast) Or FactorRuleExpression2(Parser, Ast) Or
+    FactorRuleExpression3(Parser, Ast);
+End;
+
+End.

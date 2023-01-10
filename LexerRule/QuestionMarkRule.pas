@@ -1,4 +1,4 @@
-Unit RootRule;
+Unit QuestionMarkRule;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -19,12 +19,12 @@ Uses
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := SymbolRule.Parse(Lexer, '^');
+  Result := SymbolRule.Parse(Lexer, '?');
 End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eRoot;
+  Result.TokenKind := eQuestionMark;
   Result.Parser := Parse;
 End;
 

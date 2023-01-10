@@ -49,16 +49,13 @@ Procedure TParser_Destroy(Self: PParser);
 
 Implementation
 
-Uses
-  LiteralNode, BinaryOpNode, UnaryOpNode, IdNode, ArrayAccessNode,
-  MemberRefNode, DerefNode, AssignNode, GotoNode, LabelledStmtNode
-  {$IFNDEF FPC},
+  {$IFNDEF FPC}
   {$IFDEF VER150}
-  TypInfo
+  Uses TypInfo;
   {$ELSE}
-  System.Rtti
+  Uses System.Rtti;
   {$ENDIF}
-  {$ENDIF}  ;
+  {$ENDIF}  
 
 Function TParser_Parse(Self: PParser): Boolean;
 Begin
