@@ -36,51 +36,52 @@ Type
 
   TAstVisitor_VMT = Record
     Destory: TAstVisitor_Destroy_Proc;
-    VisitArrayAccess: TAstVisitor_Visit_Proc;
-    VisitAssign: TAstVisitor_Visit_Proc;
-    VisitBinaryOp: TAstVisitor_Visit_Proc;
-    VisitDeref: TAstVisitor_Visit_Proc;
-    VisitGoto: TAstVisitor_Visit_Proc;
     VisitId: TAstVisitor_Visit_Proc;
-    VisitLabelledStmt: TAstVisitor_Visit_Proc;
-    VisitLiteral: TAstVisitor_Visit_Proc;
-    VisitMemberRef: TAstVisitor_Visit_Proc;
-    VisitUnaryOp: TAstVisitor_Visit_Proc;
+    VisitTerm: TAstVisitor_Visit_Proc;
+    VisitGroup: TAstVisitor_Visit_Proc;
+    VisitRule: TAstVisitor_Visit_Proc;
+    VisitGrammar: TAstVisitor_Visit_Proc;
   End;
 
   TAstVisitor = Record
     VMT: PAstVisitor_VMT;
   End;
 
-Procedure TAstNode_Create(Self: PAstNode);
+Procedure TAstNode_Create(Var Self: PAstNode);
 Procedure TAstNode_Destroy(Self: PAstNode);
 
-Procedure TAstVisitor_Create(Self: PAstVisitor);
+Procedure TAstVisitor_Create(Var Self: PAstVisitor);
 Procedure TAstVisitor_Destroy(Self: PAstVisitor);
 
 Implementation
 
-Procedure TAstNode_Create(Self: PAstNode);
+Var
+  mTAstNode_VMT: TAstNode_VMT;
+  mTAstVisitor_VMT: TAstVisitor_VMT;
+
+Procedure TAstNode_Create(Var Self: PAstNode);
 Begin
-  New(Self.VMT);
-  Self.VMT.Destory := TAstNode_Destroy;
+  // Abstract, no New() call.
+  Self.VMT := @mTAstNode_VMT;
 End;
 
 Procedure TAstNode_Destroy(Self: PAstNode);
 Begin
-  Dispose(Self.VMT);
+  // NOP
 End;
 
-Procedure TAstVisitor_Create(Self: PAstVisitor);
+Procedure TAstVisitor_Create(Var Self: PAstVisitor);
 Begin
-  New(Self.VMT);
-  Self.VMT.Destory := TAstVisitor_Destroy;
+  Self.VMT := @mTAstVisitor_VMT;
 End;
 
 Procedure TAstVisitor_Destroy(Self: PAstVisitor);
 Begin
-  Dispose(Self.VMT);
+  // NOP
 End;
 
+Begin
+  mTAstNode_VMT.Destory := TAstNode_Destroy;
+  mTAstVisitor_VMT.Destory := TAstVisitor_Destroy;
 End.
 

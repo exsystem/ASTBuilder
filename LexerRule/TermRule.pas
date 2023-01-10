@@ -1,4 +1,4 @@
-Unit IdRule;
+Unit TermRule;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -19,7 +19,7 @@ Uses
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  If Not IsNonTermIdInitialChar(TLexer_PeekNextChar(Lexer)) Then
+  If Not IsTermIdInitialChar(TLexer_PeekNextChar(Lexer)) Then
   Begin
     Result := False;
     Exit;
@@ -40,7 +40,7 @@ End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eId;
+  Result.TokenKind := eTerm;
   Result.Parser := Parse;
 End;
 
