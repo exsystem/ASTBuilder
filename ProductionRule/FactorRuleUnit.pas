@@ -10,8 +10,11 @@ Uses
   Parser, Lexer, ASTNode;
 
 Function FactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+
 Function FactorRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+
 Function FactorRuleExpression2(Parser: PParser; Var Ast: PAstNode): Boolean;
+
 Function FactorRuleExpression3(Parser: PParser; Var Ast: PAstNode): Boolean;
 
 Implementation
@@ -28,30 +31,31 @@ Var
 Label
   S1, S2, S3;
 Begin
-  S1:
-    If TParser_Term(Parser, eId) Then
-    Begin
-      TIdNode_Create(PIdNode(mIdNode), TParser_GetCurrentToken(Parser).Value);
-    End
-    Else
-    Begin
-      Result := False; // S1 is a Non-Accepted State Node in DFA.
-      Exit;
-    End;
-  S2:
-    mSavePointS2 := Parser.FCurrentToken;
+S1:
+  If TParser_Term(Parser, eId) Then
+  Begin
+    TIdNode_Create(PIdNode(mIdNode), TParser_GetCurrentToken(Parser).Value);
+  End
+  Else
+  Begin
+    Result := False; // S1 is a Non-Accepted State Node in DFA.
+    Exit;
+  End;
+S2:
+  mSavePointS2 := Parser.FCurrentToken;
   If TParser_Term(Parser, eQuestionMark) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast).Terms, @mIdNode);
     PGroupNode(Ast).GroupType := TGroupType.eOptional;
+    PGroupNode(Ast).IsAlternational := False;
   End
-  Else
-  If TParser_Term(Parser, eAsterisk) Then
+  Else If TParser_Term(Parser, eAsterisk) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast).Terms, @mIdNode);
     PGroupNode(Ast).GroupType := TGroupType.eMultiple;
+    PGroupNode(Ast).IsAlternational := False;
   End
   Else
   Begin
@@ -60,8 +64,8 @@ Begin
     Result := True; // S2 is a accpeted state node in DFA.
     Exit;
   End;
-  S3:
-    Result := True;
+S3:
+  Result := True;
 End;
 
 // factor -> term ( QuestionMark | Asterisk ) ?
@@ -73,30 +77,31 @@ Var
 Label
   S1, S2, S3;
 Begin
-  S1:
-    If TParser_Term(Parser, eTerm) Then
-    Begin
-      TTermNode_Create(PTermNode(mTermNode), TParser_GetCurrentToken(Parser).Value);
-    End
-    Else
-    Begin
-      Result := False; // S1 is a Non-Accepted State Node in DFA.
-      Exit;
-    End;
-  S2:
-    mSavePointS2 := Parser.FCurrentToken;
+S1:
+  If TParser_Term(Parser, eTerm) Then
+  Begin
+    TTermNode_Create(PTermNode(mTermNode), TParser_GetCurrentToken(Parser).Value);
+  End
+  Else
+  Begin
+    Result := False; // S1 is a Non-Accepted State Node in DFA.
+    Exit;
+  End;
+S2:
+  mSavePointS2 := Parser.FCurrentToken;
   If TParser_Term(Parser, eQuestionMark) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast).Terms, @mTermNode);
     PGroupNode(Ast).GroupType := TGroupType.eOptional;
+    PGroupNode(Ast).IsAlternational := False;
   End
-  Else
-  If TParser_Term(Parser, eAsterisk) Then
+  Else If TParser_Term(Parser, eAsterisk) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast).Terms, @mTermNode);
     PGroupNode(Ast).GroupType := TGroupType.eMultiple;
+    PGroupNode(Ast).IsAlternational := False;
   End
   Else
   Begin
@@ -105,8 +110,8 @@ Begin
     Result := True; // S2 is a accpeted state node in DFA.
     Exit;
   End;
-  S3:
-    Result := True;
+S3:
+  Result := True;
 End;
 
 // factor -> LParen expr RParen ( QuestionMark | Asterisk ) ?
@@ -118,70 +123,70 @@ Label
 Var
   mExprNode: PAstNode;
 Begin
-  S1:
-    If TParser_Term(Parser, eLParen) Then
-    Begin
+S1:
+  If TParser_Term(Parser, eLParen) Then
+  Begin
       // NOP
-    End
-    Else
-    Begin
-      Result := False;
-      Exit;
-    End;
-  S2:
-    If ExprRule(Parser, mExprNode) Then
-    Begin
+  End
+  Else
+  Begin
+    Result := False;
+    Exit;
+  End;
+S2:
+  If ExprRule(Parser, mExprNode) Then
+  Begin
       // NOP
+  End
+  Else
+  Begin
+    Result := False;
+    Exit;
+  End;
+S3:
+  If TParser_Term(Parser, eRParen) Then
+  Begin
+    If InstanceOf(mExprNode, @mTGroupNode_VMT) Then
+    Begin
+      Ast := mExprNode;
     End
     Else
     Begin
-      Result := False;
-      Exit;
+      TGroupNode_Create(PGroupNode(Ast));
+      PGroupNode(Ast).IsAlternational := False;
+      TList_PushBack(PGroupNode(Ast).Terms, @mExprNode);
     End;
-  S3:
-    If TParser_Term(Parser, eRParen) Then
-    Begin
-      If InstanceOf(mExprNode, @mTGroupNode_VMT) Then
-      Begin
-        Ast := mExprNode;
-      End
-      Else
-      Begin
-        TGroupNode_Create(PGroupNode(Ast));
-        TList_PushBack(PGroupNode(Ast).Terms, @mExprNode);
-      End;
-    End
-    Else
-    Begin
-      Result := False;
-      Exit;
-    End;
-  S4:
-    mSavePointS4 := Parser.FCurrentToken;
+  End
+  Else
+  Begin
+    Result := False;
+    Exit;
+  End;
+S4:
+  mSavePointS4 := Parser.FCurrentToken;
   If TParser_Term(Parser, eQuestionMark) Then
   Begin
     PGroupNode(Ast).GroupType := TGroupType.eOptional;
   End
-  Else
-  If TParser_Term(Parser, eAsterisk) Then
+  Else If TParser_Term(Parser, eAsterisk) Then
   Begin
     PGroupNode(Ast).GroupType := TGroupType.eMultiple;
   End
   Else
   Begin
     Parser.FCurrentToken := mSavePointS4;
-    PGroupNode(Ast).GroupType := TGroupType.eGroup;
     Result := True;
     Exit;
   End;
-  S5:
-    Result := True;
+S5:
+  Result := True;
 End;
 
 Function FactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
-  Result := FactorRuleExpression1(Parser, Ast) Or FactorRuleExpression2(Parser, Ast) Or
-    FactorRuleExpression3(Parser, Ast);
+  Result := FactorRuleExpression1(Parser, Ast) Or FactorRuleExpression2(Parser,
+    Ast) Or FactorRuleExpression3(Parser, Ast);
 End;
 
 End.
+

@@ -86,7 +86,6 @@ Begin
     While True Do
     Begin
       Readln(mSource);
-      //mSource := '(1)';
       If mSource = '' Then
       Begin
         Goto TestLexer;
