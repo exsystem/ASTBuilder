@@ -10,18 +10,22 @@ Uses
   ASTNode, List;
 
 Type
-  TGroupType = (eGroup, eOptional, eMultiple, eOr);
+
+  TGroupType = (eGroup, eOptional, eMultiple);
 
   PGroupNode = ^TGroupNode;
 
   TGroupNode = Record
     Parent: TAstNode;
     Terms: PList; // Of PAstNode
+    IsAlternational: Boolean;
     GroupType: TGroupType;
   End;
 
 Procedure TGroupNode_Create(Var Self: PGroupNode);
+
 Procedure TGroupNode_Destroy(Self: PAstNode);
+
 Procedure TGroupNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 
 Var
@@ -64,4 +68,6 @@ End;
 Begin
   mTGroupNode_VMT.Destory := TGroupNode_Destroy;
   mTGroupNode_VMT.Accept := TGroupNode_Accept;
+
 End.
+
