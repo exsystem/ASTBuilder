@@ -63,7 +63,7 @@ Var
   mNode: PIdNode;
 Begin
   mNode := PIdNode(Node);
-  TAstViewer_WriteLn(Self, mNode.Value);
+  TAstViewer_WriteLn(Self, 'Non-Terminal: ' + mNode.Value);
 End;
 
 Procedure TAstViewer_VisitTerm(Self: PAstVisitor; Node: PAstNode);
@@ -71,7 +71,7 @@ Var
   mNode: PTermNode;
 Begin
   mNode := PTermNode(Node);
-  TAstViewer_WriteLn(Self, mNode.Value);
+  TAstViewer_WriteLn(Self, 'Terminal: ' + mNode.Value);
 End;
 
 Procedure TAstViewer_VisitGroup(Self: PAstVisitor; Node: PAstNode);
