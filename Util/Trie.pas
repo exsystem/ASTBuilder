@@ -1,4 +1,4 @@
-﻿Unit Trie;
+Unit Trie;
 
 {$IFDEF FPC}
 {$MODE DELPHI}

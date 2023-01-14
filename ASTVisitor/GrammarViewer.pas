@@ -126,12 +126,15 @@ Var
 Begin
   mNode := PGrammarNode(Node);
   TAstViewer_WriteLn(Self, 'Grammar:');
-  For I := 0 To mNode.Rules.Size - 1 Do
+  If mNode.Rules.Size <> 0 Then
   Begin
-    mItem := PPAstNode(TList_Get(mNode.Rules, I))^;
-    TAstViewer_Indent(Self);
-    mItem.VMT.Accept(mItem, Self);
-    TAstViewer_Deindent(Self);
+    For I := 0 To mNode.Rules.Size - 1 Do
+    Begin
+      mItem := PPAstNode(TList_Get(mNode.Rules, I))^;
+      TAstViewer_Indent(Self);
+      mItem.VMT.Accept(mItem, Self);
+      TAstViewer_Deindent(Self);
+    End;
   End;
 End;
 
