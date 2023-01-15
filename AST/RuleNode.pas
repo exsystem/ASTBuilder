@@ -40,8 +40,11 @@ Procedure TRuleNode_Destroy(Self: PAstNode);
 Begin
   TIdNode_Destroy(PAstNode(PRuleNode(Self).Id));
   Dispose(PRuleNode(Self).Id);
-  TGroupNode_Destroy(PAstNode(PRuleNode(Self).Expr));
-  Dispose(PRuleNode(Self).Expr);
+  If PRuleNode(Self).Expr <> nil Then // only for non-empty rule.
+  Begin
+    TGroupNode_Destroy(PAstNode(PRuleNode(Self).Expr));
+    Dispose(PRuleNode(Self).Expr);
+  End;
   TAstNode_Destroy(Self);
 End;
 

@@ -53,8 +53,11 @@ Begin
   For I := 0 To PGroupNode(Self).Terms.Size - 1 Do
   Begin
     mElem := PPAstNode(TList_Get(PGroupNode(Self).Terms, I))^;
-    mElem.VMT.Destory(mElem);
-    Dispose(mElem);
+    If mElem <> nil Then // nil for epsilon term in the alternation group.
+    Begin
+      mElem.VMT.Destory(mElem);
+      Dispose(mElem);
+    End;
   End;
   TList_Destroy(PGroupNode(Self).Terms);
   TAstNode_Destroy(Self);
@@ -70,4 +73,3 @@ Begin
   mTGroupNode_VMT.Accept := TGroupNode_Accept;
 
 End.
-

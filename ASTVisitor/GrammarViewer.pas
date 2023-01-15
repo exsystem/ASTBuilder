@@ -102,7 +102,14 @@ Begin
   Begin
     mItem := PPAstNode(TList_Get(mNode.Terms, I))^;
     TAstViewer_Indent(Self);
-    mItem.VMT.Accept(mItem, Self);
+    If mItem = nil Then
+    Begin
+      TAstViewer_WriteLn(Self, '<empty term>');
+    End
+    Else
+    Begin
+      mItem.VMT.Accept(mItem, Self);
+    End;
     TAstViewer_Deindent(Self);
   End;
 End;
@@ -114,7 +121,14 @@ Begin
   mNode := PRuleNode(Node);
   TAstViewer_WriteLn(Self, mNode.Id.Value + ':');
   TAstViewer_Indent(Self);
-  mNode.Expr.Parent.VMT.Accept(PAstNode(mNode.Expr), Self);
+  If mNode.Expr = nil Then
+  Begin
+    TAstViewer_WriteLn(Self, '<empty rule>');
+  End
+  Else
+  Begin
+    mNode.Expr.Parent.VMT.Accept(PAstNode(mNode.Expr), Self);
+  End;
   TAstViewer_Deindent(Self);
 End;
 
@@ -171,4 +185,3 @@ Begin
   mTAstViewer_VMT.VisitGrammar := TAstViewer_VisitGrammar;
 
 End.
-
