@@ -7,17 +7,17 @@ Unit TermNode;
 Interface
 
 Uses
-  ASTNode;
+  ASTNode, lexer;
 
 Type
   PTermNode = ^TTermNode;
 
   TTermNode = Record
     Parent: TAstNode;
-    Value: String;
+    Token: TToken;
   End;
 
-Procedure TTermNode_Create(Var Self: PTermNode; Value: String);
+Procedure TTermNode_Create(Var Self: PTermNode);
 
 Procedure TTermNode_Destroy(Self: PAstNode);
 
@@ -28,12 +28,11 @@ Var
 
 Implementation
 
-Procedure TTermNode_Create(Var Self: PTermNode; Value: String);
+Procedure TTermNode_Create(Var Self: PTermNode);
 Begin
   New(Self);
   TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT := @mTTermNode_AST;
-  Self.Value := Value;
 End;
 
 Procedure TTermNode_Destroy(Self: PAstNode);

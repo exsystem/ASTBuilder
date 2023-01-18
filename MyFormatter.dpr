@@ -1,44 +1,45 @@
 ﻿Program MyFormatter;
+
 {$APPTYPE CONSOLE}
 {$R *.res}
-uses
-  {$IFNDEF FPC}
+Uses {$IFNDEF FPC}
   System.SysUtils,
-  System.Rtti,
-  {$ENDIF }
-  ASTNode in 'ASTNode.pas',
-  Lexer in 'Lexer.pas',
-  Parser in 'Parser.pas',
-  Test in 'Test\Test.pas',
-  KeywordRule in 'LexerRule\Template\KeywordRule.pas',
-  SymbolRule in 'LexerRule\Template\SymbolRule.pas',
-  GroupNode in 'AST\GroupNode.pas',
-  IdNode in 'AST\IdNode.pas',
-  TermNode in 'AST\TermNode.pas',
-  GrammarViewer in 'ASTVisitor\GrammarViewer.pas',
-  AsteriskRule in 'LexerRule\AsteriskRule.pas',
-  ColonRule in 'LexerRule\ColonRule.pas',
-  EofRule in 'LexerRule\EofRule.pas',
-  IdRule in 'LexerRule\IdRule.pas',
-  LParenRule in 'LexerRule\LParenRule.pas',
-  OrRule in 'LexerRule\OrRule.pas',
-  QuestionMarkRule in 'LexerRule\QuestionMarkRule.pas',
-  RParenRule in 'LexerRule\RParenRule.pas',
-  SemiRule in 'LexerRule\SemiRule.pas',
-  TermRule in 'LexerRule\TermRule.pas',
-  ClassUtils in 'Util\ClassUtils.pas',
-  List in 'Util\List.pas',
-  StringUtils in 'Util\StringUtils.pas',
-  Trie in 'Util\Trie.pas',
-  TypeDef in 'Util\TypeDef.pas',
-  ExprRuleUnit in 'ProductionRule\ExprRuleUnit.pas',
-  FactorRuleUnit in 'ProductionRule\FactorRuleUnit.pas',
-  GrammarRuleUnit in 'ProductionRule\GrammarRuleUnit.pas',
-  GrammarNode in 'AST\GrammarNode.pas',
-  RuleNode in 'AST\RuleNode.pas',
-  RuleRuleUnit in 'ProductionRule\RuleRuleUnit.pas';
+  System.Rtti, {$ENDIF }
+  ASTNode In 'ASTNode.pas',
+  Lexer In 'Lexer.pas',
+  Parser In 'Parser.pas',
+  KeywordRule In 'LexerRule\Template\KeywordRule.pas',
+  SymbolRule In 'LexerRule\Template\SymbolRule.pas',
+  GroupNode In 'AST\GroupNode.pas',
+  IdNode In 'AST\IdNode.pas',
+  TermNode In 'AST\TermNode.pas',
+  GrammarViewer In 'ASTVisitor\GrammarViewer.pas',
+  ClassUtils In 'Util\ClassUtils.pas',
+  List In 'Util\List.pas',
+  StringUtils In 'Util\StringUtils.pas',
+  Trie In 'Util\Trie.pas',
+  TypeDef In 'Util\TypeDef.pas',
+  ExprRuleUnit In 'ProductionRule\ExprRuleUnit.pas',
+  FactorRuleUnit In 'ProductionRule\FactorRuleUnit.pas',
+  GrammarRuleUnit In 'ProductionRule\GrammarRuleUnit.pas',
+  GrammarNode In 'AST\GrammarNode.pas',
+  RuleNode In 'AST\RuleNode.pas',
+  RuleRuleUnit In 'ProductionRule\RuleRuleUnit.pas',
+  Test2 In 'Test\Test2.pas',
+  GrammarParser In 'ASTVisitor\GrammarParser.pas',
+  ParseTree In 'ParseTree\ParseTree.pas',
+  AsteriskRule In 'LexerRule\Grammar\AsteriskRule.pas',
+  ColonRule In 'LexerRule\Grammar\ColonRule.pas',
+  EofRule In 'LexerRule\Grammar\EofRule.pas',
+  IdRule In 'LexerRule\Grammar\IdRule.pas',
+  LParenRule In 'LexerRule\Grammar\LParenRule.pas',
+  OrRule In 'LexerRule\Grammar\OrRule.pas',
+  QuestionMarkRule In 'LexerRule\Grammar\QuestionMarkRule.pas',
+  RParenRule In 'LexerRule\Grammar\RParenRule.pas',
+  SemiRule In 'LexerRule\Grammar\SemiRule.pas',
+  TermRule In 'LexerRule\Grammar\TermRule.pas';
 
 Begin
   ReportMemoryLeaksOnShutdown := True;
-  Test1();
+  Test();
 End.

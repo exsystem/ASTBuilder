@@ -9,7 +9,7 @@ Interface
 Type
   PPInteger = ^PInteger;
 
-Procedure Test1();
+Procedure Test();
 
 Implementation
 
@@ -26,7 +26,7 @@ Uses {$IFNDEF FPC}
   QuestionMarkRule,
   RParenRule, SemiRule, GrammarViewer, Parser, GrammarRuleUnit, ASTNode;
 
-Procedure Test1();
+Procedure Test();
 Var
   mSource: String;
   mLexer: PLexer;
@@ -326,7 +326,8 @@ Begin
         mSource := mSource + 'formalParameterList' + #13#10;
         mSource := mSource +
           '   : LPAREN formalParameterSection (SEMI formalParameterSection)* RPAREN'
-        + #13#10;
+        +
+          #13#10;
         mSource := mSource + '   ;' + #13#10;
         mSource := mSource + '' + #13#10;
         mSource := mSource + 'formalParameterSection' + #13#10;
@@ -351,7 +352,8 @@ Begin
         mSource := mSource + 'functionDeclaration' + #13#10;
         mSource := mSource +
           '   : FUNCTION identifier (formalParameterList)? COLON resultType SEMI block'
-        + #13#10;
+        +
+          #13#10;
         mSource := mSource + '   ;' + #13#10;
         mSource := mSource + '' + #13#10;
         mSource := mSource + 'resultType' + #13#10;

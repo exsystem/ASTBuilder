@@ -10,6 +10,7 @@ Uses
   ASTNode, IdNode, GroupNode;
 
 Type
+  PPRuleNode = ^PRuleNode;
   PRuleNode = ^TRuleNode;
 
   TRuleNode = Record
