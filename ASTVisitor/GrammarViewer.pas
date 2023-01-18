@@ -71,7 +71,7 @@ Var
   mNode: PTermNode;
 Begin
   mNode := PTermNode(Node);
-  TAstViewer_WriteLn(Self, 'Terminal: ' + mNode.Value);
+  TAstViewer_WriteLn(Self, 'Terminal: ' + mNode.Token.Value);
 End;
 
 Procedure TAstViewer_VisitGroup(Self: PAstVisitor; Node: PAstNode);
