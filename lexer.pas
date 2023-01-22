@@ -11,7 +11,9 @@ Uses
 
 Type
   PTokenKind = ^TTokenKind;
-  TTokenKind = (eUndefined, eEof, eRoot, eOr, eLParen, eRParen, eQuestionMark, eAsterisk, eColon, eSemi, eId, eTerm);
+  TTokenKind = (eUndefined, eEof, eRoot, eOr, eLParen, eRParen,
+    eQuestionMark, eAsterisk, eColon, eSemi, eId, eTerm, eString,
+    eChar, eDoubleDots, eSingleQuote);
   PToken = ^TToken;
 
   TToken = Record
@@ -48,7 +50,7 @@ Procedure TLexer_Forward(Var Self: PLexer; Const Step: TSize = 1);
 Function TLexer_PeekNextChar(Var Self: PLexer): Char;
 Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: String): Boolean;
 Function TLexer_GetNextChar(Var Self: PLexer): Char;
-Procedure TLexer_Retract(Var Self: PLexer);
+Procedure TLexer_Retract(Var Self: PLexer; Const Step: TSize = 1);
 
 Implementation
 
@@ -186,9 +188,9 @@ Begin
   Result := TLexer_IsToken(Self, TokenKind);
 End;
 
-Procedure TLexer_Retract(Var Self: PLexer);
+Procedure TLexer_Retract(Var Self: PLexer; Const Step: TSize = 1);
 Begin
-  Dec(Self.NextPos);
+  Dec(Self.NextPos, Step);
 End;
 
 End.

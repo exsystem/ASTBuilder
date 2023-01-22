@@ -1,4 +1,4 @@
-Unit RuleRuleUnit;
+Unit TermRuleRuleUnit;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -9,16 +9,16 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function RuleRule(Parser: PParser; Var Ast: PAstNode): Boolean;
-Function RuleRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
-  IdNode, GroupNode, RuleNode, ExprRuleUnit;
+  IdNode, GroupNode, RuleNode, TermExprRuleUnit;
 
-// rule -> id Colon expr Semi 
-Function RuleRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+// rule -> term Colon expr Semi
+Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mName: String;
   mGroupNode: PAstNode;
@@ -26,7 +26,7 @@ Label
   S1, S2;
 Begin
   S1:
-    If TParser_Term(Parser, eId) Then
+    If TParser_Term(Parser, eTerm) Then
     Begin
       mName := TParser_GetCurrentToken(Parser).Value;
     End
@@ -44,7 +44,7 @@ Begin
     Result := False;
     Exit;
   End;
-  If ExprRule(Parser, mGroupNode) Then
+  If TermExprRule(Parser, mGroupNode) Then
   Begin
     // NOP
   End
@@ -68,9 +68,9 @@ Begin
     Result := True;
 End;
 
-Function RuleRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
-  Result := RuleRuleExpression1(Parser, Ast);
+  Result := TermRuleExpression1(Parser, Ast);
 End;
 
 End.

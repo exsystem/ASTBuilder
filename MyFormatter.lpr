@@ -3,7 +3,7 @@ Program MyFormatter;
 {$MODE DELPHI}
 
 Uses
-  Test2 In 'Test/Test2.pas';
+  Test1 In 'Test/Test1.pas';
 
 // {$R *.res}
 

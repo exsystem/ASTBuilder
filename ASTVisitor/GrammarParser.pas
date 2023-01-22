@@ -7,7 +7,7 @@ Unit GrammarParser;
 Interface
 
 Uses
-  TypeDef, List, lexer, ParseTree, ASTNode, GrammarNode;
+  TypeDef, List, Lexer, ParseTree, ASTNode, GrammarNode;
 
 Type
   PAstViewer = ^TAstViewer;
@@ -79,15 +79,13 @@ Var
   mNode: PIdNode;
   I: TSize;
   mRule: PRuleNode;
-  mIdNode: PParseTree;
-  mCurrentNode: PParseTree;
 Begin
   mSelf := PAstViewer(Self);
   mNode := PIdNode(Node);
   For I := 0 To mSelf.FGrammar.Rules.Size - 1 Do
   Begin
     mRule := PPRuleNode(TList_Get(mSelf.FGrammar.Rules, I))^;
-    If mRule.Id.Value = mNode.Value Then
+    If mRule.Name = mNode.Value Then
     Begin
       mRule.Parent.VMT.Accept(PAstNode(mRule), Self);
       Exit;
@@ -101,15 +99,17 @@ Var
   mNode: PTermNode;
   mSelf: PAstViewer;
   mTermNode: PParseTree;
+  mTokenKind: TTokenKind;
 Begin
   mNode := PTermNode(Node);
   mSelf := PAstViewer(Self);
-  If TAstViewer_Term(mSelf, mNode.Token.Kind) Then
+  If TAstViewer_Term(mSelf, mTokenKind) Then
   Begin
     New(mTermNode);
     mTermNode.RuleName := '';
     mTermNode.Token := mNode.Token;
     TList_PushBack(mSelf.FCurrentParseTreeNode.Children, @mTermNode);
+    WriteLn(mNode.Token.Value);
     mSelf.Error := '';
     Exit;
   End;
@@ -273,7 +273,7 @@ Begin
   New(mCurr);
   TList_PushBack(mSelf.FCurrentParseTreeNode.Children, @mCurr);
   mSelf.FCurrentParseTreeNode := mCurr;
-  mSelf.FCurrentParseTreeNode.RuleName := mNode.Id.Value;
+  mSelf.FCurrentParseTreeNode.RuleName := mNode.Name;
   mSelf.FCurrentParseTreeNode.Children := TList_Create(SizeOf(PParseTree), 1);
   If mNode.Expr <> nil Then
   Begin
@@ -291,7 +291,6 @@ End;
 
 Procedure TAstViewer_VisitGrammar(Self: PAstVisitor; Node: PAstNode);
 Var
-  I: TSize;
   mItem: PAstNode;
   mSelf: PAstViewer;
   mNode: PGrammarNode;

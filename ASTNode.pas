@@ -41,6 +41,8 @@ Type
     VisitGroup: TAstVisitor_Visit_Proc;
     VisitRule: TAstVisitor_Visit_Proc;
     VisitGrammar: TAstVisitor_Visit_Proc;
+    VisitString: TAstVisitor_Visit_Proc;
+    VisitRange: TAstVisitor_Visit_Proc;
   End;
 
   TAstVisitor = Record
@@ -84,4 +86,3 @@ Begin
   mTAstNode_VMT.Destory := TAstNode_Destroy;
   mTAstVisitor_VMT.Destory := TAstVisitor_Destroy;
 End.
-
