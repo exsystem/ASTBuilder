@@ -1,4 +1,4 @@
-Unit ExprRuleUnit;
+Unit TermExprRuleUnit;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -9,17 +9,17 @@ Interface
 Uses
   Parser, Lexer, ASTNode;
 
-Function ExprRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermExprRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 
-Function ExprRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermExprRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 
 Implementation
 
 Uses
-  TypeDef, List, IdNode, TermNode, GroupNode, FactorRuleUnit;
+  TypeDef, List, IdNode, TermNode, GroupNode, TermFactorRuleUnit;
 
-// expr -> factor* ( Or factor* )*
-Function ExprRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+// termExpr -> termFactor* ( Or termFactor* )*
+Function TermExprRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePointS1, mSavePointS2: TSize;
   mFactorNode: PAstNode;
@@ -34,7 +34,7 @@ Begin
   mGroupNodeN := nil;
   S1:
     mSavePointS1 := Parser.FCurrentToken;
-  If FactorRule(Parser, mFactorNode) Then
+  If TermFactorRule(Parser, mFactorNode) Then
   Begin
     If mGroupNode1 = nil Then
     Begin
@@ -72,7 +72,7 @@ Begin
   End;
   S2:
     mSavePointS2 := Parser.FCurrentToken;
-  If FactorRule(Parser, mFactorNode) Then
+  If TermFactorRule(Parser, mFactorNode) Then
   Begin
     If mGroupNodeN = nil Then
     Begin
@@ -105,9 +105,9 @@ Begin
   End;
 End;
 
-Function ExprRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermExprRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Begin
-  Result := ExprRuleExpression1(Parser, Ast);
+  Result := TermExprRuleExpression1(Parser, Ast);
 End;
 
 End.

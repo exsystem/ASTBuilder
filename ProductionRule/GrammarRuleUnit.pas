@@ -7,7 +7,7 @@ Unit GrammarRuleUnit;
 Interface
 
 Uses
-  Parser, Lexer, ASTNode;
+  Parser, ASTNode;
 
 Function GrammarRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Function GrammarRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
@@ -15,9 +15,9 @@ Function GrammarRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  TypeDef, List, GrammarNode, RuleNode, RuleRuleUnit;
+  TypeDef, List, GrammarNode, RuleNode, RuleRuleUnit, TermRuleRuleUnit;
 
-// grammar -> rule* 
+// grammar -> rule* termRule* 
 Function GrammarRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePointS1: TSize;
@@ -29,6 +29,10 @@ Begin
   S1:
     mSavePointS1 := Parser.FCurrentToken;
   If RuleRule(Parser, mRuleNode) Then
+  Begin
+    TList_PushBack(PGrammarNode(Ast).Rules, @mRuleNode);
+  End
+  Else If TermRule(Parser, mRuleNode) Then
   Begin
     TList_PushBack(PGrammarNode(Ast).Rules, @mRuleNode);
   End

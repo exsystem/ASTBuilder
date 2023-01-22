@@ -20,6 +20,8 @@ Type
 Procedure TAstViewer_Create(Var Self: PAstViewer);
 
 Procedure TAstViewer_Destroy(Self: PAstVisitor);
+Procedure TAstViewer_VisitString(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitRange(Self: PAstVisitor; Node: PAstNode);
 
 Procedure TAstViewer_VisitId(Self: PAstVisitor; Node: PAstNode);
 
@@ -40,7 +42,7 @@ Procedure TAstViewer_Deindent(Self: PAstVisitor);
 Implementation
 
 Uses
-  List, IdNode, TermNode, GroupNode, RuleNode, GrammarNode;
+  List, StringNode, RangeNode, IdNode, TermNode, GroupNode, RuleNode, GrammarNode;
 
 Var
   mTAstViewer_VMT: TAstVisitor_VMT;
@@ -56,6 +58,22 @@ End;
 Procedure TAstViewer_Destroy(Self: PAstVisitor);
 Begin
   TAstVisitor_Destroy(Self);
+End;
+
+Procedure TAstViewer_VisitString(Self: PAstVisitor; Node: PAstNode);
+Var
+  mNode: PStringNode;
+Begin
+  mNode := PStringNode(Node);
+  TAstViewer_WriteLn(Self, 'String: ' + mNode.Value);
+End;
+
+Procedure TAstViewer_VisitRange(Self: PAstVisitor; Node: PAstNode);
+Var
+  mNode: PRangeNode;
+Begin
+  mNode := PRangeNode(Node);
+  TAstViewer_WriteLn(Self, 'Range: ' + mNode.FromChar + ' .. ' + mNode.ToChar);
 End;
 
 Procedure TAstViewer_VisitId(Self: PAstVisitor; Node: PAstNode);
@@ -119,7 +137,7 @@ Var
   mNode: PRuleNode;
 Begin
   mNode := PRuleNode(Node);
-  TAstViewer_WriteLn(Self, mNode.Id.Value + ':');
+  TAstViewer_WriteLn(Self, mNode.Name + ':');
   TAstViewer_Indent(Self);
   If mNode.Expr = nil Then
   Begin
@@ -183,5 +201,6 @@ Begin
   mTAstViewer_VMT.VisitGroup := TAstViewer_VisitGroup;
   mTAstViewer_VMT.VisitRule := TAstViewer_VisitRule;
   mTAstViewer_VMT.VisitGrammar := TAstViewer_VisitGrammar;
-
+  mTAstViewer_VMT.VisitString := TAstViewer_VisitString;
+  mTAstViewer_VMT.VisitRange := TAstViewer_VisitRange;
 End.

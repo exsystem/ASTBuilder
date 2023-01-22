@@ -88,7 +88,7 @@ Begin
     If mNode.Next[mKey[I]] = nil Then
     Begin
       mNode.Next[mKey[I]] := TTrie_CreateNode();
-      mNode.Next[mKey[I]].Data := Nil;
+      mNode.Next[mKey[I]].Data := nil;
     End;
     mNode := mNode.Next[mKey[I]];
   End;

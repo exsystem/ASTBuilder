@@ -15,7 +15,7 @@ Type
 
   TRuleNode = Record
     Parent: TAstNode;
-    Id: PIdNode;
+    Name: String;
     Expr: PGroupNode;
   End;
 
@@ -39,8 +39,6 @@ End;
 
 Procedure TRuleNode_Destroy(Self: PAstNode);
 Begin
-  TIdNode_Destroy(PAstNode(PRuleNode(Self).Id));
-  Dispose(PRuleNode(Self).Id);
   If PRuleNode(Self).Expr <> nil Then // only for non-empty rule.
   Begin
     TGroupNode_Destroy(PAstNode(PRuleNode(Self).Expr));

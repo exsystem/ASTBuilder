@@ -45,8 +45,8 @@ Begin
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'programHeading' + #13#10;
-  mSource := mSource +
-    '   : PROGRAM identifier (LPAREN identifierList RPAREN)? SEMI' + #13#10;
+  mSource := mSource + '   : PROGRAM identifier (LPAREN identifierList RPAREN)? SEMI'
+    + #13#10;
   mSource := mSource + '   | UNIT identifier SEMI' + #13#10;
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
@@ -72,8 +72,8 @@ Begin
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'constantDefinitionPart' + #13#10;
-  mSource := mSource +
-    '   : CONST (constantDefinition SEMI) (constantDefinition SEMI)*' + #13#10;
+  mSource := mSource + '   : CONST (constantDefinition SEMI) (constantDefinition SEMI)*'
+    + #13#10;
   // (constantDefinition SEMI)* => +
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
@@ -128,8 +128,8 @@ Begin
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'typeDefinition' + #13#10;
-  mSource := mSource +
-    '   : identifier EQUAL (type_ | functionType | procedureType)' + #13#10;
+  mSource := mSource + '   : identifier EQUAL (type_ | functionType | procedureType)'
+    + #13#10;
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'functionType' + #13#10;
@@ -185,8 +185,7 @@ Begin
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'arrayType' + #13#10;
-  mSource := mSource + '   : ARRAY LBRACK typeList RBRACK OF componentType'
-    + #13#10;
+  mSource := mSource + '   : ARRAY LBRACK typeList RBRACK OF componentType' + #13#10;
   mSource := mSource + '   | ARRAY LBRACK2 typeList RBRACK2 OF componentType'
     + #13#10;
   mSource := mSource + '   ;' + #13#10;
@@ -251,8 +250,8 @@ Begin
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'variableDeclarationPart' + #13#10;
-  mSource := mSource +
-    '   : VAR variableDeclaration (SEMI variableDeclaration)* SEMI' + #13#10;
+  mSource := mSource + '   : VAR variableDeclaration (SEMI variableDeclaration)* SEMI'
+    + #13#10;
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'variableDeclaration' + #13#10;
@@ -269,8 +268,8 @@ Begin
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'procedureDeclaration' + #13#10;
-  mSource := mSource +
-    '   : PROCEDURE identifier (formalParameterList)? SEMI block' + #13#10;
+  mSource := mSource + '   : PROCEDURE identifier (formalParameterList)? SEMI block'
+    + #13#10;
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'formalParameterList' + #13#10;

@@ -7,16 +7,17 @@ PROJECT="/Users/exsystem/DelphiProjects/MyFormatter/MyFormatter.lpi"
 # echo. >> "/Users/exsystem/DelphiProjects/MyFormatter/MyFormatter.lpr"
 
 if [ $1 = "clean" ] || [ $1 == "test" ]; then
-    find "/Users/exsystem/DelphiProjects/MyFormatter" -type f -name "*.pas" | xargs /Users/exsystem/DelphiProjects/jcf/JCF -config=./.vscode/jcfsettings.cfg -y -F 
-    find "/Users/exsystem/DelphiProjects/MyFormatter" -type d -name "backup" | xargs rm -rf      
-    find "/Users/exsystem/DelphiProjects/MyFormatter" -type d -name "__history" | xargs rm -rf      
-    rm -rf "/Users/exsystem/DelphiProjects/MyFormatter/lib"
-    rm -rf "/Users/exsystem/DelphiProjects/MyFormatter/Win32"
+    find . -type f -name "*.pas" -exec ../jcf/JCF -config=./.vscode/jcfsettings.cfg -y -inplace -F {} \;
+    find . -type f -name "*.pas" -exec dos2unix {} \;
+    find . -type f -name "*.jcf.pas" | xargs rm -f 
+    find . -type d -name "backup" | xargs rm -rf      
+    find . -type d -name "__history" | xargs rm -rf      
+    rm -rf "./lib"
+    rm -rf "./Win32"
 fi
 
 if $LAZBUILD $PROJECT; then
   if [ $1 = "test" ]; then
-    find "/Users/exsystem/DelphiProjects/MyFormatter" -type f -name "*.jcf.pas" | xargs rm -f 
-    "/Users/exsystem/DelphiProjects/MyFormatter/MyFormatter" 
+    ./MyFormatter 
   fi
 fi

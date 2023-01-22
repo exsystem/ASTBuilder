@@ -1,4 +1,4 @@
-Unit Test;
+Unit Test1;
 
 {$IFDEF FPC}
 {$MODE DELPHI}
@@ -24,7 +24,8 @@ Uses {$IFNDEF FPC}
   Lexer,
   EofRule, IdRule, TermRule, LParenRule, OrRule, ColonRule, AsteriskRule,
   QuestionMarkRule,
-  RParenRule, SemiRule, GrammarViewer, Parser, GrammarRuleUnit, ASTNode;
+  RParenRule, SemiRule, StringRule, CharRule, DoubleDotsRule, GrammarViewer,
+  Parser, GrammarRuleUnit, ASTNode;
 
 Procedure Test();
 Var
@@ -59,6 +60,9 @@ Begin
       TLexer_AddRule(mLexer, AsteriskRule.Compose());
       TLexer_AddRule(mLexer, QuestionMarkRule.Compose());
       TLexer_AddRule(mLexer, RParenRule.Compose());
+      TLexer_AddRule(mLexer, CharRule.Compose());
+      TLexer_AddRule(mLexer, StringRule.Compose());
+      TLexer_AddRule(mLexer, DoubleDotsRule.Compose());
       TLexer_AddRule(mLexer, SemiRule.Compose());
       Repeat
         If TLexer_GetNextToken(mLexer) Then
@@ -579,6 +583,9 @@ Begin
       TLexer_AddRule(mLexer, ColonRule.Compose());
       TLexer_AddRule(mLexer, AsteriskRule.Compose());
       TLexer_AddRule(mLexer, QuestionMarkRule.Compose());
+      TLexer_AddRule(mLexer, CharRule.Compose());
+      TLexer_AddRule(mLexer, StringRule.Compose());
+      TLexer_AddRule(mLexer, DoubleDotsRule.Compose());
       TLexer_AddRule(mLexer, RParenRule.Compose());
       TLexer_AddRule(mLexer, SemiRule.Compose());
       mParser := TParser_Create(mLexer, GrammarRule);

@@ -53,9 +53,11 @@ Implementation
   {$IFDEF VER150}
   Uses TypInfo;
   {$ELSE}
-  Uses System.Rtti;
+
+Uses System.Rtti;
+
   {$ENDIF}
-  {$ENDIF}  
+  {$ENDIF}
 
 Function TParser_Parse(Self: PParser): Boolean;
 Begin
