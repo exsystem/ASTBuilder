@@ -15,13 +15,13 @@ Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  IdNode, GroupNode, RuleNode, TermExprRuleUnit;
+  IdNode, GroupNode, TermRuleNode, TermExprRuleUnit, NFA;
 
-// rule -> term Colon expr Semi
+// termRule -> term Colon termExpr Semi
 Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mName: String;
-  mGroupNode: PAstNode;
+  mNfa: PNfa;
 Label
   S1, S2;
 Begin
@@ -44,7 +44,7 @@ Begin
     Result := False;
     Exit;
   End;
-  If TermExprRule(Parser, mGroupNode) Then
+  If TermExprRule(Parser, mNfa) Then
   Begin
     // NOP
   End
@@ -55,9 +55,9 @@ Begin
   End;
   If TParser_Term(Parser, eSemi) Then
   Begin
-    TRuleNode_Create(PRuleNode(Ast));
-    PRuleNode(Ast).Name := mName;
-    PRuleNode(Ast).Expr := PGroupNode(mGroupNode);
+    TTermRuleNode_Create(PTermRuleNode(Ast));
+    PTermRuleNode(Ast).Name := mName;
+    PTermRuleNode(Ast).Nfa := mNfa;
   End
   Else
   Begin

@@ -40,9 +40,8 @@ Type
     VisitTerm: TAstVisitor_Visit_Proc;
     VisitGroup: TAstVisitor_Visit_Proc;
     VisitRule: TAstVisitor_Visit_Proc;
+    VisitTermRule: TAstVisitor_Visit_Proc;
     VisitGrammar: TAstVisitor_Visit_Proc;
-    VisitString: TAstVisitor_Visit_Proc;
-    VisitRange: TAstVisitor_Visit_Proc;
   End;
 
   TAstVisitor = Record

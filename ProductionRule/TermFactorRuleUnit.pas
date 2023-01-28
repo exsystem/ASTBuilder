@@ -7,30 +7,29 @@ Unit TermFactorRuleUnit;
 Interface
 
 Uses
-  Parser, Lexer, ASTNode;
+  Parser, Lexer, NFA;
 
-Function TermFactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermFactorRule(Parser: PParser; Var Nfa: PNfa): Boolean;
 
-Function TermFactorRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 
-Function TermFactorRuleExpression2(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 
 Implementation
 
 Uses
-  TypeDef, List, ClassUtils, IdNode, TermNode, GroupNode, TermExprRuleUnit,
+  TypeDef, IdNode, TermNode, GroupNode, TermExprRuleUnit,
   StringFactorRuleUnit;
 
 // termFactor -> stringFactor ( QuestionMark | Asterisk ) ?
-Function TermFactorRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS2: TSize;
-  mIdNode: PAstNode;
 Label
   S1, S2, S3;
 Begin
   S1:
-    If StringFactorRule(Parser, mIdNode) Then
+    If StringFactorRule(Parser, Nfa) Then
     Begin
       // NOP
     End
@@ -43,22 +42,15 @@ Begin
     mSavePointS2 := Parser.FCurrentToken;
   If TParser_Term(Parser, eQuestionMark) Then
   Begin
-    TGroupNode_Create(PGroupNode(Ast));
-    TList_PushBack(PGroupNode(Ast).Terms, @mIdNode);
-    PGroupNode(Ast).GroupType := TGroupType.eOptional;
-    PGroupNode(Ast).IsAlternational := False;
+    TNfa_Optional(Nfa);
   End
   Else If TParser_Term(Parser, eAsterisk) Then
   Begin
-    TGroupNode_Create(PGroupNode(Ast));
-    TList_PushBack(PGroupNode(Ast).Terms, @mIdNode);
-    PGroupNode(Ast).GroupType := TGroupType.eMultiple;
-    PGroupNode(Ast).IsAlternational := False;
+    TNfa_Multiple(Nfa);
   End
   Else
   Begin
     Parser.FCurrentToken := mSavePointS2;
-    Ast := mIdNode;
     Result := True; // S2 is a accpeted state node in DFA.
     Exit;
   End;
@@ -67,13 +59,11 @@ Begin
 End;
 
 // termFactor -> LParen termExpr RParen ( QuestionMark | Asterisk ) ?
-Function TermFactorRuleExpression2(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS4: TSize;
 Label
   S1, S2, S3, S4, S5;
-Var
-  mExprNode: PAstNode;
 Begin
   S1:
     If TParser_Term(Parser, eLParen) Then
@@ -86,7 +76,7 @@ Begin
       Exit;
     End;
   S2:
-    If TermExprRule(Parser, mExprNode) Then
+    If TermExprRule(Parser, Nfa) Then
     Begin
       // NOP
     End
@@ -98,16 +88,7 @@ Begin
   S3:
     If TParser_Term(Parser, eRParen) Then
     Begin
-      If InstanceOf(mExprNode, @mTGroupNode_VMT) Then
-      Begin
-        Ast := mExprNode;
-      End
-      Else
-      Begin
-        TGroupNode_Create(PGroupNode(Ast));
-        PGroupNode(Ast).IsAlternational := False;
-        TList_PushBack(PGroupNode(Ast).Terms, @mExprNode);
-      End;
+      // NOP
     End
     Else
     Begin
@@ -118,11 +99,11 @@ Begin
     mSavePointS4 := Parser.FCurrentToken;
   If TParser_Term(Parser, eQuestionMark) Then
   Begin
-    PGroupNode(Ast).GroupType := TGroupType.eOptional;
+    TNfa_Optional(Nfa);
   End
   Else If TParser_Term(Parser, eAsterisk) Then
   Begin
-    PGroupNode(Ast).GroupType := TGroupType.eMultiple;
+    TNfa_Multiple(Nfa);
   End
   Else
   Begin
@@ -134,10 +115,10 @@ Begin
     Result := True;
 End;
 
-Function TermFactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermFactorRule(Parser: PParser; Var Nfa: PNfa): Boolean;
 Begin
-  Result := TermFactorRuleExpression1(Parser, Ast) Or
-    TermFactorRuleExpression2(Parser, Ast);
+  Result := TermFactorRuleExpression1(Parser, Nfa) Or
+    TermFactorRuleExpression2(Parser, Nfa);
 End;
 
 End.

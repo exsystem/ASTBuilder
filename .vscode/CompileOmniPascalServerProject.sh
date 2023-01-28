@@ -1,10 +1,10 @@
 #!/bin/bash
 
 LAZBUILD="/Users/ExSystem/DelphiProjects/FPCUPdeluxe/lazarus/lazbuild"
-PROJECT="/Users/exsystem/DelphiProjects/MyFormatter/MyFormatter.lpi"
+PROJECT="./MyFormatter.lpi"
 
 # Modify .lpr file in order to avoid nothing-to-do-bug (http://lists.lazarus.freepascal.org/pipermail/lazarus/2016-February/097554.html)
-# echo. >> "/Users/exsystem/DelphiProjects/MyFormatter/MyFormatter.lpr"
+# echo. >> "./MyFormatter.lpr"
 
 if [ $1 = "clean" ] || [ $1 == "test" ]; then
     find . -type f -name "*.pas" -exec ../jcf/JCF -config=./.vscode/jcfsettings.cfg -y -inplace -F {} \;

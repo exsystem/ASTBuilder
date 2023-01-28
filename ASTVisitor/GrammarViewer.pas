@@ -20,8 +20,6 @@ Type
 Procedure TAstViewer_Create(Var Self: PAstViewer);
 
 Procedure TAstViewer_Destroy(Self: PAstVisitor);
-Procedure TAstViewer_VisitString(Self: PAstVisitor; Node: PAstNode);
-Procedure TAstViewer_VisitRange(Self: PAstVisitor; Node: PAstNode);
 
 Procedure TAstViewer_VisitId(Self: PAstVisitor; Node: PAstNode);
 
@@ -30,6 +28,8 @@ Procedure TAstViewer_VisitTerm(Self: PAstVisitor; Node: PAstNode);
 Procedure TAstViewer_VisitGroup(Self: PAstVisitor; Node: PAstNode);
 
 Procedure TAstViewer_VisitRule(Self: PAstVisitor; Node: PAstNode);
+
+Procedure TAstViewer_VisitTermRule(Self: PAstVisitor; Node: PAstNode);
 
 Procedure TAstViewer_VisitGrammar(Self: PAstVisitor; Node: PAstNode);
 
@@ -42,7 +42,8 @@ Procedure TAstViewer_Deindent(Self: PAstVisitor);
 Implementation
 
 Uses
-  List, StringNode, RangeNode, IdNode, TermNode, GroupNode, RuleNode, GrammarNode;
+  List, IdNode, TermNode, GroupNode, RuleNode,
+  TermRuleNode, GrammarNode, NFA, SysUtils;
 
 Var
   mTAstViewer_VMT: TAstVisitor_VMT;
@@ -58,22 +59,6 @@ End;
 Procedure TAstViewer_Destroy(Self: PAstVisitor);
 Begin
   TAstVisitor_Destroy(Self);
-End;
-
-Procedure TAstViewer_VisitString(Self: PAstVisitor; Node: PAstNode);
-Var
-  mNode: PStringNode;
-Begin
-  mNode := PStringNode(Node);
-  TAstViewer_WriteLn(Self, 'String: ' + mNode.Value);
-End;
-
-Procedure TAstViewer_VisitRange(Self: PAstVisitor; Node: PAstNode);
-Var
-  mNode: PRangeNode;
-Begin
-  mNode := PRangeNode(Node);
-  TAstViewer_WriteLn(Self, 'Range: ' + mNode.FromChar + ' .. ' + mNode.ToChar);
 End;
 
 Procedure TAstViewer_VisitId(Self: PAstVisitor; Node: PAstNode);
@@ -141,11 +126,62 @@ Begin
   TAstViewer_Indent(Self);
   If mNode.Expr = nil Then
   Begin
-    TAstViewer_WriteLn(Self, '<empty rule>');
+    TAstViewer_WriteLn(Self, '<empty syntax rule>');
   End
   Else
   Begin
     mNode.Expr.Parent.VMT.Accept(PAstNode(mNode.Expr), Self);
+  End;
+  TAstViewer_Deindent(Self);
+End;
+
+Procedure TAstViewer_VisitTermRule(Self: PAstVisitor; Node: PAstNode);
+Var
+  mNode: PTermRuleNode;
+  mState: PNfaState;
+  mEdge: PNfaEdge;
+  I, J: TSize;
+  mFromState: String;
+Begin
+  mNode := PTermRuleNode(Node);
+  TAstViewer_WriteLn(Self, mNode.Name + ':');
+  TAstViewer_Indent(Self);
+  If mNode.Nfa = nil Then
+  Begin
+    TAstViewer_WriteLn(Self, '<empty lex rule>');
+  End
+  Else
+  Begin
+    TAstViewer_WriteLn(Self, 'Start state: ' + IntToStr(mNode.Nfa.StartState));
+    TAstViewer_WriteLn(Self, 'Moves: ');
+    TAstViewer_Indent(Self);
+    TAstViewer_WriteLn(Self, '```mermaid');
+    TAstViewer_WriteLn(Self, 'graph LR');
+    For I := 0 To mNode.Nfa.States.Size - 1 Do
+    Begin
+      mState := TNfa_GetState(mNode.Nfa, I);
+      If mState.Acceptable Then
+      Begin
+        mFromState := IntToStr(I);
+      End
+      Else
+      Begin
+        mFromState := IntToStr(I) + '[[' + IntToStr(I) + ': Accepable]]';
+      End;
+      If mState.Edges.Size > 0 Then
+      Begin
+        TAstViewer_Indent(Self);
+        For J := 0 To mState.Edges.Size - 1 Do
+        Begin
+          mEdge := PNfaEdge(TList_Get(mState.Edges, J));
+          TAstViewer_WriteLn(Self, mFromState + ' -->|' + mEdge.Value +
+            ' |' + IntToStr(mEdge.ToState) + ';');
+        End;
+        TAstViewer_Deindent(Self);
+      End;
+    End;
+    TAstViewer_WriteLn(Self, '```');
+    TAstViewer_Deindent(Self);
   End;
   TAstViewer_Deindent(Self);
 End;
@@ -163,6 +199,16 @@ Begin
     For I := 0 To mNode.Rules.Size - 1 Do
     Begin
       mItem := PPAstNode(TList_Get(mNode.Rules, I))^;
+      TAstViewer_Indent(Self);
+      mItem.VMT.Accept(mItem, Self);
+      TAstViewer_Deindent(Self);
+    End;
+  End;
+  If mNode.TermRules.Size <> 0 Then
+  Begin
+    For I := 0 To mNode.TermRules.Size - 1 Do
+    Begin
+      mItem := PPAstNode(TList_Get(mNode.TermRules, I))^;
       TAstViewer_Indent(Self);
       mItem.VMT.Accept(mItem, Self);
       TAstViewer_Deindent(Self);
@@ -200,7 +246,6 @@ Begin
   mTAstViewer_VMT.VisitTerm := TAstViewer_VisitTerm;
   mTAstViewer_VMT.VisitGroup := TAstViewer_VisitGroup;
   mTAstViewer_VMT.VisitRule := TAstViewer_VisitRule;
+  mTAstViewer_VMT.VisitTermRule := TAstViewer_VisitTermRule;
   mTAstViewer_VMT.VisitGrammar := TAstViewer_VisitGrammar;
-  mTAstViewer_VMT.VisitString := TAstViewer_VisitString;
-  mTAstViewer_VMT.VisitRange := TAstViewer_VisitRange;
 End.
