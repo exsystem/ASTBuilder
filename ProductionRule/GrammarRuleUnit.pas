@@ -22,6 +22,7 @@ Function GrammarRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePointS1: TSize;
   mRuleNode: PAstNode;
+  mTermRuleNode: PAstNode;
 Label
   S1, S2;
 Begin
@@ -32,9 +33,9 @@ Begin
   Begin
     TList_PushBack(PGrammarNode(Ast).Rules, @mRuleNode);
   End
-  Else If TermRule(Parser, mRuleNode) Then
+  Else If TermRule(Parser, mTermRuleNode) Then
   Begin
-    TList_PushBack(PGrammarNode(Ast).Rules, @mRuleNode);
+    TList_PushBack(PGrammarNode(Ast).TermRules, @mTermRuleNode);
   End
   Else
   Begin

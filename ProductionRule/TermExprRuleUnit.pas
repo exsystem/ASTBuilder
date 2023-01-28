@@ -7,30 +7,30 @@ Unit TermExprRuleUnit;
 Interface
 
 Uses
-  Parser, Lexer, ASTNode;
+  Parser, Lexer, NFA;
 
-Function TermExprRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermExprRule(Parser: PParser; Var Nfa: PNfa): Boolean;
 
-Function TermExprRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermExprRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 
 Implementation
 
 Uses
-  TypeDef, List, IdNode, TermNode, GroupNode, TermFactorRuleUnit;
+  TypeDef, IdNode, TermNode, GroupNode, TermFactorRuleUnit;
 
 // termExpr -> termFactor* ( Or termFactor* )*
-Function TermExprRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermExprRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS1, mSavePointS2: TSize;
-  mFactorNode: PAstNode;
-  mGroupNode1, mGroupNodeN: PAstNode;
-  mExprNode: PAstNode;
+  mFactorNode: PNfa;
+  mGroupNode1, mGroupNodeN: PNfa;
+  mExprNode: PNfa;
 Label
   S1, S2;
 Begin
   mGroupNode1 := nil;
   mExprNode := nil;
-  Ast := nil;
+  Nfa := nil;
   mGroupNodeN := nil;
   S1:
     mSavePointS1 := Parser.FCurrentToken;
@@ -38,15 +38,12 @@ Begin
   Begin
     If mGroupNode1 = nil Then
     Begin
-      TGroupNode_Create(PGroupNode(mGroupNode1));
-      PGroupNode(mGroupNode1).IsAlternational := False;
-      PGroupNode(mGroupNode1).GroupType := TGroupType.eGroup;
-      TList_PushBack(PGroupNode(mGroupNode1).Terms, @mFactorNode);
-      Ast := mGroupNode1;
+      mGroupNode1 := mFactorNode;
+      Nfa := mGroupNode1;
     End
     Else
     Begin
-      TList_PushBack(PGroupNode(mGroupNode1).Terms, @mFactorNode);
+      TNfa_Concat(mGroupNode1, mFactorNode);
     End;
     Goto S1;
   End
@@ -54,14 +51,11 @@ Begin
   Begin
     If mExprNode = nil Then
     Begin
-      TGroupNode_Create(PGroupNode(mExprNode));
-      PGroupNode(mExprNode).IsAlternational := True;
-      PGroupNode(mExprNode).GroupType := TGroupType.eGroup;
-      TList_PushBack(PGroupNode(mExprNode).Terms, @mGroupNode1);
+      mExprNode := mGroupNode1;
     End
     Else
     Begin
-      Ast := mExprNode;
+      Nfa := mExprNode;
     End;
   End
   Else
@@ -76,20 +70,17 @@ Begin
   Begin
     If mGroupNodeN = nil Then
     Begin
-      TGroupNode_Create(PGroupNode(mGroupNodeN));
-      PGroupNode(mGroupNodeN).IsAlternational := False;
-      PGroupNode(mGroupNodeN).GroupType := TGroupType.eGroup;
-      TList_PushBack(PGroupNode(mGroupNodeN).Terms, @mFactorNode);
+      mGroupNodeN := mFactorNode;
     End
     Else
     Begin
-      TList_PushBack(PGroupNode(mGroupNodeN).Terms, @mFactorNode);
+      TNfa_Concat(mGroupNodeN, mFactorNode);
     End;
     Goto S2;
   End
   Else If TParser_Term(Parser, TTokenKind.eOr) Then
   Begin
-    TList_PushBack(PGroupNode(mExprNode).Terms, @mGroupNodeN);
+    TNfa_Alternative(mExprNode, mGroupNodeN);
     mGroupNodeN := nil;
     Goto S2;
   End
@@ -97,17 +88,17 @@ Begin
   Begin
     If mExprNode <> nil Then
     Begin
-      TList_PushBack(PGroupNode(mExprNode).Terms, @mGroupNodeN);
-      Ast := mExprNode;
+      TNfa_Alternative(mExprNode, mGroupNodeN);
+      Nfa := mExprNode;
     End;
     Parser.FCurrentToken := mSavePointS2;
     Result := True;
   End;
 End;
 
-Function TermExprRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function TermExprRule(Parser: PParser; Var Nfa: PNfa): Boolean;
 Begin
-  Result := TermExprRuleExpression1(Parser, Ast);
+  Result := TermExprRuleExpression1(Parser, Nfa);
 End;
 
 End.

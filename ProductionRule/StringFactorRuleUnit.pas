@@ -7,27 +7,27 @@ Unit StringFactorRuleUnit;
 Interface
 
 Uses
-  Parser, Lexer, ASTNode;
+  Parser, Lexer, NFA;
 
-Function StringFactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function StringFactorRule(Parser: PParser; Var Nfa: PNfa): Boolean;
 
-Function StringFactorRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function StringFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 
-Function StringFactorRuleExpression2(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function StringFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 
-Function StringFactorRuleExpression3(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function StringFactorRuleExpression3(Parser: PParser; Var Nfa: PNfa): Boolean;
 
 Implementation
 
 Uses
-  TypeDef, IdNode, TermNode, GroupNode, TermExprRuleUnit,
-  StringNode, RangeNode;
+  TypeDef, IdNode, TermNode, GroupNode;
 
 // stringFactor -> char DoubleDots char
-Function StringFactorRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function StringFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS1: TSize;
   mFrom, mTo: String;
+  mCh: Char;
 Label
   S1, S2, S3, S4;
 Begin
@@ -93,19 +93,24 @@ Begin
   Begin
     mTo := mTo[2];
   End;
-  TRangeNode_Create(PRangeNode(Ast), mFrom[1], mTo[1]);
+  TNfa_Create(Nfa);
+  For mCh := mFrom[1] To mTo[1] Do
+  Begin
+    TNfa_AddEdge(Nfa, mCh, 0, 1);
+  End;
+  TNfa_GetState(Nfa, 1).Acceptable := True;
   Result := True;
 End;
 
 // stringFactor -> char
-Function StringFactorRuleExpression2(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function StringFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 Label
   S1, S2;
 Begin
   S1:
     If TParser_Term(Parser, eChar) Then
     Begin
-      TStringNode_Create(PStringNode(Ast), TParser_GetCurrentToken(Parser).Value);
+      // NOP
     End
     Else
     Begin
@@ -113,19 +118,32 @@ Begin
       Exit;
     End;
   S2:
-    Result := True;
+    TNfa_Create(Nfa);
+  TNfa_AddEdge(Nfa, TParser_GetCurrentToken(Parser).Value[2], 0, 1);
+  // TODO: ['a'] or [a]; and what about ['\n']?
+  TNfa_GetState(Nfa, 1).Acceptable := True;
+  Result := True;
 End;
 
 // stringFactor -> string
-Function StringFactorRuleExpression3(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function StringFactorRuleExpression3(Parser: PParser; Var Nfa: PNfa): Boolean;
+Var
+  mToken: PToken;
+  I: TSize;
 Label
   S1, S2;
 Begin
   S1:
     If TParser_Term(Parser, eString) Then
     Begin
-      TStringNode_Create(PStringNode(Ast),
-      TParser_GetCurrentToken(Parser).Value);
+      TNfa_Create(Nfa);
+      mToken := TParser_GetCurrentToken(Parser);
+      For I := Low(mToken.Value) + 1 To High(mToken.Value) - 1 Do
+      Begin
+        TNfa_AddEdge(Nfa, mToken.Value[I], I - (Low(mToken.Value) + 1),
+        I - (Low(mToken.Value) + 1) + 1);
+      End;
+      TNfa_GetState(Nfa, Nfa.States.Size - 1).Acceptable := True;
     End
     Else
     Begin
@@ -136,10 +154,10 @@ Begin
     Result := True;
 End;
 
-Function StringFactorRule(Parser: PParser; Var Ast: PAstNode): Boolean;
+Function StringFactorRule(Parser: PParser; Var Nfa: PNfa): Boolean;
 Begin
-  Result := StringFactorRuleExpression1(Parser, Ast) Or
-    StringFactorRuleExpression2(Parser, Ast) Or StringFactorRuleExpression3(Parser, Ast);
+  Result := StringFactorRuleExpression1(Parser, Nfa) Or
+    StringFactorRuleExpression2(Parser, Nfa) Or StringFactorRuleExpression3(Parser, Nfa);
 End;
 
 End.

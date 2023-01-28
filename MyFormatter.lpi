@@ -23,7 +23,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="LexerRule;ProductionRule;AST;Test;LexerRule/Template;Util;ASTVisitor;ParseTree;LexerRule/Grammar"/>
+            <OtherUnitFiles Value="LexerRule;ProductionRule;AST;Test;LexerRule/Template;Util;ASTVisitor;ParseTree;LexerRule/Grammar;Automata"/>
             <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -60,7 +60,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="LexerRule;ProductionRule;AST;Test;LexerRule/Template;Util;ASTVisitor;ParseTree;LexerRule/Grammar"/>
+            <OtherUnitFiles Value="LexerRule;ProductionRule;AST;Test;LexerRule/Template;Util;ASTVisitor;ParseTree;LexerRule/Grammar;Automata"/>
             <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -111,10 +111,6 @@
       </Unit>
       <Unit>
         <Filename Value="ProductionRule/ExprRuleUnit.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="Test/Test.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
@@ -189,14 +185,11 @@
         <Filename Value="LexerRule/Grammar/TermRule.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="Automata/NFA.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
-    <Debugger>
-      <ClassConfig>
-        <Configs>
-          <Config ConfigName="New" ConfigClass="TFpDebugDebugger" Active="True" UID="{2894189C-42E6-1166-8D07-3681E4899565}"/>
-        </Configs>
-      </ClassConfig>
-    </Debugger>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
@@ -205,7 +198,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="LexerRule;ProductionRule;AST;Test;LexerRule/Template;Util;ASTVisitor;ParseTree;LexerRule/Grammar"/>
+      <OtherUnitFiles Value="LexerRule;ProductionRule;AST;Test;LexerRule/Template;Util;ASTVisitor;ParseTree;LexerRule/Grammar;Automata"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

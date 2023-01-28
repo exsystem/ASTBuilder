@@ -24,9 +24,7 @@ uses
   GrammarNode in 'AST\GrammarNode.pas',
   GroupNode in 'AST\GroupNode.pas',
   IdNode in 'AST\IdNode.pas',
-  RangeNode in 'AST\RangeNode.pas',
   RuleNode in 'AST\RuleNode.pas',
-  StringNode in 'AST\StringNode.pas',
   TermNode in 'AST\TermNode.pas',
   ExprRuleUnit in 'ProductionRule\ExprRuleUnit.pas',
   FactorRuleUnit in 'ProductionRule\FactorRuleUnit.pas',
@@ -49,7 +47,9 @@ uses
   RParenRule in 'LexerRule\Grammar\RParenRule.pas',
   SemiRule in 'LexerRule\Grammar\SemiRule.pas',
   StringRule in 'LexerRule\Grammar\StringRule.pas',
-  TermRule in 'LexerRule\Grammar\TermRule.pas';
+  TermRule in 'LexerRule\Grammar\TermRule.pas',
+  TermRuleNode in 'AST\TermRuleNode.pas',
+  NFA in 'Automata\NFA.pas';
 
 Begin
   ReportMemoryLeaksOnShutdown := True;
