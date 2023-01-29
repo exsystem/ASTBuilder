@@ -162,23 +162,27 @@ Begin
       mState := TNfa_GetState(mNode.Nfa, I);
       If mState.Acceptable Then
       Begin
-        mFromState := IntToStr(I);
+        mFromState := IntToStr(I) + '[[' + IntToStr(I) + ': Accepable]]';
       End
       Else
       Begin
-        mFromState := IntToStr(I) + '[[' + IntToStr(I) + ': Accepable]]';
+        mFromState := IntToStr(I);
       End;
+      TAstViewer_Indent(Self);
       If mState.Edges.Size > 0 Then
       Begin
-        TAstViewer_Indent(Self);
         For J := 0 To mState.Edges.Size - 1 Do
         Begin
           mEdge := PNfaEdge(TList_Get(mState.Edges, J));
           TAstViewer_WriteLn(Self, mFromState + ' -->|' + mEdge.Value +
             ' |' + IntToStr(mEdge.ToState) + ';');
         End;
-        TAstViewer_Deindent(Self);
+      End
+      Else
+      Begin
+        TAstViewer_WriteLn(Self, mFromState + ';');
       End;
+      TAstViewer_Deindent(Self);
     End;
     TAstViewer_WriteLn(Self, '```');
     TAstViewer_Deindent(Self);
