@@ -23,10 +23,12 @@ Function TList_Create(Const ElementSize: TSize; Const Capacity: TSize): PList;
 Function TList_IsEmpty(Self: PList): Boolean;
 Procedure TList_Clear(Self: PList);
 Function TList_Get(Self: PList; Const Index: TSize): Pointer;
-Procedure TList_Set(Self: PList; Const Index: TSize; Value: Pointer);
+Procedure TList_Set(Self: PList; Const Index: TSize; Value: Pointer); Overload;
 Procedure TList_PushBack(Self: PList; Element: Pointer);
 Function TList_EmplaceBack(Self: PList): Pointer;
+Procedure TList_PopBack(Self: PList);
 Procedure TList_Erase(Self: PList; Index: TSize); // todo: iterator??
+Function TList_Back(Self: PList): Pointer;
 Procedure TList_Destroy(Self: PList);
 
 Implementation
@@ -69,6 +71,11 @@ Begin
   Inc(Self.Size);
 End;
 
+Procedure TList_PopBack(Self: PList);
+Begin
+  Dec(Self.Size);
+End;
+
 Function TList_EmplaceBack(Self: PList): Pointer;
 Begin
   If Self.Size * Self.FElemSize = Length(Self.FList) Then
@@ -84,6 +91,11 @@ Begin
   Move(Self.FList[Succ(Index) * Self.FElemSize], Self.FList[Index * Self.FElemSize],
     (Self.Size - Succ(Index)) * Self.FElemSize);
   Dec(Self.Size);
+End;
+
+Function TList_Back(Self: PList): Pointer;
+Begin
+  Result := TList_Get(Self, Self.Size - 1);
 End;
 
 Procedure TList_Destroy(Self: PList);

@@ -25,6 +25,9 @@ Type
   TNfa = Record
     StartState: TSize;
     States: PList; // of TNfaState 
+    FNewStates: PList; // of TSize
+    FOldStates: PList; // of TSize
+    FAlreadyOn: PList; // of Boolean
   End;
 
 Procedure TNfa_Create(Var Self: PNfa);
@@ -48,6 +51,21 @@ Procedure TNfa_Alternative(Var Self: PNfa; Nfa: PNfa);
 Procedure TNfa_Multiple(Var Self: PNfa);
 
 Procedure TNfa_Optional(Var Self: PNfa);
+
+{
+  SEE: <<Compilers: Principles, Techniques, and Tools (2nd Edition)>>: Chapter.3.7.2 / Page.156~158
+}
+Function TNfa_Validate(Var Self: PNfa; Input: String): Boolean;
+
+{
+  TODO: rename to TNfa_AddEpsilonClosureStates?
+}
+Procedure TNfa_AddState(Var Self: PNfa; S: TSize);
+
+{
+  TODO: rename to TNfa_PrepareOldStatesForNextTurn?
+}
+Procedure TNfa_ExchangeStates(Var Self: PNfa);
 
 Implementation
 
@@ -285,6 +303,106 @@ Begin
   End;
 
   Self.StartState := Self.States.Size - 2;
+End;
+
+Function TNfa_Validate(Var Self: PNfa; Input: String): Boolean;
+Var
+  I, J, K: TSize;
+  mFalse: Boolean;
+  mState: PNfaState;
+  mEdge: PNfaEdge;
+  mTemp: PList;
+Begin
+  Self.FOldStates := TList_Create(SizeOf(TSize), Self.States.Size);
+  Self.FNewStates := TList_Create(SizeOf(TSize), Self.States.Size);
+  Self.FAlreadyOn := TList_Create(SizeOf(Boolean), Self.States.Size);
+  mFalse := False;
+  For I := 0 To Self.FAlreadyOn.Size - 1 Do
+  Begin
+    TList_Set(Self.FAlreadyOn, I, @mFalse);
+  End;
+
+  I := 0;
+  TNfa_AddState(Self, Self.StartState);
+  TNfa_ExchangeStates(Self);
+  Inc(I);
+
+  While I <= Length(Input) Do
+  Begin
+    { TODO: Extract to a procedure called TNfa_MoveByChar? }
+    { TODO: BEGIN: }
+    While Not TList_IsEmpty(Self.FOldStates) Do
+    Begin
+      mState := TNfa_GetState(Self, PSize(TList_Back(Self.States))^);
+      For J := 0 To mState.Edges.Size - 1 Do
+      Begin
+        mEdge := PNfaEdge(TList_Get(mState.Edges, J));
+        If (mEdge.Value = Input[I]) And
+          (Not PBoolean(TList_Get(Self.FAlreadyOn, mEdge.ToState))^) Then
+        Begin
+          TNfa_AddState(Self, mEdge.ToState);
+        End;
+      End;
+      K := PSize(TList_Back(Self.FOldStates))^;
+      TList_PopBack(Self.FOldStates);
+    End;
+    { TODO: ^ END. }
+
+    TNfa_ExchangeStates(Self);
+    Inc(I);
+  End;
+
+  Result := False;
+  For I := 0 To Self.FOldStates.Size - 1 Do
+  Begin
+    mState := TNfa_GetState(Self, I);
+    If mState.Acceptable Then
+    Begin
+      Result := True;
+      Break;
+    End;
+  End;
+
+  Dispose(Self.FAlreadyOn);
+  Dispose(Self.FOldStates);
+  Dispose(Self.FNewStates);
+End;
+
+Procedure TNfa_AddState(Var Self: PNfa; S: TSize);
+Var
+  mTrue: Boolean;
+  mState: PNfaState;
+  mEdge: PNfaEdge;
+  I: TSize;
+Begin
+  TList_PushBack(Self.FNewStates, @S);
+  mTrue := True;
+  TList_Set(Self.FAlreadyOn, S, @mTrue);
+  mState := TNfa_GetState(Self, S);
+  For I := 0 To mState.Edges.Size - 1 Do
+  Begin
+    mEdge := PNfaEdge(TList_Get(mState.Edges, I));
+    If (mEdge.Value = '') And (Not
+      PBoolean(TList_Get(Self.FAlreadyOn, mEdge.ToState))^) Then
+    Begin
+      TNfa_AddState(Self, mEdge.ToState);
+    End;
+  End;
+End;
+
+Procedure TNfa_ExchangeStates(Var Self: PNfa);
+Var
+  I: TSize;
+  mFalse: Boolean;
+Begin
+  mFalse := False;
+  While Not TList_IsEmpty(Self.FNewStates) Do
+  Begin
+    I := PSize(TList_Back(Self.FNewStates))^;
+    TList_PopBack(Self.FNewStates);
+    TList_PushBack(Self.FOldStates, @I);
+    TList_Set(Self.FAlreadyOn, I, @mFalse);
+  End;
 End;
 
 End.
