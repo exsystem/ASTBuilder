@@ -11,6 +11,7 @@ Type
   UIntPtr = Cardinal;
   {$ENDIF}
 
+  PSize = ^TSize;
   TSize = UIntPtr;
 
 Implementation
