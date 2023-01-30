@@ -28,6 +28,7 @@ Type
     FNewStates: PList; // of TSize
     FOldStates: PList; // of TSize
     FAlreadyOn: PList; // of Boolean
+    Keyword: String;
   End;
 
 Procedure TNfa_Create(Var Self: PNfa);
@@ -79,6 +80,7 @@ Begin
   mState := TList_EmplaceBack(Self.States);
   mState.Acceptable := False;
   mState.Edges := TList_Create(SizeOf(TNfaEdge), 1);
+  Self.Keyword := '';
 End;
 
 Procedure TNfa_Destroy(Self: PNfa);
@@ -106,6 +108,15 @@ Var
   mEdge: PNfaEdge;
 Begin
   mState := PNfaState(TList_Get(Self.States, Source));
+  If (Source = Self.States.Size - 1) And (Destination = Self.States.Size) And
+    (mState.Edges.Size = 0) Then
+  Begin
+    Self.Keyword := Self.Keyword + Value;
+  End
+  Else
+  Begin
+    Self.Keyword := '';
+  End;
   mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
   mEdge.Value := Value;
   mEdge.ToState := Destination;
@@ -138,6 +149,8 @@ Begin
   Begin
     Exit;
   End;
+
+  Self.Keyword := Self.Keyword + Nfa.Keyword;
 
   For I := 0 To Self.States.Size - 1 Do
   Begin
@@ -183,6 +196,15 @@ Var
   mState: PNfaState;
   mEdge: PNfaEdge;
 Begin
+  If (Self.Keyword = '') Or (Nfa.Keyword = '') Then
+  Begin
+    Self.Keyword := Self.Keyword + Nfa.Keyword;
+  End
+  Else
+  Begin
+    Self.Keyword := '';
+  End;
+
   For I := 0 To Nfa.States.Size - 1 Do
   Begin
     mState := PNfaState(TList_Get(Nfa.States, I));
@@ -237,6 +259,8 @@ Var
   mState: PNfaState;
   mEdge: PNfaEdge;
 Begin
+  Self.Keyword := '';
+
   mState := PNfaState(TList_EmplaceBack(Self.States));
   mState.Acceptable := False;
   mState.Edges := TList_Create(SizeOf(TNfaEdge), 2);
@@ -277,6 +301,8 @@ Var
   mState: PNfaState;
   mEdge: PNfaEdge;
 Begin
+  Self.Keyword := '';
+
   mState := PNfaState(TList_EmplaceBack(Self.States));
   mState.Acceptable := False;
   mState.Edges := TList_Create(SizeOf(TNfaEdge), 2);
@@ -311,8 +337,13 @@ Var
   mFalse: Boolean;
   mState: PNfaState;
   mEdge: PNfaEdge;
-  mTemp: PList;
 Begin
+  If Self.Keyword <> '' Then { TODO And what about if the last state is acceptable? }
+  Begin
+    Result := (Self.Keyword = Input);
+    Exit;
+  End;
+
   Self.FOldStates := TList_Create(SizeOf(TSize), Self.States.Size);
   Self.FNewStates := TList_Create(SizeOf(TSize), Self.States.Size);
   Self.FAlreadyOn := TList_Create(SizeOf(Boolean), Self.States.Size);

@@ -152,6 +152,7 @@ Begin
   End
   Else
   Begin
+    TAstViewer_WriteLn(Self, 'Keyword: ' + mNode.Nfa.Keyword);
     TAstViewer_WriteLn(Self, 'Start state: ' + IntToStr(mNode.Nfa.StartState));
     TAstViewer_WriteLn(Self, 'Moves: ');
     TAstViewer_Indent(Self);
@@ -162,7 +163,7 @@ Begin
       mState := TNfa_GetState(mNode.Nfa, I);
       If mState.Acceptable Then
       Begin
-        mFromState := IntToStr(I) + '[[' + IntToStr(I) + ': Accepable]]';
+        mFromState := IntToStr(I) + '[[' + IntToStr(I) + ': Acceptable]]';
       End
       Else
       Begin
