@@ -24,7 +24,7 @@ End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eAsterisk;
+  Result.TokenKind.TokenKind := eAsterisk;
   Result.Parser := Parse;
 End;
 

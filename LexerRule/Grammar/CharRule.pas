@@ -90,7 +90,7 @@ End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eChar;
+  Result.TokenKind.TokenKind := eChar;
   Result.Parser := Parse;
 End;
 

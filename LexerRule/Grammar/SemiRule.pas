@@ -24,7 +24,7 @@ End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eSemi;
+  Result.TokenKind.TokenKind := eSemi;
   Result.Parser := Parse;
 End;
 

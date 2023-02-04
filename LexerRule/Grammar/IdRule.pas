@@ -40,7 +40,7 @@ End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eId;
+  Result.TokenKind.TokenKind := eId;
   Result.Parser := Parse;
 End;
 

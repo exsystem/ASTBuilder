@@ -38,7 +38,12 @@ Function TParser_IsToken(Self: PParser; TokenKind: TTokenKind): Boolean;
 
 Function TParser_GetCurrentToken(Self: PParser): PToken;
 
-Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
+Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean; Overload;
+
+Function TParser_Term(Self: PParser; GrammarTokenKind: TGrammarTokenKind): Boolean;
+  Overload;
+
+Function TParser_Term(Self: PParser; TermRule: String): Boolean; Overload;
 
 {
   Function TParser_Prod(Self: PParser; Var Ast: PAstNode;
@@ -60,12 +65,15 @@ Uses System.Rtti;
   {$ENDIF}
 
 Function TParser_Parse(Self: PParser): Boolean;
+Var
+  mTokenKind: TTokenKind;
 Begin
   // NOTICE:
   // Since the main entry is here, the production rule procedural type must accepting the AST parameter with the `Var` modifier, not `Out`!
   // Or resulting here with Self.Ast be assigned with $5555.... eventually if no parsing rule matched, with is not Nil($0000....), at least for 
   // freepascal compilers with automatically initializing the Out parameters with non-Nil ($5555....) values.
-  Result := Self.MainProductionRule(Self, Self.Ast) And TParser_Term(Self, eEof);
+  mTokenKind.TokenKind := eEof;
+  Result := Self.MainProductionRule(Self, Self.Ast) And TParser_Term(Self, mTokenKind);
 End;
 
 Function TParser_Create(Lexer: PLexer; ProductionRule: TSymbolFunc): PParser;
@@ -91,7 +99,8 @@ End;
 
 Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
 Begin
-  If (Self.FLexer.NextPos > 1) And (Self.FLexer.CurrentToken.Kind = eUndefined) Then
+  If (Self.FLexer.NextPos > 1) And (Self.FLexer.CurrentToken.Kind.TokenKind =
+    eUndefined) Then
   Begin
     // Low effeciency! Should stopped the parser immediately! 
     // * Consider `E -> Term(A) or Term(B) or Term(C) ...`
@@ -109,7 +118,24 @@ Begin
     End;
     Exit;
   End;
-  Result := (TokenKind = eEof);
+  Result := (TokenKind.TokenKind = eEof);
+End;
+
+Function TParser_Term(Self: PParser; GrammarTokenKind: TGrammarTokenKind): Boolean;
+Var
+  mTokenKind: TTokenKind;
+Begin
+  mTokenKind.TokenKind := GrammarTokenKind;
+  Result := TParser_Term(Self, mTokenKind);
+End;
+
+Function TParser_Term(Self: PParser; TermRule: String): Boolean;
+Var
+  mTokenKind: TTokenKind;
+Begin
+  mTokenKind.TokenKind := eUserDefined;
+  mTokenKind.TermRule := TermRule;
+  Result := TParser_Term(Self, mTokenKind);
 End;
 
 (*
@@ -149,7 +175,7 @@ Begin
       {$IFDEF FPC}
       WriteStr(t, TParser_GetCurrentToken(Self).Kind);
       {$ELSE}
-      t := TRttiEnumerationType.GetName(TParser_GetCurrentToken(Self).Kind);
+      t := TRttiEnumerationType.GetName(TParser_GetCurrentToken(Self).Kind.TokenKind);
       {$ENDIF}
       Writeln('> TOKEN: [' + TParser_GetCurrentToken(Self).Value + '] is ' + t);
       {$ENDIF}
@@ -164,7 +190,7 @@ End;
 
 Function TParser_IsToken(Self: PParser; TokenKind: TTokenKind): Boolean;
 Begin
-  Result := (TParser_GetCurrentToken(Self).Kind = TokenKind);
+  Result := (TParser_GetCurrentToken(Self).Kind.TokenKind = TokenKind.TokenKind);
 End;
 
 {

@@ -24,7 +24,7 @@ End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eLParen;
+  Result.TokenKind.TokenKind := eLParen;
   Result.Parser := Parse;
 End;
 

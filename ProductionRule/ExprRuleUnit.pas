@@ -50,7 +50,7 @@ Begin
     End;
     Goto S1;
   End
-  Else If TParser_Term(Parser, TTokenKind.eOr) Then
+  Else If TParser_Term(Parser, TGrammarTokenKind.eOr) Then
   Begin
     If mExprNode = nil Then
     Begin
@@ -87,7 +87,7 @@ Begin
     End;
     Goto S2;
   End
-  Else If TParser_Term(Parser, TTokenKind.eOr) Then
+  Else If TParser_Term(Parser, TGrammarTokenKind.eOr) Then
   Begin
     TList_PushBack(PGroupNode(mExprNode).Terms, @mGroupNodeN);
     mGroupNodeN := nil;
