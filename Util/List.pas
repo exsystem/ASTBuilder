@@ -15,7 +15,6 @@ Type
   TList = Record
     FElemSize: TSize;
     FList: Array Of Byte;
-    FCapacity: TSize;
     Size: TSize;
   End;
 
@@ -88,8 +87,11 @@ End;
 
 Procedure TList_Erase(Self: PList; Index: TSize); // todo: iterator??
 Begin
-  Move(Self.FList[Succ(Index) * Self.FElemSize], Self.FList[Index * Self.FElemSize],
-    (Self.Size - Succ(Index)) * Self.FElemSize);
+  If Index <> Self.Size - 1 Then
+  Begin
+    Move(Self.FList[Succ(Index) * Self.FElemSize], Self.FList[Index * Self.FElemSize],
+      (Self.Size - Succ(Index)) * Self.FElemSize);
+  End;
   Dec(Self.Size);
 End;
 

@@ -40,7 +40,7 @@ End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eTerm;
+  Result.TokenKind.TokenKind := eTerm;
   Result.Parser := Parse;
 End;
 

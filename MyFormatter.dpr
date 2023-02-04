@@ -2,7 +2,9 @@
 
 {$APPTYPE CONSOLE}
 {$R *.res}
+
 uses
+  FastMM5,
   {$IFNDEF FPC}
   System.SysUtils,
   System.Rtti,
@@ -52,6 +54,18 @@ uses
   NFA in 'Automata\NFA.pas';
 
 Begin
+  FastMM_LogToFileEvents := [mmetDebugBlockDoubleFree,
+    mmetDebugBlockReallocOfFreedBlock, mmetDebugBlockHeaderCorruption,
+    mmetDebugBlockFooterCorruption, mmetDebugBlockModifiedAfterFree,
+    mmetVirtualMethodCallOnFreedObject,
+    mmetAnotherThirdPartyMemoryManagerAlreadyInstalled,
+    mmetCannotInstallAfterDefaultMemoryManagerHasBeenUsed,
+    mmetCannotSwitchToSharedMemoryManagerWithLivePointers];
+
+  FastMM_SetEventLogFilename('C:\Users\许子健\Desktop\aaa.log');
+  FastMM_LoadDebugSupportLibrary;
+  FastMM_EnterDebugMode;
+
   ReportMemoryLeaksOnShutdown := True;
-  Test1.Test();
+  Test2.Test();
 End.

@@ -25,7 +25,7 @@ End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eDoubleDots;
+  Result.TokenKind.TokenKind := eDoubleDots;
   Result.Parser := Parse;
 End;
 

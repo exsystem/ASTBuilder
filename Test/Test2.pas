@@ -24,13 +24,13 @@ Uses {$IFNDEF FPC}
   Lexer,
   EofRule, IdRule, TermRule, LParenRule, OrRule, ColonRule, AsteriskRule,
   QuestionMarkRule,
-  RParenRule, SemiRule, GrammarParser, Parser, GrammarRuleUnit, ASTNode;
+  RParenRule, CharRule, StringRule, DoubleDotsRule, SemiRule, GrammarParser,
+  Parser, GrammarRuleUnit, ASTNode, ParseTree;
 
 Procedure Test();
 Var
   mSource: String;
   mGrammarLexer: PLexer;
-  mKind: String;
   {$IFDEF VER150}
   tInfo: PTypeInfo;
   {$ENDIF}
@@ -41,7 +41,7 @@ Var
 Begin
   mSource := '';
   mSource := mSource + 'program' + #13#10;
-  mSource := mSource + '   : programHeading (INTERFACE)? block DOT EOF' + #13#10;
+  mSource := mSource + '   : programHeading (INTERFACE)? block DOT' + #13#10;
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'programHeading' + #13#10;
@@ -318,8 +318,8 @@ Begin
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'simpleStatement' + #13#10;
-  mSource := mSource + '   : assignmentStatement' + #13#10;
-  mSource := mSource + '   | procedureStatement' + #13#10;
+  // mSource := mSource + '   : assignmentStatement' + #13#10;
+  mSource := mSource + '   : procedureStatement' + #13#10;
   mSource := mSource + '   | gotoStatement' + #13#10;
   mSource := mSource + '   | emptyStatement_' + #13#10;
   mSource := mSource + '   ;' + #13#10;
@@ -329,8 +329,8 @@ Begin
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'variable' + #13#10;
-  mSource := mSource +
-    '   : (AT identifier | identifier) (LBRACK expression (COMMA expression)* RBRACK | LBRACK2 expression (COMMA expression)* RBRACK2 | DOT identifier | POINTER)*' + #13#10;
+  mSource := mSource + '   : identifier' + #13#10;
+  // '   : (AT identifier | identifier) (LBRACK expression (COMMA expression)* RBRACK | LBRACK2 expression (COMMA expression)* RBRACK2 | DOT identifier | POINTER)*' + #13#10;
   mSource := mSource + '   ;' + #13#10;
   mSource := mSource + '' + #13#10;
   mSource := mSource + 'expression' + #13#10;
@@ -510,6 +510,17 @@ Begin
   mSource := mSource + 'recordVariableList' + #13#10;
   mSource := mSource + '   : variable (COMMA variable)*' + #13#10;
   mSource := mSource + '   ;' + #13#10;
+  mSource := mSource + 'PROGRAM: ''Program'' ;' + #13#10;
+  mSource := mSource + 'BEGIN: ''Begin'' ;' + #13#10;
+  mSource := mSource + 'END: ''End'' ;' + #13#10;
+  mSource := mSource +
+    'IDENT: (''A'' .. ''Z'') (''A'' .. ''Z'' | ''a'' .. ''z'' | ''0'' .. ''9'' | ''_'')* ;'
+    + #13#10;
+  mSource := mSource + 'LPAREN : ''('' ;' + #13#10;
+  mSource := mSource + 'RPAREN : '')'' ;' + #13#10;
+  mSource := mSource + 'DOT: ''.'' ;' + #13#10;
+  mSource := mSource + 'SEMI: '';'' ;' + #13#10;
+  mSource := mSource + 'NUM_INT: (''0'' .. ''9'') (''0'' .. ''9'')* ;' + #13#10;
   WriteLn('> ANTLR4 Grammar For PASCAL:');
   WriteLn(mSource);
   mGrammarLexer := TLexer_Create(mSource);
@@ -522,6 +533,9 @@ Begin
   TLexer_AddRule(mGrammarLexer, AsteriskRule.Compose());
   TLexer_AddRule(mGrammarLexer, QuestionMarkRule.Compose());
   TLexer_AddRule(mGrammarLexer, RParenRule.Compose());
+  TLexer_AddRule(mGrammarLexer, DoubleDotsRule.Compose());
+  TLexer_AddRule(mGrammarLexer, CharRule.Compose());
+  TLexer_AddRule(mGrammarLexer, StringRule.Compose());
   TLexer_AddRule(mGrammarLexer, SemiRule.Compose());
   mParser := TParser_Create(mGrammarLexer, GrammarRule);
   If TParser_Parse(mParser) Then
@@ -534,18 +548,19 @@ Begin
       mGrammarLexer.CurrentToken.Error]));
   End;
 
-  mLexer := TLexer_Create('Program Test; Begin ReadLn(); End.');
-
-
+  mLexer := TLexer_Create('Program Test; Begin WriteLn; ReadLn End.', False);
   TAstViewer_Create(mViewer, mLexer);
   mParser.Ast.VMT.Accept(mParser.Ast, PAstVisitor(mViewer));
-  ReadLn;
+  mViewer.Level := 0;
+  WriteLn(mViewer.Error);
+  TAstViewer_PrintParseTree(PAstVisitor(mViewer), mViewer.FParseTree);
+  TParseTree_Destroy(mViewer.FParseTree);
   TAstViewer_Destroy(PAstVisitor(mViewer));
   Dispose(mViewer);
-  Writeln;
+  TLexer_Destroy(mLexer);
   TParser_Destroy(mParser);
   TLexer_Destroy(mGrammarLexer);
-  TLexer_Destroy(mLexer);
+  ReadLn;
 End;
 
 End.

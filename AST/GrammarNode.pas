@@ -14,7 +14,7 @@ Type
 
   TGrammarNode = Record
     Parent: TAstNode;
-    Rules: PList; // Of PRuleNode 
+    Rules: PList; // Of PRuleNode
     TermRules: PList; // Of PTermRuleNode 
   End;
 
@@ -28,7 +28,7 @@ Var
 Implementation
 
 Uses
-  TypeDef;
+  TypeDef, RuleNode, TermRuleNode;
 
 Procedure TGrammarNode_Create(Var Self: PGrammarNode);
 Begin
@@ -36,8 +36,8 @@ Begin
   TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT := @mTGrammarNode_VMT;
 
-  Self.Rules := TList_Create(SizeOf(PAstNode), 1);
-  Self.TermRules := TList_Create(SizeOf(PAstNode), 1);
+  Self.Rules := TList_Create(SizeOf(PRuleNode), 1);
+  Self.TermRules := TList_Create(SizeOf(PTermRuleNode), 1);
 End;
 
 Procedure TGrammarNode_Destroy(Self: PAstNode);

@@ -84,7 +84,7 @@ End;
 
 Function Compose(): TLexerRule;
 Begin
-  Result.TokenKind := eString;
+  Result.TokenKind.TokenKind := eString;
   Result.Parser := Parse;
 End;
 
