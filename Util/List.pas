@@ -57,7 +57,7 @@ End;
 
 Procedure TList_Set(Self: PList; Const Index: TSize; Value: Pointer);
 Begin
-  Move(Value^, Self.FList[Index], Self.FElemSize);
+  Move(Value^, Self.FList[Index * Self.FElemSize], Self.FElemSize);
 End;
 
 Procedure TList_PushBack(Self: PList; Element: Pointer);

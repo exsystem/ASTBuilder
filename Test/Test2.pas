@@ -537,6 +537,7 @@ Begin
   TLexer_AddRule(mGrammarLexer, CharRule.Compose());
   TLexer_AddRule(mGrammarLexer, StringRule.Compose());
   TLexer_AddRule(mGrammarLexer, SemiRule.Compose());
+
   mParser := TParser_Create(mGrammarLexer, GrammarRule);
   If TParser_Parse(mParser) Then
     WriteLn('ACCEPTED')

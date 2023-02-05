@@ -67,5 +67,5 @@ Begin
   FastMM_EnterDebugMode;
 
   ReportMemoryLeaksOnShutdown := True;
-  Test2.Test();
+  Test1.Test();
 End.
