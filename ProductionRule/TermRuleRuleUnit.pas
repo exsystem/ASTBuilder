@@ -61,6 +61,7 @@ Begin
   End
   Else
   Begin
+    TNfa_Destroy(mNfa);
     Result := False;
     Exit;
   End;

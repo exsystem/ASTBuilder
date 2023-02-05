@@ -43,30 +43,30 @@ Begin
   Goto TestParser;
 
   TestLexer:
-    While True Do
+    // While True Do
+  Begin
+    Readln(mSource);
+    If mSource = '' Then
     Begin
-      Readln(mSource);
-      If mSource = '' Then
+      Goto TestParser;
+    End;
+    mLexer := TLexer_Create(mSource);
+    TLexer_AddRule(mLexer, EofRule.Compose());
+    TLexer_AddRule(mLexer, IdRule.Compose());
+    TLexer_AddRule(mLexer, TermRule.Compose());
+    TLexer_AddRule(mLexer, LParenRule.Compose());
+    TLexer_AddRule(mLexer, OrRule.Compose());
+    TLexer_AddRule(mLexer, ColonRule.Compose());
+    TLexer_AddRule(mLexer, AsteriskRule.Compose());
+    TLexer_AddRule(mLexer, QuestionMarkRule.Compose());
+    TLexer_AddRule(mLexer, RParenRule.Compose());
+    TLexer_AddRule(mLexer, CharRule.Compose());
+    TLexer_AddRule(mLexer, StringRule.Compose());
+    TLexer_AddRule(mLexer, DoubleDotsRule.Compose());
+    TLexer_AddRule(mLexer, SemiRule.Compose());
+    Repeat
+      If TLexer_GetNextToken(mLexer) Then
       Begin
-        Goto TestParser;
-      End;
-      mLexer := TLexer_Create(mSource);
-      TLexer_AddRule(mLexer, EofRule.Compose());
-      TLexer_AddRule(mLexer, IdRule.Compose());
-      TLexer_AddRule(mLexer, TermRule.Compose());
-      TLexer_AddRule(mLexer, LParenRule.Compose());
-      TLexer_AddRule(mLexer, OrRule.Compose());
-      TLexer_AddRule(mLexer, ColonRule.Compose());
-      TLexer_AddRule(mLexer, AsteriskRule.Compose());
-      TLexer_AddRule(mLexer, QuestionMarkRule.Compose());
-      TLexer_AddRule(mLexer, RParenRule.Compose());
-      TLexer_AddRule(mLexer, CharRule.Compose());
-      TLexer_AddRule(mLexer, StringRule.Compose());
-      TLexer_AddRule(mLexer, DoubleDotsRule.Compose());
-      TLexer_AddRule(mLexer, SemiRule.Compose());
-      Repeat
-        If TLexer_GetNextToken(mLexer) Then
-        Begin
         {$IFDEF FPC}
         WriteStr(mKind, mLexer.CurrentToken.Kind.TokenKind);
         {$ELSE}
@@ -74,18 +74,18 @@ Begin
           tInfo := TypeInfo(TTokenKind);
           mKind := GetEnumName(tInfo, Ord(mLexer.CurrentToken.Kind.TokenKind));
           {$ELSE}
-          mKind := TRttiEnumerationType.GetName(mLexer.CurrentToken.Kind.TokenKind);
+        mKind := TRttiEnumerationType.GetName(mLexer.CurrentToken.Kind.TokenKind);
           {$ENDIF}
         {$ENDIF}
-          Writeln(Format('token kind = %s: %s @ pos = %d',
-          [mKind, mLexer.CurrentToken.Value, mLexer.CurrentToken.StartPos]));
-          Continue;
-        End;
-        Writeln(Format('[ERROR] Illegal token "%s" found at pos %d.',
-        [mLexer.CurrentToken.Value, mLexer.CurrentToken.StartPos]));
-      Until TLexer_PeekNextChar(mLexer) = #0;
-      TLexer_Destroy(mLexer);
-    End;
+        Writeln(Format('token kind = %s: %s @ pos = %d',
+        [mKind, mLexer.CurrentToken.Value, mLexer.CurrentToken.StartPos]));
+        Continue;
+      End;
+      Writeln(Format('[ERROR] Illegal token "%s" found at pos %d.',
+      [mLexer.CurrentToken.Value, mLexer.CurrentToken.StartPos]));
+    Until TLexer_PeekNextChar(mLexer) = #0;
+    TLexer_Destroy(mLexer);
+  End;
 
   TestParser:
     // While True Do
@@ -608,10 +608,10 @@ Begin
       mLexer.CurrentToken.Error]));
     End;
 
-    TAstViewer_Create(mViewer);
-    mParser.Ast.VMT.Accept(mParser.Ast, PAstVisitor(mViewer));
-    TAstViewer_Destroy(PAstVisitor(mViewer));
-    Dispose(mViewer);
+    // TAstViewer_Create(mViewer);
+    // mParser.Ast.VMT.Accept(mParser.Ast, PAstVisitor(mViewer));
+    // TAstViewer_Destroy(PAstVisitor(mViewer));
+    // Dispose(mViewer);
 
     Writeln;
     TParser_Destroy(mParser);

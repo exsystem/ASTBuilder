@@ -62,6 +62,7 @@ End;
 Function TermFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS4: TSize;
+  mNfa: PNfa;
 Label
   S1, S2, S3, S4, S5;
 Begin
@@ -76,7 +77,7 @@ Begin
       Exit;
     End;
   S2:
-    If TermExprRule(Parser, Nfa) Then
+    If TermExprRule(Parser, mNfa) Then
     Begin
       // NOP
     End
@@ -92,11 +93,13 @@ Begin
     End
     Else
     Begin
+      TNfa_Destroy(mNfa);
       Result := False;
       Exit;
     End;
   S4:
     mSavePointS4 := Parser.FCurrentToken;
+  Nfa := mNfa;
   If TParser_Term(Parser, eQuestionMark) Then
   Begin
     TNfa_Optional(Nfa);
