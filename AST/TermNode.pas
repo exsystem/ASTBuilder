@@ -1,8 +1,6 @@
 Unit TermNode;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -28,15 +26,24 @@ Var
 
 Implementation
 
+Uses
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StringUtils;
+
 Procedure TTermNode_Create(Var Self: PTermNode);
 Begin
   New(Self);
   TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT := @mTTermNode_AST;
+  Self.Token.Error := strnew('');
+  Self.Token.Value := strnew('');
+  Self.Token.Kind.TermRule := strnew('');
 End;
 
 Procedure TTermNode_Destroy(Self: PAstNode);
 Begin
+  FreeStr(PTermNode(Self).Token.Error);
+  FreeStr(PTermNode(Self).Token.Value);
+  FreeStr(PTermNode(Self).Token.Kind.TermRule);
   TAstNode_Destroy(Self);
 End;
 

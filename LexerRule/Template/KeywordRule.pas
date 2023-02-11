@@ -1,36 +1,34 @@
 Unit KeywordRule;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
 Uses
   Lexer;
 
-Function Parse(Lexer: PLexer; Keyword: String): Boolean;
+Function Parse(Lexer: PLexer; Keyword: PChar): Boolean;
 Function Compose(Lexer: PLexer; Parser: TLexerRuleParser; TokenKind: TTokenKind;
-  Keyword: String): TLexerRule;
+  Keyword: PChar): TLexerRule;
 
 Implementation
 
 Uses
-  Trie;
+  Trie, {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF};
 
-Function Parse(Lexer: PLexer; Keyword: String): Boolean;
+Function Parse(Lexer: PLexer; Keyword: PChar): Boolean;
 Begin
   Result := TLexer_PeekNextWord(Lexer, Keyword);
   If Result Then
   Begin
-    Lexer.CurrentToken.Value := Keyword;
+    Lexer.CurrentToken.Value := strnew(Keyword);
     Lexer.CurrentToken.StartPos := Lexer.NextPos;
     TLexer_Forward(Lexer, Length(Keyword));
   End;
 End;
 
 Function Compose(Lexer: PLexer; Parser: TLexerRuleParser; TokenKind: TTokenKind;
-  Keyword: String): TLexerRule;
+  Keyword: PChar): TLexerRule;
 Begin
   Result.TokenKind := TokenKind;
   Result.Parser := Parser;

@@ -1,8 +1,6 @@
 Unit Parser;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 {.$DEFINE DEBUG}
 
 Interface
@@ -25,7 +23,7 @@ Type
     FCurrentToken: TSize;
     MainProductionRule: TSymbolFunc;
     Ast: PAstNode;
-    Error: String;
+    Error: PChar;
   End;
 
 Function TParser_Create(Lexer: PLexer; ProductionRule: TSymbolFunc): PParser;
@@ -43,7 +41,7 @@ Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean; Overload;
 Function TParser_Term(Self: PParser; GrammarTokenKind: TGrammarTokenKind): Boolean;
   Overload;
 
-Function TParser_Term(Self: PParser; TermRule: String): Boolean; Overload;
+Function TParser_Term(Self: PParser; TermRule: PChar): Boolean; Overload;
 
 {
   Function TParser_Prod(Self: PParser; Var Ast: PAstNode;
@@ -54,14 +52,16 @@ Procedure TParser_Destroy(Self: PParser);
 
 Implementation
 
-  {$IFNDEF FPC}
+  {$IFDEF DCC}
   {$IFDEF VER150}
-  Uses TypInfo;
+  Uses TypInfo, SysUtils,  StringUtils;
+  {$ELSE}
+  Uses System.Rtti, SysUtils, StringUtils;
+  {$ENDIF}
   {$ELSE}
 
-Uses System.Rtti;
+Uses SysUtils, StringUtils;
 
-  {$ENDIF}
   {$ENDIF}
 
 Function TParser_Parse(Self: PParser): Boolean;
@@ -84,16 +84,28 @@ Begin
   Result.FTokenList := TList_Create(SizeOf(TToken), 5);
   Result.FCurrentToken := 0;
   Result.Ast := nil;
+  Result.Error := strnew('');
 End;
 
 Procedure TParser_Destroy(Self: PParser);
+Var
+  I: TSize;
+  mToken: PToken;
 Begin
+  For I := 0 To Self.FTokenList.Size - 1 Do
+  Begin
+    mToken := PToken(TList_Get(Self.FTokenList, I));
+    FreeStr(mToken.Error);
+    FreeStr(mToken.Value);
+    FreeStr(mToken.Kind.TermRule);
+  End;
   TList_Destroy(Self.FTokenList);
   If Self.Ast <> nil Then
   Begin
     Self.Ast.VMT.Destory(Self.Ast);
     Dispose(Self.Ast);
   End;
+  FreeStr(Self.Error);
   Dispose(Self);
 End;
 
@@ -126,10 +138,12 @@ Var
   mTokenKind: TTokenKind;
 Begin
   mTokenKind.TokenKind := GrammarTokenKind;
+  mTokenKind.TermRule := StrNew('');
   Result := TParser_Term(Self, mTokenKind);
+  FreeStr(mTokenKind.TermRule);
 End;
 
-Function TParser_Term(Self: PParser; TermRule: String): Boolean;
+Function TParser_Term(Self: PParser; TermRule: PChar): Boolean;
 Var
   mTokenKind: TTokenKind;
 Begin
@@ -171,6 +185,9 @@ Begin
       *)
       mToken := TList_EmplaceBack(Self.FTokenList); // USE EMPLACE
       mToken^ := Self.FLexer.CurrentToken;
+      mToken.Error := StrNew(Self.FLexer.CurrentToken.Error);
+      mToken.Value := StrNew(Self.FLexer.CurrentToken.Value);
+      mToken.Kind.TermRule := StrNew(Self.FLexer.CurrentToken.Kind.TermRule);
       {$IFDEF DEBUG}
       {$IFDEF FPC}
       WriteStr(t, TParser_GetCurrentToken(Self).Kind);

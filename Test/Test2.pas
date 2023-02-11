@@ -1,8 +1,6 @@
 Unit Test2;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -25,7 +23,7 @@ Uses {$IFNDEF FPC}
   EofRule, IdRule, TermRule, LParenRule, OrRule, ColonRule, AsteriskRule,
   QuestionMarkRule,
   RParenRule, CharRule, StringRule, DoubleDotsRule, SemiRule, GrammarParser,
-  Parser, GrammarRuleUnit, ASTNode, ParseTree;
+  Parser, GrammarRuleUnit, ASTNode, ParseTree, TypeDef;
 
 Procedure Test();
 Var
@@ -523,7 +521,7 @@ Begin
   mSource := mSource + 'NUM_INT: (''0'' .. ''9'') (''0'' .. ''9'')* ;' + #13#10;
   WriteLn('> ANTLR4 Grammar For PASCAL:');
   WriteLn(mSource);
-  mGrammarLexer := TLexer_Create(mSource);
+  mGrammarLexer := TLexer_Create(PChar(mSource));
   TLexer_AddRule(mGrammarLexer, EofRule.Compose());
   TLexer_AddRule(mGrammarLexer, IdRule.Compose());
   TLexer_AddRule(mGrammarLexer, TermRule.Compose());

@@ -1,8 +1,6 @@
 Unit TermFactorRuleUnit;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 

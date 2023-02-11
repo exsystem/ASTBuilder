@@ -1,8 +1,6 @@
 Unit TypeDef;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 

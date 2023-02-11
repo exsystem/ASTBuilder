@@ -1,13 +1,11 @@
 Unit ParseTree;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
 Uses
-  Lexer, List;
+  Lexer, List, TypeDef;
 
 Type
   PPParseTree = ^PParseTree;
@@ -15,7 +13,7 @@ Type
   PParseTree = ^TParseTree;
 
   TParseTree = Record
-    RuleName: String;
+    RuleName: PChar;
     Token: TToken;
     Children: PList; // of PParseTree
   End;

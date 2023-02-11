@@ -97,9 +97,8 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="lexer.pas"/>
+        <Filename Value="Lexer.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Lexer"/>
       </Unit>
       <Unit>
         <Filename Value="Parser.pas"/>

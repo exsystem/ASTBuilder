@@ -1,5 +1,7 @@
 Unit ClassUtils;
 
+{$I define.inc}
+
 Interface
 
 Uses

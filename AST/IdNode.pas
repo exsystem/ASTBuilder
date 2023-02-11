@@ -1,8 +1,6 @@
 Unit IdNode;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -14,10 +12,10 @@ Type
 
   TIdNode = Record
     Parent: TAstNode;
-    Value: String;
+    Value: PChar;
   End;
 
-Procedure TIdNode_Create(Var Self: PIdNode; Value: String);
+Procedure TIdNode_Create(Var Self: PIdNode; Value: PChar);
 
 Procedure TIdNode_Destroy(Self: PAstNode);
 
@@ -28,17 +26,21 @@ Var
 
 Implementation
 
-Procedure TIdNode_Create(Var Self: PIdNode; Value: String);
+Uses
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StringUtils;
+
+Procedure TIdNode_Create(Var Self: PIdNode; Value: PChar);
 Begin
   New(Self);
   TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT := @mTIdNode_AST;
 
-  Self.Value := Value;
+  Self.Value := strnew(Value);
 End;
 
 Procedure TIdNode_Destroy(Self: PAstNode);
 Begin
+  FreeStr(PIdNode(Self).Value);
   TAstNode_Destroy(Self);
 End;
 

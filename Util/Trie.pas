@@ -1,8 +1,6 @@
 Unit Trie;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -27,16 +25,19 @@ Type
 
 Function TTrie_Create(Const ElementSize: TSize): PTrie;
 Procedure TTrie_Clear(Self: PTrie);
-Function TTrie_Get(Self: PTrie; Const Key: String): Pointer;
-Procedure TTrie_Set(Self: PTrie; Const Key: String; Value: Pointer);
-Procedure TTrie_Erase(Self: PTrie; Const Key: String);
+Function TTrie_Get(Self: PTrie; Const Key: PChar): Pointer;
+Procedure TTrie_Set(Self: PTrie; Const Key: PChar; Value: Pointer);
+Procedure TTrie_Erase(Self: PTrie; Const Key: PChar);
 Procedure TTrie_Destroy(Self: PTrie);
 Function TTrie_CreateNode(): PNode;
 Function TTrie_Empty(Root: PNode): Boolean;
-Function TTrie_Delete(Self: PTrie; Root: PNode; Key: String; Depth: TSize): PNode;
+Function TTrie_Delete(Self: PTrie; Root: PNode; Key: PChar; Depth: TSize): PNode;
 Procedure TTrie_DoClear(Root: PNode);
 
 Implementation
+
+Uses
+{$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF};
 
 Function TTrie_Create(Const ElementSize: TSize): PTrie;
 Begin
@@ -55,15 +56,15 @@ Begin
   End;
 End;
 
-Function TTrie_Get(Self: PTrie; Const Key: String): Pointer;
+Function TTrie_Get(Self: PTrie; Const Key: PChar): Pointer;
 Var
   mNode: PNode;
   mKey: PByte;
   I: TSize;
 Begin
   mNode := Self.Root;
-  mKey := PByte(@Key[Low(Key)]);
-  For I := 0 To Length(Key) * SizeOf(Char) - 1 Do
+  mKey := PByte(Key);
+  For I := 0 To strlen(Key) * SizeOf(Char) - 1 Do
   Begin
     mNode := mNode.Next[mKey[I]];
     If mNode = nil Then
@@ -75,15 +76,15 @@ Begin
   Result := mNode.Data;
 End;
 
-Procedure TTrie_Set(Self: PTrie; Const Key: String; Value: Pointer);
+Procedure TTrie_Set(Self: PTrie; Const Key: PChar; Value: Pointer);
 Var
   mNode: PNode;
   mKey: PByte;
   I: TSize;
 Begin
   mNode := Self.Root;
-  mKey := PByte(@Key[Low(Key)]);
-  For I := 0 To Length(Key) * SizeOf(Char) - 1 Do
+  mKey := PByte(Key);
+  For I := 0 To strlen(Key) * SizeOf(Char) - 1 Do
   Begin
     If mNode.Next[mKey[I]] = nil Then
     Begin
@@ -101,7 +102,7 @@ Begin
   mNode.Leaf := True;
 End;
 
-Procedure TTrie_Erase(Self: PTrie; Const Key: String);
+Procedure TTrie_Erase(Self: PTrie; Const Key: PChar);
 Begin
   TTrie_Delete(Self, Self.Root, Key, 0);
 End;
@@ -124,18 +125,18 @@ Begin
   End;
 End;
 
-Function TTrie_Delete(Self: PTrie; Root: PNode; Key: String; Depth: TSize): PNode;
+Function TTrie_Delete(Self: PTrie; Root: PNode; Key: PChar; Depth: TSize): PNode;
 Var
   mKey: PByte;
 Begin
-  mKey := PByte(@Key[Low(Key)]);
+  mKey := PByte(Key);
   If Root = nil Then
   Begin
     Result := nil;
     Exit;
   End;
 
-  If Depth = Succ(Length(Key) * SizeOf(Char)) Then
+  If Depth = Succ(StrLen(Key) * SizeOf(Char)) Then
   Begin
     Root.Leaf := False;
     If TTrie_Empty(Root) Then

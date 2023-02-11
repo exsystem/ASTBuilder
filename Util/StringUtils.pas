@@ -1,10 +1,11 @@
 Unit StringUtils;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
+
+Uses
+  TypeDef;
 
 Function IsSpace(Const Ch: Char): Boolean;
 Function IsDigit(Const Ch: Char): Boolean;
@@ -14,8 +15,18 @@ Function IsIdChar(Const Ch: Char): Boolean;
 Function Lower(Const Ch: Char): Char;
 Function IsTermIdInitialChar(Const Ch: Char): Boolean;
 Function IsNonTermIdInitialChar(Const Ch: Char): Boolean;
+Function CreateStr(Len: TSize): PChar;
+Function ReallocStr(S: PChar; Len: TSize): PChar;
+Procedure FreeStr(S: PChar);
+Function SubStr(S: PChar; FromIndex: TSize; Len: TSize): PChar;
+{$IFDEF FPC}
+function strnew(p : pchar) : pchar;
+{$ENDIF}
 
 Implementation
+
+Uses
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF};
 
 Function IsSpace(Const Ch: Char): Boolean;
 Begin
@@ -63,5 +74,61 @@ Function IsNonTermIdInitialChar(Const Ch: Char): Boolean;
 Begin
   Result := Ch In ['a' .. 'z'];
 End;
+
+Function CreateStr(Len: TSize): PChar;
+Begin
+  {$IFDEF USE_STR_ALLOC}
+  Result := StrAlloc(Len + 1);
+  {$ELSE}
+  GetMem(Result, (Len + 1) * SizeOf(Char));
+  {$ENDIF}
+  Result[0] := #0;
+  Result[Len] := #0;
+End;
+
+Function ReallocStr(S: PChar; Len: TSize): PChar;
+Begin
+  {$IFDEF USE_STR_ALLOC}
+  Result := StrAlloc(Len + 1);
+  StrCopy(Result, S);
+  StrDispose(S);
+  {$ELSE}
+  GetMem(Result, (Len + 1) * SizeOf(Char));
+  strcopy(Result, S);
+  FreeMem(S, (StrLen(S) + 1) * SizeOf(Char));
+  {$ENDIF}
+End;
+
+Procedure FreeStr(S: PChar);
+Begin
+  {$IFDEF USE_STR_ALLOC}
+  StrDispose(S);
+  {$ELSE}
+  FreeMem(S, (strlen(S) + 1) * SizeOf(Char));
+  {$ENDIF}
+End;
+
+Function SubStr(S: PChar; FromIndex: TSize; Len: TSize): PChar;
+Begin
+  Result := CreateStr(Len);
+  Move(S[FromIndex], Result[0], Len * sizeof(Char));
+  Result[Len] := #0;
+End;
+
+{$IFDEF FPC}
+function strnew(p : pchar) : pchar;
+var
+  len : longint;
+begin
+  Result:=nil;
+  if p=nil then
+   exit;
+  len:=strlen(p)+1;
+  Result:=StrAlloc(Len);
+  if Result<>nil then
+   move(p^,Result^,len);
+end;
+{$ENDIF}
+
 
 End.

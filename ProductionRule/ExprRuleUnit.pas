@@ -1,8 +1,6 @@
 Unit ExprRuleUnit;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -16,7 +14,7 @@ Function ExprRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  TypeDef, List, IdNode, TermNode, GroupNode, FactorRuleUnit;
+  TypeDef, List, IdNode, GroupNode, FactorRuleUnit;
 
 // expr -> factor* ( Or factor* )*
 Function ExprRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;

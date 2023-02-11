@@ -1,8 +1,6 @@
 Unit RuleNode;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -15,7 +13,7 @@ Type
 
   TRuleNode = Record
     Parent: TAstNode;
-    Name: String;
+    Name: PChar;
     Expr: PGroupNode;
   End;
 
@@ -30,11 +28,15 @@ Var
 
 Implementation
 
+Uses
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StringUtils;
+
 Procedure TRuleNode_Create(Var Self: PRuleNode);
 Begin
   New(Self);
   TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT := @mTRuleNode_AST;
+  Self.Name := strnew('');
 End;
 
 Procedure TRuleNode_Destroy(Self: PAstNode);
@@ -44,6 +46,7 @@ Begin
     TGroupNode_Destroy(PAstNode(PRuleNode(Self).Expr));
     Dispose(PRuleNode(Self).Expr);
   End;
+  FreeStr(PRuleNode(Self).Name);
   TAstNode_Destroy(Self);
 End;
 
