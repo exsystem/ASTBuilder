@@ -1,8 +1,6 @@
 Unit FactorRuleUnit;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -20,7 +18,8 @@ Function FactorRuleExpression3(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  TypeDef, List, ClassUtils, IdNode, TermNode, GroupNode, ExprRuleUnit;
+  TypeDef, List, ClassUtils, IdNode, TermNode, GroupNode, ExprRuleUnit,
+ {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StringUtils;
 
 // factor -> id ( QuestionMark | Asterisk ) ?
 // DFA: (S1)--[id]->((S2))--[?, *]->((S3))
@@ -81,7 +80,14 @@ Begin
     If TParser_Term(Parser, eTerm) Then
     Begin
       TTermNode_Create(PTermNode(mTermNode));
+      FreeStr(PTermNode(mTermNode).Token.Error);
+      FreeStr(PTermNode(mTermNode).Token.Value);
+      FreeStr(PTermNode(mTermNode).Token.Kind.TermRule);
       PTermNode(mTermNode).Token := TParser_GetCurrentToken(Parser)^;
+      PTermNode(mTermNode).Token.Error := StrNew(PTermNode(mTermNode).Token.Error);
+      PTermNode(mTermNode).Token.Value := StrNew(PTermNode(mTermNode).Token.Value);
+      PTermNode(mTermNode).Token.Kind.TermRule :=
+        StrNew(PTermNode(mTermNode).Token.Kind.TermRule);
     End
     Else
     Begin

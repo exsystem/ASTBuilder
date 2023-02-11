@@ -1,8 +1,6 @@
 Unit StringRule;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -15,7 +13,7 @@ Function Compose(): TLexerRule;
 Implementation
 
 Uses
-  TypeDef;
+  TypeDef, StringUtils;
 
 // ' ( other-than-eof-and-quote | \ any-but-not-eof ) * '
 // first make a NFA for this regexp, then transform into DFA.
@@ -77,14 +75,16 @@ Begin
     End;
   S4:
     Result := True;
+  FreeStr(Lexer.CurrentToken.Value);
   Lexer.CurrentToken.Value :=
-    Copy(Lexer.Source, Lexer.CurrentToken.StartPos, Lexer.NextPos -
+    SubStr(Lexer.Source, Lexer.CurrentToken.StartPos, Lexer.NextPos -
     Lexer.CurrentToken.StartPos);
 End;
 
 Function Compose(): TLexerRule;
 Begin
   Result.TokenKind.TokenKind := eString;
+  Result.TokenKind.TermRule := nil;
   Result.Parser := Parse;
 End;
 

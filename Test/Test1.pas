@@ -1,8 +1,6 @@
 Unit Test1;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -25,7 +23,7 @@ Uses {$IFNDEF FPC}
   EofRule, IdRule, TermRule, LParenRule, OrRule, ColonRule, AsteriskRule,
   QuestionMarkRule,
   RParenRule, SemiRule, StringRule, CharRule, DoubleDotsRule, GrammarViewer,
-  Parser, GrammarRuleUnit, ASTNode;
+  Parser, GrammarRuleUnit, ASTNode, TypeDef;
 
 Procedure Test();
 Var
@@ -50,7 +48,7 @@ Begin
     Begin
       Goto TestParser;
     End;
-    mLexer := TLexer_Create(mSource);
+    mLexer := TLexer_Create(PChar(mSource));
     TLexer_AddRule(mLexer, EofRule.Compose());
     TLexer_AddRule(mLexer, IdRule.Compose());
     TLexer_AddRule(mLexer, TermRule.Compose());
@@ -83,8 +81,9 @@ Begin
       End;
       Writeln(Format('[ERROR] Illegal token "%s" found at pos %d.',
       [mLexer.CurrentToken.Value, mLexer.CurrentToken.StartPos]));
-    Until TLexer_PeekNextChar(mLexer) = #0;
+    Until TLexer_PeekNextChar(mLexer) = #1;
     TLexer_Destroy(mLexer);
+    Exit;
   End;
 
   TestParser:
@@ -583,7 +582,7 @@ Begin
     Begin
       Goto TestLexer;
     End;
-    mLexer := TLexer_Create(mSource);
+    mLexer := TLexer_Create(PChar(mSource));
     TLexer_AddRule(mLexer, EofRule.Compose());
     TLexer_AddRule(mLexer, IdRule.Compose());
     TLexer_AddRule(mLexer, TermRule.Compose());
@@ -608,10 +607,10 @@ Begin
       mLexer.CurrentToken.Error]));
     End;
 
-    // TAstViewer_Create(mViewer);
-    // mParser.Ast.VMT.Accept(mParser.Ast, PAstVisitor(mViewer));
-    // TAstViewer_Destroy(PAstVisitor(mViewer));
-    // Dispose(mViewer);
+    TAstViewer_Create(mViewer);
+    mParser.Ast.VMT.Accept(mParser.Ast, PAstVisitor(mViewer));
+    TAstViewer_Destroy(PAstVisitor(mViewer));
+    Dispose(mViewer);
 
     Writeln;
     TParser_Destroy(mParser);

@@ -1,8 +1,6 @@
 Unit IdRule;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -15,7 +13,7 @@ Function Compose(): TLexerRule;
 Implementation
 
 Uses
-  StringUtils;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StringUtils;
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
@@ -33,14 +31,16 @@ Begin
     TLexer_Forward(Lexer);
   End;
 
+  FreeStr(Lexer.CurrentToken.Value);
   Lexer.CurrentToken.Value :=
-    Copy(Lexer.Source, Lexer.CurrentToken.StartPos, Lexer.NextPos -
+    SubStr(Lexer.Source, Lexer.CurrentToken.StartPos, Lexer.NextPos -
     Lexer.CurrentToken.StartPos);
 End;
 
 Function Compose(): TLexerRule;
 Begin
   Result.TokenKind.TokenKind := eId;
+  Result.TokenKind.TermRule := nil;
   Result.Parser := Parse;
 End;
 

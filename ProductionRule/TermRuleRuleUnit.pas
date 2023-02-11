@@ -1,8 +1,6 @@
 Unit TermRuleRuleUnit;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -15,12 +13,13 @@ Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  IdNode, GroupNode, TermRuleNode, TermExprRuleUnit, NFA;
+  IdNode, GroupNode, TermRuleNode, TermExprRuleUnit, NFA,
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StringUtils;
 
 // termRule -> term Colon termExpr Semi
 Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
-  mName: String;
+  mName: PChar;
   mNfa: PNfa;
 Label
   S1, S2;
@@ -28,7 +27,7 @@ Begin
   S1:
     If TParser_Term(Parser, eTerm) Then
     Begin
-      mName := TParser_GetCurrentToken(Parser).Value;
+      mName := strnew(TParser_GetCurrentToken(Parser).Value);
     End
     Else
     Begin
@@ -41,6 +40,7 @@ Begin
   End
   Else
   Begin
+    FreeStr(mName);
     Result := False;
     Exit;
   End;
@@ -50,18 +50,21 @@ Begin
   End
   Else
   Begin
+    FreeStr(mName);
     Result := False;
     Exit;
   End;
   If TParser_Term(Parser, eSemi) Then
   Begin
     TTermRuleNode_Create(PTermRuleNode(Ast));
+    FreeStr(PTermRuleNode(Ast).Name);
     PTermRuleNode(Ast).Name := mName;
     PTermRuleNode(Ast).Nfa := mNfa;
   End
   Else
   Begin
     TNfa_Destroy(mNfa);
+    FreeStr(mName);
     Result := False;
     Exit;
   End;

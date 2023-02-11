@@ -1,8 +1,6 @@
 Unit GrammarRuleUnit;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 

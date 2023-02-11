@@ -1,8 +1,6 @@
 Unit GroupNode;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 

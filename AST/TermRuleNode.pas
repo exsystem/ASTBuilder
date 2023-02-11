@@ -1,8 +1,6 @@
 Unit TermRuleNode;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -15,7 +13,7 @@ Type
 
   TTermRuleNode = Record
     Parent: TAstNode;
-    Name: String;
+    Name: PChar;
     Nfa: PNfa;
   End;
 
@@ -30,11 +28,16 @@ Var
 
 Implementation
 
+Uses
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StringUtils;
+
 Procedure TTermRuleNode_Create(Var Self: PTermRuleNode);
 Begin
   New(Self);
   TAstNode_Create(PAstNode(Self));
   Self.Parent.VMT := @mTTermRuleNode_AST;
+  Self.Name := strnew('');
+  Self.Nfa := nil;
 End;
 
 Procedure TTermRuleNode_Destroy(Self: PAstNode);
@@ -43,6 +46,7 @@ Begin
   Begin
     TNfa_Destroy(PTermRuleNode(Self).Nfa);
   End;
+  FreeStr(PTermRuleNode(Self).Name);
   TAstNode_Destroy(Self);
 End;
 

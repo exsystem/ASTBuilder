@@ -1,8 +1,6 @@
 Unit StringFactorRuleUnit;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -20,14 +18,16 @@ Function StringFactorRuleExpression3(Parser: PParser; Var Nfa: PNfa): Boolean;
 Implementation
 
 Uses
-  TypeDef, IdNode, TermNode, GroupNode;
+  TypeDef, IdNode, TermNode, GroupNode,
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StringUtils;
 
 // stringFactor -> char DoubleDots char
 Function StringFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS1: TSize;
-  mFrom, mTo: String;
+  mFrom, mTo: PChar;
   mCh: Char;
+  mChStr: PChar;
 Label
   S1, S2, S3, S4;
 Begin
@@ -35,7 +35,7 @@ Begin
     mSavePointS1 := Parser.FCurrentToken;
   If TParser_Term(Parser, eChar) Then
   Begin
-    mFrom := TParser_GetCurrentToken(Parser).Value;
+    mFrom := strnew(TParser_GetCurrentToken(Parser).Value);
   End
   Else
   Begin
@@ -48,6 +48,7 @@ Begin
     End
     Else
     Begin
+      FreeStr(mFrom);
       Parser.FCurrentToken := mSavePointS1;
       Result := False;
       Exit;
@@ -55,49 +56,56 @@ Begin
   S3:
     If TParser_Term(Parser, eChar) Then
     Begin
-      mTo := TParser_GetCurrentToken(Parser).Value;
+      mTo := strnew(TParser_GetCurrentToken(Parser).Value);
     End
     Else
     Begin
+      FreeStr(mFrom);
       Parser.FCurrentToken := mSavePointS1;
       Result := False;
       Exit;
     End;
   S4:
-    If mFrom[2] = '\' Then
+    If mFrom[1] = '\' Then
       // TODO extract a util function. and add more chars allowing escaping.
     Begin
-      Case mFrom[3] Of
-        'n': mFrom := #13;
-        'r': mFrom := #10;
-        't': mFrom := #20;
+      Case mFrom[2] Of
+        'n': mFrom[0] := #13;
+        'r': mFrom[0] := #10;
+        't': mFrom[0] := #20;
         Else
-          mFrom := mFrom[3];
+          mFrom[0] := mFrom[2];
       End;
     End
     Else
     Begin
-      mFrom := mFrom[2];
+      mFrom[0] := mFrom[1];
     End;
-  If mTo[2] = '\' Then
+  If mTo[1] = '\' Then
   Begin
-    Case mTo[3] Of
-      'n': mTo := #13;
-      'r': mTo := #10;
-      't': mTo := #20;
+    Case mTo[2] Of
+      'n': mTo[0] := #13;
+      'r': mTo[0] := #10;
+      't': mTo[0] := #20;
       Else
-        mTo := mTo[3];
+        mTo[0] := mTo[2];
     End;
   End
   Else
   Begin
-    mTo := mTo[2];
+    mTo[0] := mTo[1];
   End;
   TNfa_Create(Nfa);
-  For mCh := mFrom[1] To mTo[1] Do
+  mChStr := CreateStr(1);
+  mChStr[1] := #0;
+  For mCh := mFrom[0] To mTo[0] Do
   Begin
-    TNfa_AddEdge(Nfa, mCh, 0, 1);
+    mChStr[0] := mCh;
+    TNfa_AddEdge(Nfa, mChStr, 0, 1);
   End;
+  FreeStr(mChStr);
+  FreeStr(mFrom);
+  FreeStr(mTo);
   TNfa_GetState(Nfa, 1).Acceptable := True;
   Result := True;
 End;
@@ -106,6 +114,8 @@ End;
 Function StringFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 Label
   S1, S2;
+Var
+  mCh: PChar;
 Begin
   S1:
     If TParser_Term(Parser, eChar) Then
@@ -119,7 +129,11 @@ Begin
     End;
   S2:
     TNfa_Create(Nfa);
-  TNfa_AddEdge(Nfa, TParser_GetCurrentToken(Parser).Value[2], 0, 1);
+  mCh := CreateStr(1);
+  mCh[0] := TParser_GetCurrentToken(Parser).Value[1];
+  mCh[1] := #0;
+  TNfa_AddEdge(Nfa, mCh, 0, 1);
+  FreeStr(mCh);
   // TODO: ['a'] or [a]; and what about ['\n']?
   TNfa_GetState(Nfa, 1).Acceptable := True;
   Result := True;
@@ -130,6 +144,7 @@ Function StringFactorRuleExpression3(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mToken: PToken;
   I: TSize;
+  mCh: PChar;
 Label
   S1, S2;
 Begin
@@ -138,11 +153,14 @@ Begin
     Begin
       TNfa_Create(Nfa);
       mToken := TParser_GetCurrentToken(Parser);
-      For I := Low(mToken.Value) + 1 To High(mToken.Value) - 1 Do
+      mCh := CreateStr(1);
+      mCh[1] := #0;
+      For I := 1 To strlen(mToken.Value) - 2 Do
       Begin
-        TNfa_AddEdge(Nfa, mToken.Value[I], I - (Low(mToken.Value) + 1),
-        I - (Low(mToken.Value) + 1) + 1);
+        mCh[0] := mToken.Value[I];
+        TNfa_AddEdge(Nfa, mCh, I - 1, I);
       End;
+      FreeStr(mCh);
       TNfa_GetState(Nfa, Nfa.States.Size - 1).Acceptable := True;
     End
     Else

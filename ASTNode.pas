@@ -1,8 +1,6 @@
 Unit ASTNode;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 

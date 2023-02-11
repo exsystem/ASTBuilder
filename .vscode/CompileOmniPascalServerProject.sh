@@ -13,7 +13,7 @@ if [ $1 = "clean" ] || [ $1 == "test" ]; then
     find . -type d -name "backup" | xargs rm -rf      
     find . -type d -name "__history" | xargs rm -rf      
     rm -rf "./lib"
-    rm -rf "./Win32"
+    # rm -rf "./Win32"
 fi
 
 if $LAZBUILD $PROJECT; then

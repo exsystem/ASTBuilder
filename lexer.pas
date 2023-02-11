@@ -1,8 +1,6 @@
 Unit Lexer;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -20,12 +18,12 @@ Type
 
   TTokenKind = Record
     TokenKind: TGrammarTokenKind;
-    TermRule: String;
+    TermRule: PChar;
   End;
 
   TToken = Record
-    Error: String;
-    Value: String;
+    Error: PChar;
+    Value: PChar;
     StartPos: TSize;
     Kind: TTokenKind;
   End;
@@ -34,7 +32,7 @@ Type
 
   TLexer = Record
     GrammarNode: PGrammarNode;
-    Source: String;
+    Source: PChar;
     NextPos: TSize;
     CurrentToken: TToken;
     Keywords: PTrie; // of <String, TTokenKind>
@@ -50,7 +48,7 @@ Type
     Parser: TLexerRuleParser;
   End;
 
-Function TLexer_Create(Const Source: String; Const GrammarMode: Boolean = True): PLexer;
+Function TLexer_Create(Const Source: PChar; Const GrammarMode: Boolean = True): PLexer;
 
 Procedure TLexer_Destroy(Var Self: PLexer);
 
@@ -66,7 +64,7 @@ Procedure TLexer_Forward(Var Self: PLexer; Const Step: TSize = 1);
 
 Function TLexer_PeekNextChar(Var Self: PLexer): Char;
 
-Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: String): Boolean;
+Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: PChar): Boolean;
 
 Function TLexer_GetNextChar(Var Self: PLexer): Char;
 
@@ -75,9 +73,9 @@ Procedure TLexer_Retract(Var Self: PLexer; Const Step: TSize = 1);
 Implementation
 
 Uses
-  StringUtils, SysUtils, NFA, TermRuleNode;
+  SysUtils, StringUtils, NFA, TermRuleNode{$IFDEF USE_STRINGS}, strings{$ENDIF};
 
-Function TLexer_Create(Const Source: String; Const GrammarMode: Boolean = True): PLexer;
+Function TLexer_Create(Const Source: PChar; Const GrammarMode: Boolean = True): PLexer;
 Begin
   New(Result);
   Result.RuleList := nil;
@@ -86,9 +84,14 @@ Begin
     Result.RuleList := TList_Create(SizeOf(TLexerRule), 10);
     Result.Keywords := TTrie_Create(SizeOf(TTokenKind));
   End;
-  Result.Source := Source + #0;
-  Result.NextPos := 1;
+  Result.Source := CreateStr(StrLen(Source) + 1);
+  StrCat(Result.Source, Source);
+  StrCat(Result.Source, #1);
+  Result.NextPos := 0;
+  Result.CurrentToken.Value := strnew('');
+  Result.CurrentToken.Error := strnew('');
   Result.CurrentToken.Kind.TokenKind := eUndefined;
+  Result.CurrentToken.Kind.TermRule := strnew('');
 End;
 
 Function TLexer_GetNextToken(Var Self: PLexer): Boolean;
@@ -114,24 +117,29 @@ Begin
     For I := 0 To Pred(Self.RuleList.Size) Do
     Begin
       mRule := PLexerRule(TList_Get(Self.RuleList, I));
-      Self.CurrentToken.Error := '';
+      FreeStr(Self.CurrentToken.Error);
+      Self.CurrentToken.Error := strnew('');
       If mRule.Parser(Self) Then
       Begin
-        Result := (Self.CurrentToken.Error = '');
+        Result := (strcomp(Self.CurrentToken.Error, '') = 0);
         If Result Then
         Begin
           mKeyword := PTokenKind(TTrie_Get(Self.Keywords, Self.CurrentToken.Value));
           If mKeyword <> nil Then
           Begin
+            FreeStr(Self.CurrentToken.Kind.TermRule);
             Self.CurrentToken.Kind := mKeyword^;
           End
           Else
           Begin
+            FreeStr(Self.CurrentToken.Kind.TermRule);
             Self.CurrentToken.Kind := mRule.TokenKind;
+            Self.CurrentToken.Kind.TermRule := strnew(Self.CurrentToken.Kind.TermRule);
           End;
         End
         Else
         Begin
+          FreeStr(Self.CurrentToken.Kind.TermRule);
           Self.CurrentToken.Kind.TokenKind := eUndefined;
         End;
         Exit;
@@ -143,20 +151,23 @@ Begin
     For I := 0 To Pred(Self.GrammarNode.TermRules.Size) Do
     Begin
       mTermRuleNode := PPTermRuleNode(TList_Get(Self.GrammarNode.TermRules, I))^;
-      Self.CurrentToken.Error := '';
+      FreeStr(Self.CurrentToken.Error);
+      Self.CurrentToken.Error := strnew('');
       Result := False;
-      If mTermRuleNode.Nfa.Keyword <> '' Then
+      If strcomp(mTermRuleNode.Nfa.Keyword, '') <> 0 Then
       Begin
         If Not TLexer_PeekNextWord(Self, mTermRuleNode.Nfa.Keyword) Then
         Begin
           Continue;
         End;
         Self.CurrentToken.Kind.TokenKind := eUserDefined;
-        Self.CurrentToken.Kind.TermRule := mTermRuleNode.Name;
+        FreeStr(Self.CurrentToken.Kind.TermRule);
+        Self.CurrentToken.Kind.TermRule := strnew(mTermRuleNode.Name);
         Self.CurrentToken.StartPos := Self.NextPos;
-        Self.CurrentToken.Value := mTermRuleNode.Nfa.Keyword;
+        FreeStr(Self.CurrentToken.Value);
+        Self.CurrentToken.Value := strnew(mTermRuleNode.Nfa.Keyword);
         TLexer_Forward(Self, Length(Self.CurrentToken.Value));
-        Result := (Self.CurrentToken.Error = '');
+        Result := (strcomp(Self.CurrentToken.Error, '') = 0);
         Exit;
       End
       Else
@@ -174,12 +185,14 @@ Begin
         End;
         If Result Then
         Begin
+          FreeStr(Self.CurrentToken.Value);
           Self.CurrentToken.Value :=
-            Copy(Self.Source, Self.CurrentToken.StartPos, mSavePoint -
+            SubStr(Self.Source, Self.CurrentToken.StartPos, mSavePoint -
             Self.CurrentToken.StartPos);
           Self.CurrentToken.Kind.TokenKind := eUserDefined;
-          Self.CurrentToken.Kind.TermRule := mTermRuleNode.Name;
-          Result := (Self.CurrentToken.Error = '');
+          FreeStr(Self.CurrentToken.Kind.TermRule);
+          Self.CurrentToken.Kind.TermRule := strnew(mTermRuleNode.Name);
+          Result := (strcomp(Self.CurrentToken.Error, '') = 0);
           TLexer_Retract(Self, mSavePoint - Self.NextPos);
           Exit;
         End;
@@ -193,8 +206,10 @@ Begin
     TLexer_Forward(Self);
   End;
   Self.CurrentToken.Kind.TokenKind := eUndefined;
-  Self.CurrentToken.Error := 'Illegal token.';
-  Self.CurrentToken.Value := Copy(Self.Source, Self.CurrentToken.StartPos,
+  FreeStr(Self.CurrentToken.Error);
+  Self.CurrentToken.Error := strnew('Illegal token.');
+  FreeStr(Self.CurrentToken.Value);
+  Self.CurrentToken.Value := SubStr(Self.Source, Self.CurrentToken.StartPos,
     Self.NextPos - Self.CurrentToken.StartPos);
   Result := False;
 End;
@@ -206,6 +221,10 @@ Begin
     TList_Destroy(Self.RuleList);
     TTrie_Destroy(Self.Keywords);
   End;
+  FreeStr(Self.CurrentToken.Error);
+  FreeStr(Self.CurrentToken.Value);
+  FreeStr(Self.CurrentToken.Kind.TermRule);
+  FreeStr(Self.Source);
   Dispose(Self);
   Self := nil;
 End;
@@ -226,24 +245,24 @@ Begin
   TLexer_Forward(Self);
 End;
 
-Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: String): Boolean;
+Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: PChar): Boolean;
 Var
   I: TSize;
 Begin
-  If Self.NextPos + Length(NextWord) > Length(Self.Source) Then
+  If Self.NextPos + strlen(NextWord) > strlen(Self.Source) Then
   Begin
     Result := False;
     Exit;
   End;
-  Result := CompareMem(@Self.Source[Self.NextPos], @NextWord[1],
-    Length(NextWord) * SizeOf(Char));
+  Result := CompareMem(@Self.Source[Self.NextPos], NextWord,
+    strlen(NextWord) * SizeOf(Char));
   If Result Then
   Begin
     Exit;
   End;
-  For I := Low(NextWord) To High(NextWord) Do
+  For I := 0 To strlen(NextWord) - 1 Do
   Begin
-    If Lower(NextWord[I]) <> Lower(Self.Source[Self.NextPos + I - Low(NextWord)]) Then
+    If Lower(NextWord[I]) <> Lower(Self.Source[Self.NextPos + I]) Then
     Begin
       Result := False;
       Exit;
@@ -261,7 +280,7 @@ Function TLexer_IsToken(Var Self: PLexer; Const TokenKind: TTokenKind): Boolean;
 Begin
   If TokenKind.TokenKind = TGrammarTokenKind.eUserDefined Then
   Begin
-    Result := (Self.CurrentToken.Kind.TermRule = TokenKind.TermRule) And
+    Result := (strcomp(Self.CurrentToken.Kind.TermRule, TokenKind.TermRule) = 0) And
       (Self.CurrentToken.Kind.TokenKind = TGrammarTokenKind.eUserDefined);
   End
   Else

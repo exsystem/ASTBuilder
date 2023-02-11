@@ -1,8 +1,6 @@
 Unit AsteriskRule;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -25,6 +23,7 @@ End;
 Function Compose(): TLexerRule;
 Begin
   Result.TokenKind.TokenKind := eAsterisk;
+  Result.TokenKind.TermRule := nil;
   Result.Parser := Parse;
 End;
 

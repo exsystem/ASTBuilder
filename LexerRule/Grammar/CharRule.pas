@@ -1,8 +1,6 @@
 Unit CharRule;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -15,7 +13,7 @@ Function Compose(): TLexerRule;
 Implementation
 
 Uses
-  TypeDef;
+  TypeDef, StringUtils;
 
 // ' ( \ any-but-not-eof | other-than-eof-and-quote ) '
 Function Parse(Lexer: PLexer): Boolean;
@@ -82,8 +80,9 @@ Begin
       Exit;
     End;
   S5:
-    Lexer.CurrentToken.Value :=
-      Copy(Lexer.Source, Lexer.CurrentToken.StartPos, Lexer.NextPos -
+    FreeStr(Lexer.CurrentToken.Value);
+  Lexer.CurrentToken.Value :=
+    SubStr(Lexer.Source, Lexer.CurrentToken.StartPos, Lexer.NextPos -
     Lexer.CurrentToken.StartPos);
   Result := True;
 End;
@@ -91,6 +90,7 @@ End;
 Function Compose(): TLexerRule;
 Begin
   Result.TokenKind.TokenKind := eChar;
+  Result.TokenKind.TermRule := nil;
   Result.Parser := Parse;
 End;
 

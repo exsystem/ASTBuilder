@@ -1,8 +1,6 @@
 Unit OrRule;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -25,6 +23,7 @@ End;
 Function Compose(): TLexerRule;
 Begin
   Result.TokenKind.TokenKind := eOr;
+  Result.TokenKind.TermRule := nil;
   Result.Parser := Parse;
 End;
 
