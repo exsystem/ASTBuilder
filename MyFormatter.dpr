@@ -51,7 +51,8 @@ uses
   StringRule in 'LexerRule\Grammar\StringRule.pas',
   TermRule in 'LexerRule\Grammar\TermRule.pas',
   TermRuleNode in 'AST\TermRuleNode.pas',
-  NFA in 'Automata\NFA.pas';
+  NFA in 'Automata\NFA.pas',
+  Test3 in 'Test\Test3.pas';
 
 Begin
   FastMM_LogToFileEvents := [mmetDebugBlockDoubleFree,
@@ -68,5 +69,5 @@ Begin
   FastMM_EnterDebugMode;
 
   ReportMemoryLeaksOnShutdown := True;
-  Test2.Test();
+  Test3.Test();
 End.

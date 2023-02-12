@@ -228,6 +228,7 @@
         <DCCReference Include="LexerRule\Grammar\TermRule.pas"/>
         <DCCReference Include="AST\TermRuleNode.pas"/>
         <DCCReference Include="Automata\NFA.pas"/>
+        <DCCReference Include="Test\Test3.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -272,6 +273,12 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="Win32\Debug\MyFormatter.exe" Configuration="Debug" Class="ProjectOutput"/>
+                <DeployFile LocalName="Win32\Debug\MyFormatter.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>MyFormatter.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="iOSSimulator">
                         <Operation>1</Operation>

@@ -5,87 +5,114 @@ Unit Test3;
 Interface
 
 Type
-  TTest = Record
-    MyInt: Integer;
-    MyString: String;
-  End;
-
-Procedure TestStr();
+  PPInteger = ^PInteger;
 
 Procedure Test();
 
 Implementation
 
-Uses
-  List, TypeDef, SysUtils;
+Uses {$IFNDEF FPC}
+  {$IFDEF VER150}
+  TypInfo
+  {$ELSE}
+  System.Rtti
+  {$ENDIF}
+  , {$ENDIF}
+  SysUtils,
+  Lexer,
+  EofRule, IdRule, TermRule, LParenRule, OrRule, ColonRule, AsteriskRule,
+  QuestionMarkRule,
+  RParenRule, CharRule, StringRule, DoubleDotsRule, SemiRule, GrammarParser,
+  Parser, GrammarRuleUnit, ASTNode, ParseTree, TypeDef,
+ {$IFDEF USE_STRINGS}strings,{$ENDIF} StringUtils;
 
-Procedure TestStr();
+Function ReadTextFileToString(Path: String): PChar;
 Var
-  mList: PList; // of string
-  I: TSize;
-  mItem: String;
+  mFile: TextFile;
+  mLine: String;
 Begin
-  mList := TList_Create(SizeOf(String), 1);
-  mItem := '1111';
-  TList_PushBack(mList, @mItem);
-  mItem := '2222';
-  TList_PushBack(mList, @mItem);
-  mItem := '3333';
-  TList_PushBack(mList, @mItem);
-  For I := 0 To mList.Size - 1 Do
+  AssignFile(mFile, Path);
+  Reset(mFile);
+  Result := StrNew('');
+  While Not EOF(mFile) Do
   Begin
-    mItem := String(TList_Get(mList, I)^);
-    WriteLn(mItem);
-    mItem := 'foo' + mItem;
-    TList_Set(mList, I, @mItem);
+    ReadLn(mFile, mLine);
+    Result := ReallocStr(Result, StrLen(Result) + StrLen(PChar(mLine)));
+    StrCat(Result, PChar(mLine));
   End;
-  For I := 0 To mList.Size - 1 Do
-  Begin
-    mItem := String(TList_Get(mList, I)^);
-    mItem := 'foo' + mItem;
-    WriteLn(mItem);
-  End;
-  TList_Destroy(mList);
-  ReadLn;
+  CloseFile(mFile);
 End;
 
 Procedure Test();
 Var
-  mList: PList; // of TTest
-  I: TSize;
-  mItem: TTest;
-
+  mGrammarFilePath: String;
+  mGrammar: PChar;
+  mCodeFilePath: String;
+  mCode: PChar;
+  mGrammarLexer: PLexer;
+  {$IFDEF VER150}
+  tInfo: PTypeInfo;
+  {$ENDIF}
+  mParser: PParser;
+  mViewer: PAstViewer;
+  mLexer: PLexer;
 Begin
-  TestStr();
-
-  mList := TList_Create(SizeOf(TTest), 1);
-
-  mItem.MyInt := 11;
-  mItem.MyString := 'abc';
-  TList_PushBack(mList, @mItem);
-
-  mItem.MyInt := 22;
-  mItem.MyString := 'def';
-  TList_PushBack(mList, @mItem);
-
-  mItem.MyInt := 33;
-  mItem.MyString := 'ghi';
-  TList_PushBack(mList, @mItem);
-
-  For I := 0 To mList.Size - 1 Do
+  WriteLn('Grammar File Path?');
+  ReadLn(mGrammarFilePath);
+  If mGrammarFilePath = '' Then
   Begin
-    mItem := TTest(TList_Get(mList, I)^);
-    WriteLn(IntToStr(mItem.MyInt) + ', ' + mItem.MyString);
-    mItem.MyString := 'foo' + mItem.MyString;
-    TList_Set(mList, I, @mItem);
+    mGrammarFilePath := '/Users/exsystem/testfile/pas.xg';
   End;
-  For I := 0 To mList.Size - 1 Do
+  mGrammar := ReadTextFileToString(mGrammarFilePath);
+
+  WriteLn('Code File Path?');
+  ReadLn(mCodeFilePath);
+  If mCodeFilePath = '' Then
   Begin
-    mItem := TTest(TList_Get(mList, I)^);
-    mItem.MyString := 'foo' + mItem.MyString;
-    WriteLn(IntToStr(mItem.MyInt) + ', ' + mItem.MyString);
+    mCodeFilePath := '/Users/exsystem/testfile/test.pas';
   End;
-  TList_Destroy(mList);
+  mCode := ReadTextFileToString(mCodeFilePath);
+
+  mGrammarLexer := TLexer_Create(mGrammar);
+  TLexer_AddRule(mGrammarLexer, EofRule.Compose());
+  TLexer_AddRule(mGrammarLexer, IdRule.Compose());
+  TLexer_AddRule(mGrammarLexer, TermRule.Compose());
+  TLexer_AddRule(mGrammarLexer, LParenRule.Compose());
+  TLexer_AddRule(mGrammarLexer, OrRule.Compose());
+  TLexer_AddRule(mGrammarLexer, ColonRule.Compose());
+  TLexer_AddRule(mGrammarLexer, AsteriskRule.Compose());
+  TLexer_AddRule(mGrammarLexer, QuestionMarkRule.Compose());
+  TLexer_AddRule(mGrammarLexer, RParenRule.Compose());
+  TLexer_AddRule(mGrammarLexer, DoubleDotsRule.Compose());
+  TLexer_AddRule(mGrammarLexer, CharRule.Compose());
+  TLexer_AddRule(mGrammarLexer, StringRule.Compose());
+  TLexer_AddRule(mGrammarLexer, SemiRule.Compose());
+
+  mParser := TParser_Create(mGrammarLexer, GrammarRule);
+  If TParser_Parse(mParser) Then
+    WriteLn('ACCEPTED')
+  Else
+  Begin
+    WriteLn(Format('ERROR: Parser Message: %s', [mParser.Error]));
+    WriteLn(Format('ERROR: Current Token at Pos = %d, Value = [%s], Message: %s',
+      [mGrammarLexer.CurrentToken.StartPos, mGrammarLexer.CurrentToken.Value,
+      mGrammarLexer.CurrentToken.Error]));
+  End;
+
+  mLexer := TLexer_Create(mCode, False);
+  TAstViewer_Create(mViewer, mLexer);
+  mParser.Ast.VMT.Accept(mParser.Ast, PAstVisitor(mViewer));
+  mViewer.Level := 0;
+  WriteLn(mViewer.Error);
+  TAstViewer_PrintParseTree(PAstVisitor(mViewer), mViewer.FParseTree);
+  TParseTree_Destroy(mViewer.FParseTree);
+  TAstViewer_Destroy(PAstVisitor(mViewer));
+  Dispose(mViewer);
+  TLexer_Destroy(mLexer);
+  TParser_Destroy(mParser);
+  TLexer_Destroy(mGrammarLexer);
+  FreeStr(mGrammar);
+  FreeStr(mCode);
   ReadLn;
 End;
 
