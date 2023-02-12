@@ -183,7 +183,7 @@ Begin
   Begin
     Exit;
   End;
-  For i := Low(Byte) To High(Byte) Do
+  For I := Low(Byte) To High(Byte) Do
   Begin
     TTrie_DoClear(Root.Next[I]);
   End;

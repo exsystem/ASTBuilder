@@ -5,7 +5,7 @@ Unit ParseTree;
 Interface
 
 Uses
-  Lexer, List, TypeDef;
+  Lexer, List;
 
 Type
   PPParseTree = ^PParseTree;
@@ -22,8 +22,15 @@ Procedure TParseTree_Destroy(Self: PParseTree);
 
 Implementation
 
+Uses
+ {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StringUtils;
+
 Procedure TParseTree_Destroy(Self: PParseTree);
 Begin
+  FreeStr(Self.RuleName);
+  FreeStr(Self.Token.Error);
+  FreeStr(Self.Token.Value);
+  FreeStr(Self.Token.Kind.TermRule);
   If Self.Children <> nil Then
   Begin
     While Not TList_IsEmpty(Self.Children) Do

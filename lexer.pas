@@ -215,6 +215,8 @@ Begin
 End;
 
 Procedure TLexer_Destroy(Var Self: PLexer);
+Var
+  I: TSize;
 Begin
   If Self.RuleList <> nil Then
   Begin
