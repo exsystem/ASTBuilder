@@ -60,12 +60,13 @@ Begin
     mmetVirtualMethodCallOnFreedObject,
     mmetAnotherThirdPartyMemoryManagerAlreadyInstalled,
     mmetCannotInstallAfterDefaultMemoryManagerHasBeenUsed,
-    mmetCannotSwitchToSharedMemoryManagerWithLivePointers];
+    mmetCannotSwitchToSharedMemoryManagerWithLivePointers,
+    mmetUnexpectedMemoryLeakDetail];
 
   FastMM_SetEventLogFilename('C:\Users\许子健\Desktop\aaa.log');
   FastMM_LoadDebugSupportLibrary;
   FastMM_EnterDebugMode;
 
   ReportMemoryLeaksOnShutdown := True;
-  Test1.Test();
+  Test2.Test();
 End.
