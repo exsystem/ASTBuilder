@@ -34,7 +34,7 @@ Begin
       Result := False;
       Exit;
     End;
-  If TParser_Term(Parser, TGrammarTokenKind.eColon) Then
+  If TParser_Term(Parser, eColon) Then
   Begin
     // NOP
   End

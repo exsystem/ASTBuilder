@@ -69,7 +69,7 @@ Begin
         WriteStr(mKind, mLexer.CurrentToken.Kind.TokenKind);
         {$ELSE}
           {$IFDEF VER150}
-          tInfo := TypeInfo(TTokenKind);
+          tInfo := TypeInfo(TGrammarTokenKind);
           mKind := GetEnumName(tInfo, Ord(mLexer.CurrentToken.Kind.TokenKind));
           {$ELSE}
         mKind := TRttiEnumerationType.GetName(mLexer.CurrentToken.Kind.TokenKind);

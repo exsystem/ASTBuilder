@@ -151,7 +151,7 @@ Begin
   If mNode.IsAlternational Then
   Begin
     Case mNode.GroupType Of
-      TGroupType.eGroup:
+      eGroup:
       Begin
         For I := 0 To mNode.Terms.Size - 1 Do
         Begin
@@ -169,7 +169,7 @@ Begin
           End;
         End;
       End;
-      TGroupType.eOptional:
+      eOptional:
       Begin
         For I := 0 To mNode.Terms.Size - 1 Do
         Begin
@@ -189,7 +189,7 @@ Begin
         FreeStr(mSelf.Error);
         mSelf.Error := strnew('');
       End;
-      TGroupType.eMultiple:
+      eMultiple:
       Begin
         FreeStr(mSelf.Error);
         mSelf.Error := strnew('');
@@ -221,7 +221,7 @@ Begin
     FreeStr(mSelf.Error);
     mSelf.Error := strnew('');
     Case mNode.GroupType Of
-      TGroupType.eGroup:
+      eGroup:
       Begin
         mSavePoint := mSelf.FCurrentParseTreeNode.Children.Size;
         For I := 0 To mNode.Terms.Size - 1 Do
@@ -244,7 +244,7 @@ Begin
           End;
         End;
       End;
-      TGroupType.eOptional:
+      eOptional:
       Begin
         mSavePoint := mSelf.FCurrentParseTreeNode.Children.Size;
         For I := 0 To mNode.Terms.Size - 1 Do
@@ -269,7 +269,7 @@ Begin
           End;
         End;
       End;
-      TGroupType.eMultiple:
+      eMultiple:
       Begin
         FreeStr(mSelf.Error);
         mSelf.Error := strnew('');
