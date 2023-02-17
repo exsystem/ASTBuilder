@@ -65,8 +65,8 @@ Begin
   mNode := Self.Root;
   mKey := PByte(Key);
   I := 0;
-  While I < strlen(Key) * SizeOf(Char) do
-  begin
+  While I < strlen(Key) * SizeOf(Char) Do
+  Begin
     mNode := mNode.Next[mKey^];
     If mNode = nil Then
     Begin
@@ -74,7 +74,7 @@ Begin
       Exit;
     End;
     Inc(mKey, I);
-  end;
+  End;
   Result := mNode.Data;
 End;
 
@@ -87,8 +87,8 @@ Begin
   mNode := Self.Root;
   mKey := PByte(Key);
   I := 0;
-  While I < strlen(Key) * SizeOf(Char) do
-  begin
+  While I < strlen(Key) * SizeOf(Char) Do
+  Begin
     If mNode.Next[mKey^] = nil Then
     Begin
       mNode.Next[mKey^] := TTrie_CreateNode();
@@ -96,8 +96,8 @@ Begin
     End;
     mNode := mNode.Next[mKey^];
     Inc(mKey, I);
-  end;
-  
+  End;
+
   If mNode.Data <> nil Then
   Begin
     FreeMem(mNode.Data, Self.FElemSize);
