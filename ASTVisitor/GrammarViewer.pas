@@ -97,11 +97,11 @@ Var
 Begin
   mNode := PGroupNode(Node);
   Case mNode.GroupType Of
-    TGroupType.eGroup:
+    eGroup:
       mGroupType := 'Group';
-    TGroupType.eOptional:
+    eOptional:
       mGroupType := 'Optional';
-    TGroupType.eMultiple:
+    eMultiple:
       mGroupType := 'Multiple';
   End;
   If mNode.IsAlternational Then

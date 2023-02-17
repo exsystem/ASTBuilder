@@ -64,15 +64,17 @@ Var
 Begin
   mNode := Self.Root;
   mKey := PByte(Key);
-  For I := 0 To strlen(Key) * SizeOf(Char) - 1 Do
-  Begin
-    mNode := mNode.Next[mKey[I]];
+  I := 0;
+  While I < strlen(Key) * SizeOf(Char) do
+  begin
+    mNode := mNode.Next[mKey^];
     If mNode = nil Then
     Begin
       Result := nil;
       Exit;
     End;
-  End;
+    Inc(mKey, I);
+  end;
   Result := mNode.Data;
 End;
 
@@ -84,15 +86,18 @@ Var
 Begin
   mNode := Self.Root;
   mKey := PByte(Key);
-  For I := 0 To strlen(Key) * SizeOf(Char) - 1 Do
-  Begin
-    If mNode.Next[mKey[I]] = nil Then
+  I := 0;
+  While I < strlen(Key) * SizeOf(Char) do
+  begin
+    If mNode.Next[mKey^] = nil Then
     Begin
-      mNode.Next[mKey[I]] := TTrie_CreateNode();
-      mNode.Next[mKey[I]].Data := nil;
+      mNode.Next[mKey^] := TTrie_CreateNode();
+      mNode.Next[mKey^].Data := nil;
     End;
-    mNode := mNode.Next[mKey[I]];
-  End;
+    mNode := mNode.Next[mKey^];
+    Inc(mKey, I);
+  end;
+  
   If mNode.Data <> nil Then
   Begin
     FreeMem(mNode.Data, Self.FElemSize);
@@ -149,7 +154,8 @@ Begin
     Exit;
   End;
 
-  Root.Next[mKey[Depth]] := TTrie_Delete(Self, Root.Next[mKey[Depth]], Key, Succ(Depth));
+  Inc(mKey, Depth);
+  Root.Next[mKey^] := TTrie_Delete(Self, Root.Next[mKey^], Key, Succ(Depth));
 
   If TTrie_Empty(Root) And (Not Root.Leaf) Then
   Begin

@@ -46,14 +46,14 @@ Begin
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast).Terms, @mIdNode);
-    PGroupNode(Ast).GroupType := TGroupType.eOptional;
+    PGroupNode(Ast).GroupType := eOptional;
     PGroupNode(Ast).IsAlternational := False;
   End
   Else If TParser_Term(Parser, eAsterisk) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast).Terms, @mIdNode);
-    PGroupNode(Ast).GroupType := TGroupType.eMultiple;
+    PGroupNode(Ast).GroupType := eMultiple;
     PGroupNode(Ast).IsAlternational := False;
   End
   Else
@@ -100,14 +100,14 @@ Begin
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast).Terms, @mTermNode);
-    PGroupNode(Ast).GroupType := TGroupType.eOptional;
+    PGroupNode(Ast).GroupType := eOptional;
     PGroupNode(Ast).IsAlternational := False;
   End
   Else If TParser_Term(Parser, eAsterisk) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast).Terms, @mTermNode);
-    PGroupNode(Ast).GroupType := TGroupType.eMultiple;
+    PGroupNode(Ast).GroupType := eMultiple;
     PGroupNode(Ast).IsAlternational := False;
   End
   Else
@@ -173,11 +173,11 @@ Begin
     mSavePointS4 := Parser.FCurrentToken;
   If TParser_Term(Parser, eQuestionMark) Then
   Begin
-    PGroupNode(Ast).GroupType := TGroupType.eOptional;
+    PGroupNode(Ast).GroupType := eOptional;
   End
   Else If TParser_Term(Parser, eAsterisk) Then
   Begin
-    PGroupNode(Ast).GroupType := TGroupType.eMultiple;
+    PGroupNode(Ast).GroupType := eMultiple;
   End
   Else
   Begin

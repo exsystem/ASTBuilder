@@ -38,7 +38,7 @@ Begin
     Begin
       TGroupNode_Create(PGroupNode(mGroupNode1));
       PGroupNode(mGroupNode1).IsAlternational := False;
-      PGroupNode(mGroupNode1).GroupType := TGroupType.eGroup;
+      PGroupNode(mGroupNode1).GroupType := eGroup;
       TList_PushBack(PGroupNode(mGroupNode1).Terms, @mFactorNode);
       Ast := mGroupNode1;
     End
@@ -48,13 +48,13 @@ Begin
     End;
     Goto S1;
   End
-  Else If TParser_Term(Parser, TGrammarTokenKind.eOr) Then
+  Else If TParser_Term(Parser, eOr) Then
   Begin
     If mExprNode = nil Then
     Begin
       TGroupNode_Create(PGroupNode(mExprNode));
       PGroupNode(mExprNode).IsAlternational := True;
-      PGroupNode(mExprNode).GroupType := TGroupType.eGroup;
+      PGroupNode(mExprNode).GroupType := eGroup;
       TList_PushBack(PGroupNode(mExprNode).Terms, @mGroupNode1);
     End
     Else
@@ -76,7 +76,7 @@ Begin
     Begin
       TGroupNode_Create(PGroupNode(mGroupNodeN));
       PGroupNode(mGroupNodeN).IsAlternational := False;
-      PGroupNode(mGroupNodeN).GroupType := TGroupType.eGroup;
+      PGroupNode(mGroupNodeN).GroupType := eGroup;
       TList_PushBack(PGroupNode(mGroupNodeN).Terms, @mFactorNode);
     End
     Else
@@ -85,7 +85,7 @@ Begin
     End;
     Goto S2;
   End
-  Else If TParser_Term(Parser, TGrammarTokenKind.eOr) Then
+  Else If TParser_Term(Parser, eOr) Then
   Begin
     TList_PushBack(PGroupNode(mExprNode).Terms, @mGroupNodeN);
     mGroupNodeN := nil;

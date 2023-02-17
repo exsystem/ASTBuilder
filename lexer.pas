@@ -280,10 +280,10 @@ End;
 
 Function TLexer_IsToken(Var Self: PLexer; Const TokenKind: TTokenKind): Boolean;
 Begin
-  If TokenKind.TokenKind = TGrammarTokenKind.eUserDefined Then
+  If TokenKind.TokenKind = eUserDefined Then
   Begin
     Result := (strcomp(Self.CurrentToken.Kind.TermRule, TokenKind.TermRule) = 0) And
-      (Self.CurrentToken.Kind.TokenKind = TGrammarTokenKind.eUserDefined);
+      (Self.CurrentToken.Kind.TokenKind = eUserDefined);
   End
   Else
   Begin
