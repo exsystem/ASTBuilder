@@ -11,8 +11,9 @@ Type
   PTokenKind = ^TTokenKind;
 
   TGrammarTokenKind = (eUndefined, eUserDefined, eEof, eRoot, eOr,
-    eLParen, eRParen, eQuestionMark, eAsterisk, eColon, eSemi, eId,
-    eTerm, eString, eChar, eDoubleDots, eSingleQuote);
+    eLParen, eRParen, eLBracket, eRBracket, eQuestionMark, ePlus,
+    eAsterisk, eColon, eSemi, eId,
+    eTerm, eString, eChar, eDoubleDots, eSingleQuote, eTilde, eSkip);
 
   PToken = ^TToken;
 

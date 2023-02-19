@@ -21,8 +21,9 @@ Uses {$IFNDEF FPC}
   SysUtils,
   Lexer,
   EofRule, IdRule, TermRule, LParenRule, OrRule, ColonRule, AsteriskRule,
-  QuestionMarkRule,
-  RParenRule, SemiRule, StringRule, CharRule, DoubleDotsRule, GrammarViewer,
+  QuestionMarkRule, PlusRule, TildeRule,
+  RParenRule, LBracketRule, RBracketRule, CharRule, StringRule,
+  DoubleDotsRule, SemiRule, SkipRule, GrammarParser,
   Parser, GrammarRuleUnit, ASTNode, TypeDef;
 
 Procedure Test();
@@ -62,6 +63,7 @@ Begin
     TLexer_AddRule(mLexer, StringRule.Compose());
     TLexer_AddRule(mLexer, DoubleDotsRule.Compose());
     TLexer_AddRule(mLexer, SemiRule.Compose());
+    TLexer_AddRule(mLexer, SkipRule.Compose());
     Repeat
       If TLexer_GetNextToken(mLexer) Then
       Begin
@@ -583,19 +585,20 @@ Begin
       Goto TestLexer;
     End;
     mLexer := TLexer_Create(PChar(mSource));
-    TLexer_AddRule(mLexer, EofRule.Compose());
-    TLexer_AddRule(mLexer, IdRule.Compose());
-    TLexer_AddRule(mLexer, TermRule.Compose());
-    TLexer_AddRule(mLexer, LParenRule.Compose());
-    TLexer_AddRule(mLexer, OrRule.Compose());
-    TLexer_AddRule(mLexer, ColonRule.Compose());
-    TLexer_AddRule(mLexer, AsteriskRule.Compose());
-    TLexer_AddRule(mLexer, QuestionMarkRule.Compose());
-    TLexer_AddRule(mLexer, CharRule.Compose());
-    TLexer_AddRule(mLexer, StringRule.Compose());
-    TLexer_AddRule(mLexer, DoubleDotsRule.Compose());
-    TLexer_AddRule(mLexer, RParenRule.Compose());
-    TLexer_AddRule(mLexer, SemiRule.Compose());
+    TLexer_AddRule(mGrammarLexer, EofRule.Compose());
+    TLexer_AddRule(mGrammarLexer, IdRule.Compose());
+    TLexer_AddRule(mGrammarLexer, TermRule.Compose());
+    TLexer_AddRule(mGrammarLexer, LParenRule.Compose());
+    TLexer_AddRule(mGrammarLexer, OrRule.Compose());
+    TLexer_AddRule(mGrammarLexer, ColonRule.Compose());
+    TLexer_AddRule(mGrammarLexer, AsteriskRule.Compose());
+    TLexer_AddRule(mGrammarLexer, QuestionMarkRule.Compose());
+    TLexer_AddRule(mGrammarLexer, RParenRule.Compose());
+    TLexer_AddRule(mGrammarLexer, DoubleDotsRule.Compose());
+    TLexer_AddRule(mGrammarLexer, CharRule.Compose());
+    TLexer_AddRule(mGrammarLexer, StringRule.Compose());
+    TLexer_AddRule(mGrammarLexer, SemiRule.Compose());
+    TLexer_AddRule(mGrammarLexer, SkipRule.Compose());
     mParser := TParser_Create(mLexer, GrammarRule);
     If TParser_Parse(mParser) Then
       WriteLn('ACCEPTED')

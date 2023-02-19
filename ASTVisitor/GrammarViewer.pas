@@ -182,6 +182,11 @@ Begin
   End
   Else
   Begin
+    If mNode.Skipped Then
+    Begin
+      TAstViewer_WriteLn(Self, 'Ignored');
+    End;
+    TAstViewer_WriteLn(Self, PChar('Start state: ' + IntToStr(mNode.Nfa.StartState)));
     mText := CreateStr(strlen('Keyword: ') + strlen(mNode.Nfa.Keyword));
     strcat(mText, 'Keyword: ');
     strcat(mText, mNode.Nfa.Keyword);
