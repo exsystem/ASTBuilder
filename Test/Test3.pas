@@ -21,8 +21,9 @@ Uses {$IFNDEF FPC}
   SysUtils,
   Lexer,
   EofRule, IdRule, TermRule, LParenRule, OrRule, ColonRule, AsteriskRule,
-  QuestionMarkRule,
-  RParenRule, CharRule, StringRule, DoubleDotsRule, SemiRule, GrammarParser,
+  QuestionMarkRule, PlusRule, TildeRule,
+  RParenRule, LBracketRule, RBracketRule, CharRule, StringRule,
+  DoubleDotsRule, SemiRule, SkipRule, GrammarParser,
   Parser, GrammarRuleUnit, ASTNode, ParseTree, TypeDef,
  {$IFDEF USE_STRINGS}strings,{$ENDIF} StringUtils;
 
@@ -86,7 +87,12 @@ Begin
   TLexer_AddRule(mGrammarLexer, DoubleDotsRule.Compose());
   TLexer_AddRule(mGrammarLexer, CharRule.Compose());
   TLexer_AddRule(mGrammarLexer, StringRule.Compose());
+  TLexer_AddRule(mGrammarLexer, LBracketRule.Compose());
+  TLexer_AddRule(mGrammarLexer, RBracketRule.Compose());
+  TLexer_AddRule(mGrammarLexer, PlusRule.Compose());
+  TLexer_AddRule(mGrammarLexer, TildeRule.Compose());
   TLexer_AddRule(mGrammarLexer, SemiRule.Compose());
+  TLexer_AddRule(mGrammarLexer, SkipRule.Compose());
 
   mParser := TParser_Create(mGrammarLexer, GrammarRule);
   If TParser_Parse(mParser) Then

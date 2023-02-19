@@ -16,11 +16,12 @@ Uses
   IdNode, GroupNode, TermRuleNode, TermExprRuleUnit, NFA,
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StringUtils;
 
-// termRule -> term Colon termExpr Semi
+// termRule -> term Colon termExpr skip? Semi
 Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mName: PChar;
   mNfa: PNfa;
+  mSkipped: Boolean;
 Label
   S1, S2;
 Begin
@@ -54,12 +55,14 @@ Begin
     Result := False;
     Exit;
   End;
+  mSkipped := TParser_Term(Parser, eSkip);
   If TParser_Term(Parser, eSemi) Then
   Begin
     TTermRuleNode_Create(PTermRuleNode(Ast));
     FreeStr(PTermRuleNode(Ast).Name);
     PTermRuleNode(Ast).Name := mName;
     PTermRuleNode(Ast).Nfa := mNfa;
+    PTermRuleNode(Ast).Skipped := mSkipped;
   End
   Else
   Begin

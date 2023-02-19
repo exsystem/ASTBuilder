@@ -15,6 +15,7 @@ Type
     Parent: TAstNode;
     Name: PChar;
     Nfa: PNfa;
+    Skipped: Boolean;
   End;
 
 Procedure TTermRuleNode_Create(Var Self: PTermRuleNode);
@@ -38,6 +39,7 @@ Begin
   Self.Parent.VMT := @mTTermRuleNode_AST;
   Self.Name := strnew('');
   Self.Nfa := nil;
+  Self.Skipped := False;
 End;
 
 Procedure TTermRuleNode_Destroy(Self: PAstNode);

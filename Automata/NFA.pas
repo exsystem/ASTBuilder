@@ -19,6 +19,7 @@ Type
 
   TNfaEdge = Record
     Value: PChar;
+    Others: Boolean;
     ToState: TSize;
   End;
 
@@ -41,6 +42,8 @@ Function TNfa_GetState(Self: PNfa; StateIndex: TSize): PNfaState;
 
 Procedure TNfa_AddEdge(Self: PNfa; Value: PChar; Source: TSize; Destination: TSize);
 
+Procedure TNfa_CombineCharEdge(Self: PNfa; Nfa: PNfa);
+
 {
   TODO: extend the procedure below to accept mutiple NFAs into one NFA, not only two.
 }
@@ -54,6 +57,10 @@ Procedure TNfa_Alternative(Var Self: PNfa; Nfa: PNfa);
 Procedure TNfa_Multiple(Var Self: PNfa);
 
 Procedure TNfa_Optional(Var Self: PNfa);
+
+Procedure TNfa_OneOrMore(Var Self: PNfa);
+
+Procedure TNfa_Not(Var Self: PNfa);
 
 Procedure TNfa_Reset(Var Self: PNfa);
 
@@ -151,12 +158,43 @@ Begin
   End;
   mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
   mEdge.Value := strnew(Value);
+  mEdge.Others := False;
   mEdge.ToState := Destination;
   If Destination = Self.States.Size Then
   Begin
     mState := PNfaState(TList_EmplaceBack(Self.States));
     mState.Edges := TList_Create(SizeOf(TNfaEdge), 1);
   End;
+End;
+
+Procedure TNfa_CombineCharEdge(Self: PNfa; Nfa: PNfa);
+Var
+  mState, mNfaState: PNfaState;
+  mEdge, mNfaEdge: PNfaEdge;
+  I: TSize;
+Begin
+  { TODO check if this operation is allowed by Self and Nfa }
+
+  mNfaState := PNfaState(TList_Get(Nfa.States, 0));
+  mNfaEdge := PNfaEdge(TList_Get(mNfaState.Edges, 0));
+
+  mState := PNfaState(TList_Get(Self.States, 0));
+  For I := 0 To mState.Edges.Size - 1 Do
+  Begin
+    mEdge := PNfaEdge(TList_Get(mState.Edges, I));
+    If strcomp(mEdge.Value, mNfaEdge.Value) = 0 Then
+    Begin
+      TNfa_Destroy(Nfa);
+      Exit;
+    End;
+  End;
+
+  mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
+  mEdge.Value := strnew(mNfaEdge.Value);
+  mEdge.Others := False;
+  mEdge.ToState := 1;
+
+  TNfa_Destroy(Nfa);
 End;
 
 {
@@ -201,6 +239,7 @@ Begin
     Begin
       mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
       mEdge.Value := strnew('');
+      mEdge.Others := False;
       mEdge.ToState := Nfa.StartState + Self.States.Size;
       mState.Acceptable := False;
     End;
@@ -269,9 +308,11 @@ Begin
   mState.Edges := TList_Create(SizeOf(TNfaEdge), 2);
   mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
   mEdge.Value := strnew('');
+  mEdge.Others := False;
   mEdge.ToState := Self.StartState;
   mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
   mEdge.Value := strnew('');
+  mEdge.Others := False;
   mEdge.ToState := Nfa.StartState + (Self.States.Size - 1) - Nfa.States.Size;
   Self.StartState := Self.States.Size - 1;
 
@@ -286,6 +327,7 @@ Begin
     Begin
       mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
       mEdge.Value := strnew('');
+      mEdge.Others := False;
       mEdge.ToState := Self.States.Size - 1;
       mState.Acceptable := False;
     End;
@@ -293,6 +335,78 @@ Begin
 
   TList_Destroy(Nfa.States);
   Dispose(Nfa);
+End;
+
+{
+  A := ~A ; // A only contains one char.
+}
+Procedure TNfa_Not(Var Self: PNfa);
+Var
+  I: TSize;
+  mState: PNfaState;
+  mEdge: PNfaEdge;
+Begin
+  FreeStr(Self.Keyword);
+  Self.Keyword := strnew('');
+
+  mState := PNfaState(TList_Get(Self.States, 0));
+  mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
+  mEdge.Value := strnew('~');
+  mEdge.Others := False;
+  mEdge.Others := True;
+  mEdge.ToState := 2;
+
+
+  mState := PNfaState(TList_Get(Self.States, 1));
+  mState.Acceptable := False;
+
+  mState := PNfaState(TList_EmplaceBack(Self.States));
+  mState.Acceptable := True;
+  mState.Edges := TList_Create(SizeOf(TNfaEdge), 1);
+End;
+
+{
+  A := A + ;
+}
+Procedure TNfa_OneOrMore(Var Self: PNfa);
+Var
+  I, J: TSize;
+  mState: PNfaState;
+  mEdge: PNfaEdge;
+  mFlag: Boolean;
+Begin
+  FreeStr(Self.Keyword);
+  Self.Keyword := strnew('');
+
+  For I := 0 To Self.States.Size - 1 Do
+  Begin
+    mState := PNfaState(TList_Get(Self.States, I));
+    If mState.Acceptable Then
+    Begin
+      If mState.Edges.Size > 0 Then
+      Begin
+        mFlag := False;
+        For J := 0 To mState.Edges.Size - 1 Do
+        Begin
+          mEdge := PNfaEdge(TList_Get(mState.Edges, J));
+          If (mEdge.ToState = Self.StartState) And (mEdge.Value = '') Then
+          Begin
+            mFlag := True;
+            Break;
+          End;
+        End;
+        If mFlag Then
+        Begin
+          Continue;
+        End;
+      End;
+
+      mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
+      mEdge.Value := strnew('');
+      mEdge.Others := False;
+      mEdge.ToState := Self.StartState;
+    End;
+  End;
 End;
 
 {
@@ -312,9 +426,11 @@ Begin
   mState.Edges := TList_Create(SizeOf(TNfaEdge), 2);
   mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
   mEdge.Value := strnew('');
+  mEdge.Others := False;
   mEdge.ToState := Self.StartState;
   mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
   mEdge.Value := strnew('');
+  mEdge.Others := False;
   mEdge.ToState := Self.States.Size;
   mState := PNfaState(TList_EmplaceBack(Self.States));
   mState.Acceptable := True;
@@ -327,10 +443,12 @@ Begin
     Begin
       mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
       mEdge.Value := strnew('');
+      mEdge.Others := False;
       mEdge.ToState := Self.StartState;
       mState.Acceptable := False;
       mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
       mEdge.Value := strnew('');
+      mEdge.Others := False;
       mEdge.ToState := Self.States.Size - 1;
     End;
   End;
@@ -355,9 +473,11 @@ Begin
   mState.Edges := TList_Create(SizeOf(TNfaEdge), 2);
   mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
   mEdge.Value := strnew('');
+  mEdge.Others := False;
   mEdge.ToState := Self.StartState;
   mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
   mEdge.Value := strnew('');
+  mEdge.Others := False;
   mEdge.ToState := Self.States.Size;
   mState := PNfaState(TList_EmplaceBack(Self.States));
   mState.Acceptable := True;
@@ -371,6 +491,7 @@ Begin
       mState.Acceptable := False;
       mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
       mEdge.Value := strnew('');
+      mEdge.Others := False;
       mEdge.ToState := Self.States.Size - 1;
     End;
   End;
@@ -407,6 +528,7 @@ Var
   I: TSize;
   mState: PNfaState;
   mEdge: PNfaEdge;
+  mNot: Boolean;
 Begin
   Result := False;
   { TODO: Extract to a procedure called TNfa_MoveByChar? }
@@ -416,16 +538,32 @@ Begin
     mState := TNfa_GetState(Self, PSize(TList_Back(Self.FOldStates))^);
     If mState.Edges.Size > 0 Then
     Begin
-      For I := 0 To mState.Edges.Size - 1 Do
+      mEdge := PNfaEdge(TList_Get(mState.Edges, mState.Edges.Size - 1));
+      mNot := mEdge.Others;
+      If mState.Edges.Size > 1 Then
       Begin
-        mEdge := PNfaEdge(TList_Get(mState.Edges, I));
-        If (strcomp(mEdge.Value, '') <> 0) And (mEdge.Value[0] = Ch) Then
+        For I := 0 To mState.Edges.Size - 2 Do
         Begin
-          Result := True;
-          If (Not PBoolean(TList_Get(Self.FAlreadyOn, mEdge.ToState))^) Then
+          mEdge := PNfaEdge(TList_Get(mState.Edges, I));
+          If (strcomp(mEdge.Value, '') <> 0) And (mEdge.Value[0] = Ch) Then
           Begin
-            TNfa_AddState(Self, mEdge.ToState);
+            Result := True;
+            mNot := False;
+            If (Not PBoolean(TList_Get(Self.FAlreadyOn, mEdge.ToState))^) Then
+            Begin
+              TNfa_AddState(Self, mEdge.ToState);
+            End;
           End;
+        End;
+      End;
+      mEdge := PNfaEdge(TList_Get(mState.Edges, mState.Edges.Size - 1));
+      If (strcomp(mEdge.Value, '') <> 0) And (mEdge.Others And mNot) Or
+        ((Not mEdge.Others) And (mEdge.Value[0] = Ch)) Then
+      Begin
+        Result := True;
+        If (Not PBoolean(TList_Get(Self.FAlreadyOn, mEdge.ToState))^) Then
+        Begin
+          TNfa_AddState(Self, mEdge.ToState);
         End;
       End;
     End;

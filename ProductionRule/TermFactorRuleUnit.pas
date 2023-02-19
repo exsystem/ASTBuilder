@@ -19,7 +19,7 @@ Uses
   TypeDef, IdNode, TermNode, GroupNode, TermExprRuleUnit,
   StringFactorRuleUnit;
 
-// termFactor -> stringFactor ( QuestionMark | Asterisk ) ?
+// termFactor -> stringFactor ( QuestionMark | Plus | Asterisk ) ?
 Function TermFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS2: TSize;
@@ -42,6 +42,10 @@ Begin
   Begin
     TNfa_Optional(Nfa);
   End
+  Else If TParser_Term(Parser, ePlus) Then
+  Begin
+    TNfa_OneOrMore(Nfa);
+  End
   Else If TParser_Term(Parser, eAsterisk) Then
   Begin
     TNfa_Multiple(Nfa);
@@ -56,7 +60,7 @@ Begin
     Result := True;
 End;
 
-// termFactor -> LParen termExpr RParen ( QuestionMark | Asterisk ) ?
+// termFactor -> LParen termExpr RParen ( QuestionMark | Plus | Asterisk ) ?
 Function TermFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS4: TSize;
@@ -101,6 +105,10 @@ Begin
   If TParser_Term(Parser, eQuestionMark) Then
   Begin
     TNfa_Optional(Nfa);
+  End
+  Else If TParser_Term(Parser, ePlus) Then
+  Begin
+    TNfa_OneOrMore(Nfa);
   End
   Else If TParser_Term(Parser, eAsterisk) Then
   Begin
