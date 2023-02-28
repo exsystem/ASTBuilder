@@ -66,7 +66,7 @@ Begin
   End;
   If IndividualCharFactorRule(Parser, mFactorNode) Then
   Begin
-    TNfa_CombineCharEdge(mNfa, mFactorNode);
+    TNfa_MergeChars(mNfa, mFactorNode);
     Goto S4;
   End
   Else
@@ -83,6 +83,8 @@ Begin
         TNfa_Not(mNfa);
       End;
       Nfa := mNfa;
+      Result := True;
+      Exit;
     End
     Else
     Begin
@@ -100,7 +102,7 @@ Function CharFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mNot: Boolean;
 Label
-  S1, S2;
+  S1, S2, S3;
 Begin
   S1:
     mNot := TParser_Term(Parser, eTilde);
@@ -117,6 +119,8 @@ Begin
       Result := False;
       Exit;
     End;
+  S3:
+    Result := True;
 End;
 
 Function CharFactorRule(Parser: PParser; Var Nfa: PNfa): Boolean;

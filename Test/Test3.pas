@@ -63,6 +63,9 @@ Begin
   If mGrammarFilePath = '' Then
   Begin
     mGrammarFilePath := '/Users/exsystem/testfile/pas.xg';
+    {$IFDEF DCC}
+    mGrammarFilePath := 'Z:\testfile\t.xg';
+    {$ENDIF}
   End;
   mGrammar := ReadTextFileToString(mGrammarFilePath);
 
@@ -71,6 +74,9 @@ Begin
   If mCodeFilePath = '' Then
   Begin
     mCodeFilePath := '/Users/exsystem/testfile/test.pas';
+    {$IFDEF DCC}
+    mCodeFilePath := 'Z:\testfile\t.pas';
+    {$ENDIF}
   End;
   mCode := ReadTextFileToString(mCodeFilePath);
 
