@@ -42,7 +42,7 @@ Function TNfa_GetState(Self: PNfa; StateIndex: TSize): PNfaState;
 
 Procedure TNfa_AddEdge(Self: PNfa; Value: PChar; Source: TSize; Destination: TSize);
 
-Procedure TNfa_CombineCharEdge(Self: PNfa; Nfa: PNfa);
+Procedure TNfa_MergeChars(Self: PNfa; Nfa: PNfa);
 
 {
   TODO: extend the procedure below to accept mutiple NFAs into one NFA, not only two.
@@ -167,33 +167,39 @@ Begin
   End;
 End;
 
-Procedure TNfa_CombineCharEdge(Self: PNfa; Nfa: PNfa);
+Procedure TNfa_MergeChars(Self: PNfa; Nfa: PNfa);
 Var
   mState, mNfaState: PNfaState;
   mEdge, mNfaEdge: PNfaEdge;
-  I: TSize;
+  I, J: TSize;
 Begin
   { TODO check if this operation is allowed by Self and Nfa }
 
-  mNfaState := PNfaState(TList_Get(Nfa.States, 0));
-  mNfaEdge := PNfaEdge(TList_Get(mNfaState.Edges, 0));
-
   mState := PNfaState(TList_Get(Self.States, 0));
-  For I := 0 To mState.Edges.Size - 1 Do
+  mNfaState := PNfaState(TList_Get(Nfa.States, 0));
+  For I := 0 To mNfaState.Edges.Size - 1 Do
   Begin
-    mEdge := PNfaEdge(TList_Get(mState.Edges, I));
-    If strcomp(mEdge.Value, mNfaEdge.Value) = 0 Then
+    mNfaEdge := PNfaEdge(TList_Get(mNfaState.Edges, I));
+
+    For J := 0 To mState.Edges.Size - 1 Do
     Begin
-      TNfa_Destroy(Nfa);
-      Exit;
+      mEdge := PNfaEdge(TList_Get(mState.Edges, J));
+      If strcomp(mEdge.Value, mNfaEdge.Value) = 0 Then
+      Begin
+        TNfa_Destroy(Nfa);
+        Exit;
+      End;
     End;
   End;
 
-  mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
-  mEdge.Value := strnew(mNfaEdge.Value);
-  mEdge.Others := False;
-  mEdge.ToState := 1;
-
+  For I := 0 To mNfaState.Edges.Size - 1 Do
+  Begin
+    mNfaEdge := PNfaEdge(TList_Get(mNfaState.Edges, I));
+    mEdge := PNfaEdge(TList_EmplaceBack(mState.Edges));
+    mEdge.Value := strnew(mNfaEdge.Value);
+    mEdge.Others := False;
+    mEdge.ToState := 1;
+  End;
   TNfa_Destroy(Nfa);
 End;
 

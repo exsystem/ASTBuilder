@@ -182,7 +182,9 @@ Begin
           Begin
             Result := True;
             mSavePoint := Self.NextPos;
+            Continue;
           End;
+          Break;
         End;
         If Result Then
         Begin

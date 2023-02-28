@@ -23,12 +23,13 @@ Uses {$IFNDEF FPC}
   EofRule, IdRule, TermRule, LParenRule, OrRule, ColonRule, AsteriskRule,
   QuestionMarkRule, PlusRule, TildeRule,
   RParenRule, LBracketRule, RBracketRule, CharRule, StringRule,
-  DoubleDotsRule, SemiRule, SkipRule, GrammarParser,
+  DoubleDotsRule, SemiRule, SkipRule, GrammarViewer,
   Parser, GrammarRuleUnit, ASTNode, TypeDef;
 
 Procedure Test();
 Var
   mSource: String;
+  mGrammarLexer: PLexer;
   mLexer: PLexer;
   mKind: String;
   {$IFDEF VER150}
@@ -584,7 +585,7 @@ Begin
     Begin
       Goto TestLexer;
     End;
-    mLexer := TLexer_Create(PChar(mSource));
+    mGrammarLexer := TLexer_Create(PChar(mSource));
     TLexer_AddRule(mGrammarLexer, EofRule.Compose());
     TLexer_AddRule(mGrammarLexer, IdRule.Compose());
     TLexer_AddRule(mGrammarLexer, TermRule.Compose());
@@ -599,15 +600,15 @@ Begin
     TLexer_AddRule(mGrammarLexer, StringRule.Compose());
     TLexer_AddRule(mGrammarLexer, SemiRule.Compose());
     TLexer_AddRule(mGrammarLexer, SkipRule.Compose());
-    mParser := TParser_Create(mLexer, GrammarRule);
+    mParser := TParser_Create(mGrammarLexer, GrammarRule);
     If TParser_Parse(mParser) Then
       WriteLn('ACCEPTED')
     Else
     Begin
       WriteLn(Format('ERROR: Parser Message: %s', [mParser.Error]));
       WriteLn(Format('ERROR: Current Token at Pos = %d, Value = [%s], Message: %s',
-      [mLexer.CurrentToken.StartPos, mLexer.CurrentToken.Value,
-      mLexer.CurrentToken.Error]));
+      [mGrammarLexer.CurrentToken.StartPos, mGrammarLexer.CurrentToken.Value,
+      mGrammarLexer.CurrentToken.Error]));
     End;
 
     TAstViewer_Create(mViewer);
@@ -617,7 +618,7 @@ Begin
 
     Writeln;
     TParser_Destroy(mParser);
-    TLexer_Destroy(mLexer);
+    TLexer_Destroy(mGrammarLexer);
   End;
 End;
 
