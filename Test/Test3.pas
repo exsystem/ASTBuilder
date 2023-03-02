@@ -62,7 +62,7 @@ Begin
   ReadLn(mGrammarFilePath);
   If mGrammarFilePath = '' Then
   Begin
-    mGrammarFilePath := '/Users/exsystem/testfile/pas.xg';
+    mGrammarFilePath := '/Users/exsystem/testfile/t.xg';
     {$IFDEF DCC}
     mGrammarFilePath := 'Z:\testfile\t.xg';
     {$ENDIF}
@@ -73,7 +73,7 @@ Begin
   ReadLn(mCodeFilePath);
   If mCodeFilePath = '' Then
   Begin
-    mCodeFilePath := '/Users/exsystem/testfile/test.pas';
+    mCodeFilePath := '/Users/exsystem/testfile/t.pas';
     {$IFDEF DCC}
     mCodeFilePath := 'Z:\testfile\t.pas';
     {$ENDIF}
@@ -89,6 +89,7 @@ Begin
   TLexer_AddRule(mGrammarLexer, ColonRule.Compose());
   TLexer_AddRule(mGrammarLexer, AsteriskRule.Compose());
   TLexer_AddRule(mGrammarLexer, QuestionMarkRule.Compose());
+  TLexer_AddRule(mGrammarLexer, TildeRule.Compose());
   TLexer_AddRule(mGrammarLexer, RParenRule.Compose());
   TLexer_AddRule(mGrammarLexer, DoubleDotsRule.Compose());
   TLexer_AddRule(mGrammarLexer, CharRule.Compose());

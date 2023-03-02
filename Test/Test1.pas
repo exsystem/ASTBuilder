@@ -594,6 +594,7 @@ Begin
     TLexer_AddRule(mGrammarLexer, ColonRule.Compose());
     TLexer_AddRule(mGrammarLexer, AsteriskRule.Compose());
     TLexer_AddRule(mGrammarLexer, QuestionMarkRule.Compose());
+    TLexer_AddRule(mGrammarLexer, TildeRule.Compose());
     TLexer_AddRule(mGrammarLexer, RParenRule.Compose());
     TLexer_AddRule(mGrammarLexer, DoubleDotsRule.Compose());
     TLexer_AddRule(mGrammarLexer, CharRule.Compose());
