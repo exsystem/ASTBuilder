@@ -21,7 +21,7 @@ Uses
 // charFactor -> Tilde? LParen individualCharFactor ( Or individualCharFactor )* RParen
 Function CharFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
-  mSavePointS4: TSize;
+  mSavePointS2, mSavePointS4: TSize;
   mFactorNode: PNfa;
   mNfa: PNfa;
   mNot: Boolean;
@@ -33,15 +33,16 @@ Begin
   S1:
     mNot := TParser_Term(Parser, eTilde);
   S2:
-    If TParser_Term(Parser, eLParen) Then
-    Begin
-      // NOP 
-    End
-    Else
-    Begin
-      Result := False;
-      Exit;
-    End;
+    mSavePointS2 := Parser.FCurrentToken;
+  If TParser_Term(Parser, eLParen) Then
+  Begin
+    // NOP 
+  End
+  Else
+  Begin
+    Result := False;
+    Exit;
+  End;
 
   S3:
     If IndividualCharFactorRule(Parser, mFactorNode) Then
@@ -50,6 +51,7 @@ Begin
     End
     Else
     Begin
+      Parser.FCurrentToken := mSavePointS2;
       Result := False;
       Exit;
     End;
