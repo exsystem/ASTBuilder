@@ -236,6 +236,7 @@
         <DCCReference Include="ProductionRule\TermExprRuleUnit.pas"/>
         <DCCReference Include="ProductionRule\TermFactorRuleUnit.pas"/>
         <DCCReference Include="ProductionRule\TermRuleRuleUnit.pas"/>
+        <DCCReference Include="Test\TestUtil.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
