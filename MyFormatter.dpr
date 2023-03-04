@@ -59,7 +59,8 @@ uses
   StringFactorRuleUnit in 'ProductionRule\StringFactorRuleUnit.pas',
   TermExprRuleUnit in 'ProductionRule\TermExprRuleUnit.pas',
   TermFactorRuleUnit in 'ProductionRule\TermFactorRuleUnit.pas',
-  TermRuleRuleUnit in 'ProductionRule\TermRuleRuleUnit.pas';
+  TermRuleRuleUnit in 'ProductionRule\TermRuleRuleUnit.pas',
+  TestUtil in 'Test\TestUtil.pas';
 
 Begin
   FastMM_LogToFileEvents := [mmetDebugBlockDoubleFree,

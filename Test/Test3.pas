@@ -4,9 +4,6 @@ Unit Test3;
 
 Interface
 
-Type
-  PPInteger = ^PInteger;
-
 Procedure Test();
 
 Implementation
@@ -19,36 +16,15 @@ Uses {$IFNDEF FPC}
   {$ENDIF}
   , {$ENDIF}
   SysUtils,
+  TestUtil,
   Lexer,
-  EofRule, IdRule, TermRule, LParenRule, OrRule, ColonRule, AsteriskRule,
-  QuestionMarkRule, PlusRule, TildeRule,
-  RParenRule, LBracketRule, RBracketRule, CharRule, StringRule,
-  DoubleDotsRule, SemiRule, SkipRule, GrammarParser,
-  Parser, GrammarRuleUnit, ASTNode, ParseTree, TypeDef,
+  GrammarParser,
+  Parser, GrammarRuleUnit, ASTNode, ParseTree,
  {$IFDEF USE_STRINGS}strings,{$ENDIF} StringUtils;
-
-Function ReadTextFileToString(Path: String): PChar;
-Var
-  mFile: TextFile;
-  mLine: String;
-Begin
-  AssignFile(mFile, Path);
-  Reset(mFile);
-  Result := StrNew('');
-  While Not EOF(mFile) Do
-  Begin
-    ReadLn(mFile, mLine);
-    Result := ReallocStr(Result, StrLen(Result) + StrLen(PChar(mLine)));
-    StrCat(Result, PChar(mLine));
-  End;
-  CloseFile(mFile);
-End;
 
 Procedure Test();
 Var
-  mGrammarFilePath: String;
   mGrammar: PChar;
-  mCodeFilePath: String;
   mCode: PChar;
   mGrammarLexer: PLexer;
   {$IFDEF VER150}
@@ -58,49 +34,10 @@ Var
   mViewer: PAstViewer;
   mLexer: PLexer;
 Begin
-  WriteLn('Grammar File Path?');
-  ReadLn(mGrammarFilePath);
-  If mGrammarFilePath = '' Then
-  Begin
-    mGrammarFilePath := '/Users/exsystem/testfile/t.xg';
-    {$IFDEF DCC}
-    mGrammarFilePath := 'Z:\testfile\t.xg';
-    {$ENDIF}
-  End;
-  mGrammar := ReadTextFileToString(mGrammarFilePath);
+  mGrammar := PropmtForFile('Grammar File Path? (Default = t.xg)', 't.xg');
+  mCode := PropmtForFile('Source Code File Path? (Default = t.pas)', 't.pas');
 
-  WriteLn('Code File Path?');
-  ReadLn(mCodeFilePath);
-  If mCodeFilePath = '' Then
-  Begin
-    mCodeFilePath := '/Users/exsystem/testfile/t.pas';
-    {$IFDEF DCC}
-    mCodeFilePath := 'Z:\testfile\t.pas';
-    {$ENDIF}
-  End;
-  mCode := ReadTextFileToString(mCodeFilePath);
-
-  mGrammarLexer := TLexer_Create(mGrammar);
-  TLexer_AddRule(mGrammarLexer, EofRule.Compose());
-  TLexer_AddRule(mGrammarLexer, IdRule.Compose());
-  TLexer_AddRule(mGrammarLexer, TermRule.Compose());
-  TLexer_AddRule(mGrammarLexer, LParenRule.Compose());
-  TLexer_AddRule(mGrammarLexer, OrRule.Compose());
-  TLexer_AddRule(mGrammarLexer, ColonRule.Compose());
-  TLexer_AddRule(mGrammarLexer, AsteriskRule.Compose());
-  TLexer_AddRule(mGrammarLexer, QuestionMarkRule.Compose());
-  TLexer_AddRule(mGrammarLexer, TildeRule.Compose());
-  TLexer_AddRule(mGrammarLexer, RParenRule.Compose());
-  TLexer_AddRule(mGrammarLexer, DoubleDotsRule.Compose());
-  TLexer_AddRule(mGrammarLexer, CharRule.Compose());
-  TLexer_AddRule(mGrammarLexer, StringRule.Compose());
-  TLexer_AddRule(mGrammarLexer, LBracketRule.Compose());
-  TLexer_AddRule(mGrammarLexer, RBracketRule.Compose());
-  TLexer_AddRule(mGrammarLexer, PlusRule.Compose());
-  TLexer_AddRule(mGrammarLexer, TildeRule.Compose());
-  TLexer_AddRule(mGrammarLexer, SemiRule.Compose());
-  TLexer_AddRule(mGrammarLexer, SkipRule.Compose());
-
+  mGrammarLexer := GetGrammarLexer(mGrammar);
   mParser := TParser_Create(mGrammarLexer, GrammarRule);
   If TParser_Parse(mParser) Then
     WriteLn('ACCEPTED')
