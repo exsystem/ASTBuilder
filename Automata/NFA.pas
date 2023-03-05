@@ -315,7 +315,6 @@ End;
 }
 Procedure TNfa_Not(Var Self: PNfa);
 Var
-  I: TSize;
   mState: PNfaState;
   mEdge: PNfaEdge;
 Begin
@@ -507,6 +506,7 @@ Begin
           If (strcomp(mEdge.Value, '') <> 0) And (mEdge.Value[0] = Ch) Then
           Begin
             mNot := True;
+            Break;
           End;
         End;
         If Not mNot Then
@@ -524,12 +524,13 @@ Begin
         For I := 0 To mState.Edges.Size - 1 Do
         Begin
           mEdge := PNfaEdge(TList_Get(mState.Edges, I));
-          If (strcomp(mEdge.Value, '') = 0) And (mEdge.Value[0] = Ch) Then
+          If (strcomp(mEdge.Value, '') <> 0) And (mEdge.Value[0] = Ch) Then
           Begin
             If Not PBoolean(TList_Get(Self.FAlreadyOn, mEdge.ToState))^ Then
             Begin
               TNfa_AddState(Self, mEdge.ToState);
             End;
+            Result := True;
           End;
         End;
       End;

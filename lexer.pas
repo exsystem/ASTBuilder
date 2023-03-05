@@ -184,7 +184,6 @@ Begin
             mSavePoint := Self.NextPos;
             Continue;
           End;
-          Break;
         End;
         If Result Then
         Begin
@@ -218,8 +217,6 @@ Begin
 End;
 
 Procedure TLexer_Destroy(Var Self: PLexer);
-Var
-  I: TSize;
 Begin
   If Self.RuleList <> nil Then
   Begin
