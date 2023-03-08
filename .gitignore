@@ -144,3 +144,5 @@ modules/
 *.dSYM
 MyFormatter
 MyFormatter-*
+
+MYFMTTR.OPT

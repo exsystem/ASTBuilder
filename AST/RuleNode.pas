@@ -5,7 +5,7 @@ Unit RuleNode;
 Interface
 
 Uses
-  ASTNode, IdNode, GroupNode;
+  ASTNode, IdNode, GrpNode;
 
 Type
   PPRuleNode = ^PRuleNode;
@@ -29,30 +29,30 @@ Var
 Implementation
 
 Uses
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StringUtils;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtils;
 
 Procedure TRuleNode_Create(Var Self: PRuleNode);
 Begin
   New(Self);
   TAstNode_Create(PAstNode(Self));
-  Self.Parent.VMT := @mTRuleNode_AST;
-  Self.Name := strnew('');
+  Self^.Parent.VMT := @mTRuleNode_AST;
+  Self^.Name := strnew('');
 End;
 
 Procedure TRuleNode_Destroy(Self: PAstNode);
 Begin
-  If PRuleNode(Self).Expr <> nil Then // only for non-empty rule.
+  If PRuleNode(Self)^.Expr <> nil Then { only for non-empty rule. }
   Begin
-    TGroupNode_Destroy(PAstNode(PRuleNode(Self).Expr));
-    Dispose(PRuleNode(Self).Expr);
+    TGroupNode_Destroy(PAstNode(PRuleNode(Self)^.Expr));
+    Dispose(PRuleNode(Self)^.Expr);
   End;
-  FreeStr(PRuleNode(Self).Name);
+  FreeStr(PRuleNode(Self)^.Name);
   TAstNode_Destroy(Self);
 End;
 
 Procedure TRuleNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Begin
-  Visitor.VMT.VisitRule(Visitor, Self);
+  Visitor^.VMT^.VisitRule(Visitor, Self);
 End;
 
 Begin

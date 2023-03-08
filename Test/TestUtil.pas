@@ -5,7 +5,7 @@ Unit TestUtil;
 Interface
 
 Uses
-  Lexer;
+  {$IFDEF CLASSIC}WinCrt, {$ENDIF} Lexer;
 
 Function ReadTextFileToString(Path: String): PChar;
 Function PropmtForFile(Prompt: PChar; DefaultFilePath: PChar): PChar;
@@ -14,15 +14,16 @@ Function GetGrammarLexer(Grammar: PChar): PLexer;
 Implementation
 
 Uses
-  EofRule, IdRule, TermRule, LParenRule, OrRule, ColonRule, AsteriskRule,
-  QuestionMarkRule, PlusRule, TildeRule, RParenRule, LBracketRule,
-  RBracketRule, CharRule, StringRule, DoubleDotsRule, SemiRule, SkipRule, SysUtils,
- {$IFDEF USE_STRINGS}strings,{$ENDIF} StringUtils;
+  EofRule, IdRule, TermRule, LParRule, OrRule, ColnRule, AstkRule,
+  QMrkRule, PlusRule, TildRule, RParRule, LBrkRule,
+  RBrkRule, CharRule, StrRule, DDtsRule, SemiRule, SkipRule, SysUtils,
+ {$IFDEF USE_STRINGS}strings,{$ENDIF} StrUtils;
 
 Function ReadTextFileToString(Path: String): PChar;
 Var
   mFile: TextFile;
   mLine: String;
+  pLine: PChar;
 Begin
   AssignFile(mFile, Path);
   Reset(mFile);
@@ -30,8 +31,11 @@ Begin
   While Not EOF(mFile) Do
   Begin
     ReadLn(mFile, mLine);
-    Result := ReallocStr(Result, StrLen(Result) + StrLen(PChar(mLine)));
-    StrCat(Result, PChar(mLine));
+    pLine := CreateStr(Length(mLine));
+    StrPCopy(pLine, mLine);
+    Result := ReallocStr(Result, StrLen(Result) + Length(mLine));
+    StrCat(Result, pLine);
+    FreeStr(pLine);
   End;
   CloseFile(mFile);
 End;
@@ -44,7 +48,7 @@ Begin
   ReadLn(mFilePath);
   If mFilePath = '' Then
   Begin
-    mFilePath := DefaultFilePath;
+    mFilePath := StrPas(DefaultFilePath);
   End;
   {$IFDEF DCC}
   mFilePath := '..\..\Test\TestCase\' + mFilePath;
@@ -57,26 +61,26 @@ End;
 
 Function GetGrammarLexer(Grammar: PChar): PLexer;
 Begin
-  Result := TLexer_Create(Grammar);
-  TLexer_AddRule(Result, EofRule.Compose());
-  TLexer_AddRule(Result, IdRule.Compose());
-  TLexer_AddRule(Result, TermRule.Compose());
-  TLexer_AddRule(Result, LParenRule.Compose());
-  TLexer_AddRule(Result, OrRule.Compose());
-  TLexer_AddRule(Result, ColonRule.Compose());
-  TLexer_AddRule(Result, AsteriskRule.Compose());
-  TLexer_AddRule(Result, QuestionMarkRule.Compose());
-  TLexer_AddRule(Result, TildeRule.Compose());
-  TLexer_AddRule(Result, RParenRule.Compose());
-  TLexer_AddRule(Result, DoubleDotsRule.Compose());
-  TLexer_AddRule(Result, CharRule.Compose());
-  TLexer_AddRule(Result, StringRule.Compose());
-  TLexer_AddRule(Result, LBracketRule.Compose());
-  TLexer_AddRule(Result, RBracketRule.Compose());
-  TLexer_AddRule(Result, PlusRule.Compose());
-  TLexer_AddRule(Result, TildeRule.Compose());
-  TLexer_AddRule(Result, SemiRule.Compose());
-  TLexer_AddRule(Result, SkipRule.Compose());
+  Result := TLexer_Create(Grammar, True);
+  TLexer_AddRule(Result, EofRule.Compose);
+  TLexer_AddRule(Result, IdRule.Compose);
+  TLexer_AddRule(Result, TermRule.Compose);
+  TLexer_AddRule(Result, LParRule.Compose);
+  TLexer_AddRule(Result, OrRule.Compose);
+  TLexer_AddRule(Result, ColnRule.Compose);
+  TLexer_AddRule(Result, AstkRule.Compose);
+  TLexer_AddRule(Result, QMrkRule.Compose);
+  TLexer_AddRule(Result, TildRule.Compose);
+  TLexer_AddRule(Result, RParRule.Compose);
+  TLexer_AddRule(Result, DDtsRule.Compose);
+  TLexer_AddRule(Result, CharRule.Compose);
+  TLexer_AddRule(Result, StrRule.Compose);
+  TLexer_AddRule(Result, LBrkRule.Compose);
+  TLexer_AddRule(Result, RBrkRule.Compose);
+  TLexer_AddRule(Result, PlusRule.Compose);
+  TLexer_AddRule(Result, TildRule.Compose);
+  TLexer_AddRule(Result, SemiRule.Compose);
+  TLexer_AddRule(Result, SkipRule.Compose);
 End;
 
 End.
