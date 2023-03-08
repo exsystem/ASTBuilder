@@ -4,12 +4,12 @@ Unit Test1;
 
 Interface
 
-Procedure Test();
+Procedure Test;
 
 Implementation
 
 Uses {$IFNDEF FPC}
-  {$IFDEF VER150}
+  {$IFDEF CLASSIC}
   TypInfo
   {$ELSE}
   System.Rtti
@@ -18,9 +18,9 @@ Uses {$IFNDEF FPC}
   SysUtils,
   Lexer,
   TestUtil,
- {$IFDEF USE_STRINGS}strings,{$ENDIF} StringUtils;
+ {$IFDEF USE_STRINGS}strings,{$ENDIF} StrUtils;
 
-Procedure Test();
+Procedure Test;
 Var
   mSource: PChar;
   mLexer: PLexer;
@@ -36,20 +36,25 @@ Begin
     Begin
         {$IFDEF FPC}
         WriteStr(mKind, mLexer.CurrentToken.Kind.TokenKind);
-        {$ELSE}
-          {$IFDEF VER150}
-          tInfo := TypeInfo(TGrammarTokenKind);
-          mKind := GetEnumName(tInfo, Ord(mLexer.CurrentToken.Kind.TokenKind));
-          {$ELSE}
-      mKind := TRttiEnumerationType.GetName(mLexer.CurrentToken.Kind.TokenKind);
-          {$ENDIF}
+        {$ENDIF}
+        {$IFDEF DCC}
+        {$IFDEF VER150}
+        tInfo := TypeInfo(TGrammarTokenKind);
+        mKind := GetEnumName(tInfo, Ord(mLexer^.CurrentToken.Kind.TokenKind));
+        {$ENDIF}
+        {$IFDEF CLASSIC}
+        mKind := IntToStr(Ord(mLexer^.CurrentToken.Kind.TokenKind));
+        {$ENDIF}
+        {$IFDEF MORDEN}
+        mKind := TRttiEnumerationType.GetName(mLexer.CurrentToken.Kind.TokenKind);
+        {$ENDIF}
         {$ENDIF}
       Writeln(Format('token kind = %s: %s @ pos = %d',
-        [mKind, mLexer.CurrentToken.Value, mLexer.CurrentToken.StartPos]));
+        [mKind, mLexer^.CurrentToken.Value, mLexer^.CurrentToken.StartPos]));
       Continue;
     End;
     Writeln(Format('[ERROR] Illegal token "%s" found at pos %d.',
-      [mLexer.CurrentToken.Value, mLexer.CurrentToken.StartPos]));
+      [mLexer^.CurrentToken.Value, mLexer^.CurrentToken.StartPos]));
   Until TLexer_PeekNextChar(mLexer) = #1;
   TLexer_Destroy(mLexer);
   FreeStr(mSource);

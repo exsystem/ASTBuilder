@@ -4,12 +4,12 @@ Unit Test3;
 
 Interface
 
-Procedure Test();
+Procedure Test;
 
 Implementation
 
 Uses {$IFNDEF FPC}
-  {$IFDEF VER150}
+  {$IFDEF CLASSIC}
   TypInfo
   {$ELSE}
   System.Rtti
@@ -18,11 +18,11 @@ Uses {$IFNDEF FPC}
   SysUtils,
   TestUtil,
   Lexer,
-  GrammarParser,
-  Parser, GrammarRuleUnit, ASTNode, ParseTree,
- {$IFDEF USE_STRINGS}strings,{$ENDIF} StringUtils;
+  GrmrPasr,
+  Parser, GrmRUnit, ASTNode, ParseTr,
+ {$IFDEF USE_STRINGS}strings,{$ENDIF} StrUtils;
 
-Procedure Test();
+Procedure Test;
 Var
   mGrammar: PChar;
   mCode: PChar;
@@ -43,19 +43,19 @@ Begin
     WriteLn('ACCEPTED')
   Else
   Begin
-    WriteLn(Format('ERROR: Parser Message: %s', [mParser.Error]));
+    WriteLn(Format('ERROR: Parser Message: %s', [mParser^.Error]));
     WriteLn(Format('ERROR: Current Token at Pos = %d, Value = [%s], Message: %s',
-      [mGrammarLexer.CurrentToken.StartPos, mGrammarLexer.CurrentToken.Value,
-      mGrammarLexer.CurrentToken.Error]));
+      [mGrammarLexer^.CurrentToken.StartPos, mGrammarLexer^.CurrentToken.Value,
+      mGrammarLexer^.CurrentToken.Error]));
   End;
 
   mLexer := TLexer_Create(mCode, False);
   TAstViewer_Create(mViewer, mLexer);
-  mParser.Ast.VMT.Accept(mParser.Ast, PAstVisitor(mViewer));
-  mViewer.Level := 0;
-  WriteLn(mViewer.Error);
-  TAstViewer_PrintParseTree(PAstVisitor(mViewer), mViewer.FParseTree);
-  TParseTree_Destroy(mViewer.FParseTree);
+  mParser^.Ast^.VMT^.Accept(mParser^.Ast, PAstVisitor(mViewer));
+  mViewer^.Level := 0;
+  WriteLn(mViewer^.Error);
+  TAstViewer_PrintParseTree(PAstVisitor(mViewer), mViewer^.FParseTree);
+  TParseTree_Destroy(mViewer^.FParseTree);
   TAstViewer_Destroy(PAstVisitor(mViewer));
   Dispose(mViewer);
   TLexer_Destroy(mLexer);

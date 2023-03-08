@@ -5,8 +5,14 @@ Unit TypeDef;
 Interface
 
 Type
-  {$IFDEF VER150}
+  {$IFDEF TPC}
+  Cardinal = Word;
+  {$ENDIF}
+
+  {$IFDEF CLASSIC}
   UIntPtr = Cardinal;
+  PByte = ^Byte;
+  PBoolean = ^Boolean;
   {$ENDIF}
 
   PSize = ^TSize;

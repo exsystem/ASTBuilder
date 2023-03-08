@@ -60,23 +60,23 @@ Var
 
 Procedure TAstNode_Create(Var Self: PAstNode);
 Begin
-  // Abstract, no New() call.
-  Self.VMT := @mTAstNode_VMT;
+  { Abstract, no New() call. }
+  Self^.VMT := @mTAstNode_VMT;
 End;
 
 Procedure TAstNode_Destroy(Self: PAstNode);
 Begin
-  // NOP
+  { NOP }
 End;
 
 Procedure TAstVisitor_Create(Var Self: PAstVisitor);
 Begin
-  Self.VMT := @mTAstVisitor_VMT;
+  Self^.VMT := @mTAstVisitor_VMT;
 End;
 
 Procedure TAstVisitor_Destroy(Self: PAstVisitor);
 Begin
-  // NOP
+  { NOP }
 End;
 
 Begin
