@@ -13,7 +13,7 @@ Type
   TGrammarTokenKind = (eUndefined, eUserDefined, eEof, eRoot, eOr,
     eLParen, eRParen, eLBracket, eRBracket, eQuestionMark, ePlus,
     eAsterisk, eColon, eSemi, eId,
-    eTerm, eString, eChar, eDoubleDots, eSingleQuote, eTilde, eSkip);
+    eTerm, eString, eChar, eCharSet, eDoubleDots, eSingleQuote, eTilde, eSkip);
 
   PToken = ^TToken;
 
@@ -189,8 +189,8 @@ Begin
         Begin
           FreeStr(Self^.CurrentToken.Value);
           Self^.CurrentToken.Value :=
-            SubStr(Self^.Source, Self^.CurrentToken.StartPos, mSavePoint -
-            Self^.CurrentToken.StartPos);
+            SubStr(Self^.Source, Self^.CurrentToken.StartPos,
+            mSavePoint - Self^.CurrentToken.StartPos);
           Self^.CurrentToken.Kind.TokenKind := eUserDefined;
           FreeStr(Self^.CurrentToken.Kind.TermRule);
           Self^.CurrentToken.Kind.TermRule := strnew(mTermRuleNode^.Name);

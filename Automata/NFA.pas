@@ -209,7 +209,8 @@ Begin
   End
   Else
   Begin
-    Self^.Keyword := ReallocStr(Self^.Keyword, strlen(Self^.Keyword) + strlen(Nfa^.Keyword));
+    Self^.Keyword := ReallocStr(Self^.Keyword, strlen(Self^.Keyword) +
+      strlen(Nfa^.Keyword));
     strcopy(Self^.Keyword, Nfa^.Keyword);
   End;
   FreeStr(Nfa^.Keyword);
@@ -257,7 +258,8 @@ Var
 Begin
   If (strcomp(Self^.Keyword, '') = 0) Xor (strcomp(Nfa^.Keyword, '') = 0) Then
   Begin
-    Self^.Keyword := ReallocStr(Self^.Keyword, strlen(Self^.Keyword) + strlen(Nfa^.Keyword));
+    Self^.Keyword := ReallocStr(Self^.Keyword, strlen(Self^.Keyword) +
+      strlen(Nfa^.Keyword));
     strcat(Self^.Keyword, Nfa^.Keyword);
   End
   Else

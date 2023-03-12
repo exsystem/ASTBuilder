@@ -64,7 +64,8 @@ uses
   TEST1 in 'Test\TEST1.PAS',
   TEST2 in 'Test\TEST2.PAS',
   TEST3 in 'Test\TEST3.PAS',
-  TESTUTIL in 'Test\TESTUTIL.PAS';
+  TESTUTIL in 'Test\TESTUTIL.PAS',
+  CHSETRULE in 'LexrRule\Grammar\CHSETRULE.PAS';
 
 Begin
   {$IFDEF USE_FASTMM5}

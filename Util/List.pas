@@ -97,7 +97,8 @@ Procedure TList_Erase(Self: PList; Index: TSize); { todo: iterator?? }
 Begin
   If Index <> Self^.Size - 1 Then
   Begin
-    Move(Self^.FList[Succ(Index) * Self^.FElemSize], Self^.FList[Index * Self^.FElemSize],
+    Move(Self^.FList[Succ(Index) * Self^.FElemSize],
+      Self^.FList[Index * Self^.FElemSize],
       (Self^.Size - Succ(Index)) * Self^.FElemSize);
   End;
   Dec(Self^.Size);
