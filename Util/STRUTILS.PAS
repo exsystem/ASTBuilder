@@ -112,7 +112,7 @@ End;
 Function SubStr(S: PChar; FromIndex: TSize; Len: TSize): PChar;
 Begin
   Result := CreateStr(Len);
-  Move(S[FromIndex], Result[0], Len * sizeof(Char));
+  Move(S[FromIndex], Result[0], Len * SizeOf(Char));
   Result[Len] := #0;
 End;
 

@@ -14,6 +14,8 @@ Function IndividualCharFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Bo
 
 Function IndividualCharFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 
+Function IndividualCharFactorRuleExpression3(Parser: PParser; Var Nfa: PNfa): Boolean;
+
 Implementation
 
 Uses
@@ -139,11 +141,100 @@ Begin
 End;
 
 { TODO individualCharFactor -> CharSet ; [a-z\n\r] }
+Function IndividualCharFactorRuleExpression3(Parser: PParser; Var Nfa: PNfa): Boolean;
+Label
+  S1;
+Var
+  mTerm: PChar;
+  mChList: PChar;
+  mSourceStart: PChar;
+  mDestStart: PChar;
+  mLength: TSize;
+  mCurr: PChar;
+  mRangeMode: Boolean;
+  mCh: PChar;
+Begin
+  S1:
+    If TParser_TermByGrammarTokenKind(Parser, eCharSet) Then
+    Begin
+      mTerm := TParser_GetCurrentToken(Parser)^.Value;
+      mCurr := SubStr(mTerm, 1, StrLen(mTerm) - 2);
+      mChList := CreateStr(StrLen(mCurr));
+      mSourceStart := mCurr;
+      mDestStart := mChList;
+      mLength := 0;
+      mCh := mCurr;
+      While mCh^ <> #0 Do
+      Begin
+        If mCh^ = '\' Then
+        Begin
+          Move(mSourceStart^, mDestStart^, mLength * SizeOf(Char));
+          Inc(mDestStart, mLength);
+          Inc(mCh);
+          mSourceStart := mCh;
+          mLength := 0;
+        End;
+        Inc(mLength);
+        Inc(mCh);
+      End;
+      Move(mSourceStart^, mDestStart^, mLength * SizeOf(Char));
+      Inc(mDestStart, mLength);
+      mDestStart^ := #0;
+      FreeStr(mCurr);
+
+      mSourceStart := mChList;
+      mCurr := mChList;
+      mRangeMode := False;
+      TNfa_Create(Nfa);
+      mCh := CreateStr(1);
+      mCh[1] := #0;
+      Repeat
+        If mCurr^ = '-' Then
+        Begin
+          mRangeMode := True;
+        End
+        Else
+        Begin
+          If mRangeMode Then
+          Begin
+            mCh[0] := mSourceStart^;
+            Inc(mCh[0]);
+            While mCh[0] <> mCurr^ Do
+            Begin
+              TNfa_AddEdge(Nfa, mCh, 0, 1);
+              Inc(mCh[0]);
+            End;
+            TNfa_AddEdge(Nfa, mCh, 0, 1);
+            mRangeMode := False;
+          End
+          Else
+          Begin
+            mCh[0] := mCurr^;
+            TNfa_AddEdge(Nfa, mCh, 0, 1);
+            mSourceStart := mCurr;
+          End;
+        End;
+
+        Inc(mCurr);
+      Until mCurr = mDestStart;
+
+      FreeStr(mCh);
+      mDestStart^ := '.';
+      FreeStr(mChList);
+      Result := True;
+    End
+    Else
+    Begin
+      Result := False;
+      Exit;
+    End;
+End;
 
 Function IndividualCharFactorRule(Parser: PParser; Var Nfa: PNfa): Boolean;
 Begin
   Result := IndividualCharFactorRuleExpression1(Parser, Nfa) Or
-    IndividualCharFactorRuleExpression2(Parser, Nfa);
+    IndividualCharFactorRuleExpression2(Parser, Nfa) Or
+    IndividualCharFactorRuleExpression3(Parser, Nfa);
 End;
 
 End.
