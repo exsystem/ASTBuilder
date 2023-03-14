@@ -59,6 +59,7 @@ Begin
   Else If mCurr = ']' Then
   Begin
     TLexer_Forward(Lexer, 1);
+    Inc(mOffset);
     Goto S3;
   End
   Else
@@ -69,6 +70,7 @@ Begin
   End;
   S3:
     FreeStr(Lexer^.CurrentToken.Value);
+    Lexer^.CurrentToken.StartPos := Lexer^.NextPos - mOffset;
   Lexer^.CurrentToken.Value :=
     SubStr(Lexer^.Source, Lexer^.CurrentToken.StartPos, Lexer^.NextPos -
     Lexer^.CurrentToken.StartPos);

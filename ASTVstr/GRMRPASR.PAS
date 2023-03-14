@@ -109,7 +109,7 @@ Begin
     End;
   End;
   FreeStr(mSelf^.Error);
-  mSelf^.Error := strnew('Error^.');
+  mSelf^.Error := strnew('Error.');
 End;
 
 Procedure TAstViewer_VisitTerm(Self: PAstVisitor; Node: PAstNode);
@@ -135,7 +135,7 @@ Begin
     Exit;
   End;
   FreeStr(mSelf^.Error);
-  mSelf^.Error := strnew('Error^.');
+  mSelf^.Error := strnew('Error.');
 End;
 
 Procedure TAstViewer_VisitGroup(Self: PAstVisitor; Node: PAstNode);

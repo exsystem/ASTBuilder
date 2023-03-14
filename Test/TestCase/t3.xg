@@ -1,0 +1,3 @@
+ident : IDENT;
+
+IDENT: [abc-f\\\n123x-zA-Z]; 
