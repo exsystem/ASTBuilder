@@ -208,6 +208,7 @@ Begin
     strcat(mText, mStrPChar);
     FreeStr(mStrPChar);
     TAstViewer_WriteLn(Self, mText);
+    FreeStr(mText);
     TAstViewer_WriteLn(Self, 'Moves: ');
     TAstViewer_Indent(Self);
     TAstViewer_WriteLn(Self, '```mermaid');

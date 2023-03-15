@@ -16,7 +16,7 @@ Implementation
 Uses
   EofRule, IdRule, TermRule, LParRule, OrRule, ColnRule, AstkRule,
   QMrkRule, PlusRule, TildRule, RParRule, LBrkRule,
-  RBrkRule, CharRule, ChSetRule, StrRule, DDtsRule, SemiRule, SkipRule, SysUtils,
+  RBrkRule, CharRule, ChStRule, StrRule, DDtsRule, SemiRule, SkipRule, SysUtils,
  {$IFDEF USE_STRINGS}strings,{$ENDIF} StrUtils;
 
 Function ReadTextFileToString(Path: String): PChar;
@@ -74,7 +74,7 @@ Begin
   TLexer_AddRule(Result, RParRule.Compose);
   TLexer_AddRule(Result, DDtsRule.Compose);
   TLexer_AddRule(Result, CharRule.Compose);
-  TLexer_AddRule(Result, ChSetRule.Compose);
+  TLexer_AddRule(Result, ChStRule.Compose);
   TLexer_AddRule(Result, StrRule.Compose);
   TLexer_AddRule(Result, LBrkRule.Compose);
   TLexer_AddRule(Result, RBrkRule.Compose);

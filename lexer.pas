@@ -13,7 +13,7 @@ Type
   TGrammarTokenKind = (eUndefined, eUserDefined, eEof, eRoot, eOr,
     eLParen, eRParen, eLBracket, eRBracket, eQuestionMark, ePlus,
     eAsterisk, eColon, eSemi, eId,
-    eTerm, eString, eChar, eCharSet, eDoubleDots, eSingleQuote, eTilde, eSkip);
+    eTerm, eString, eChar, eCharSet, eDot, eDoubleDots, eSingleQuote, eTilde, eSkip);
 
   PToken = ^TToken;
 

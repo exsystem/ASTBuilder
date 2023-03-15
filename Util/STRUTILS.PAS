@@ -16,6 +16,7 @@ Function IsIdChar(Const Ch: Char): Boolean;
 Function Lower(Const Ch: Char): Char;
 Function IsTermIdInitialChar(Const Ch: Char): Boolean;
 Function IsNonTermIdInitialChar(Const Ch: Char): Boolean;
+Function EscapeChar(Source: Char): Char;
 Function CreateStr(Len: TSize): PChar;
 Function ReallocStr(S: PChar; Len: TSize): PChar;
 Procedure FreeStr(S: PChar);
@@ -74,6 +75,21 @@ End;
 Function IsNonTermIdInitialChar(Const Ch: Char): Boolean;
 Begin
   Result := Ch In ['a' .. 'z'];
+End;
+
+Function EscapeChar(Source: Char): Char;
+Begin
+  Case Source Of
+    'a': Result := #7;
+    'b': Result := #8;
+    't': Result := #9;
+    'n': Result := #10;
+    'v': Result := #11;
+    'f': Result := #12;
+    'r': Result := #13;
+    Else
+      Result := Source;
+  End;
 End;
 
 Function CreateStr(Len: TSize): PChar;

@@ -16,6 +16,8 @@ Function IndividualCharFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Bo
 
 Function IndividualCharFactorRuleExpression3(Parser: PParser; Var Nfa: PNfa): Boolean;
 
+Function IndividualCharFactorRuleExpression4(Parser: PParser; Var Nfa: PNfa): Boolean;
+
 Implementation
 
 Uses
@@ -171,6 +173,7 @@ Begin
           Move(mSourceStart^, mDestStart^, mLength * SizeOf(Char));
           Inc(mDestStart, mLength);
           Inc(mCh);
+          mCh^ := EscapeChar(mCh^);
           mSourceStart := mCh;
           mLength := 0;
         End;
@@ -230,11 +233,32 @@ Begin
     End;
 End;
 
+Function IndividualCharFactorRuleExpression4(Parser: PParser; Var Nfa: PNfa): Boolean;
+Label
+  S1, S2;
+Begin
+  S1:
+    If TParser_TermByGrammarTokenKind(Parser, eDot) Then
+    Begin
+      { NOP }
+    End
+    Else
+    Begin
+      Result := False;
+      Exit;
+    End;
+  S2:
+    TNfa_Create(Nfa);
+  TNfa_AnyChar(Nfa, 0, 1);
+  Result := True;
+End;
+
 Function IndividualCharFactorRule(Parser: PParser; Var Nfa: PNfa): Boolean;
 Begin
   Result := IndividualCharFactorRuleExpression1(Parser, Nfa) Or
     IndividualCharFactorRuleExpression2(Parser, Nfa) Or
-    IndividualCharFactorRuleExpression3(Parser, Nfa);
+    IndividualCharFactorRuleExpression3(Parser, Nfa) Or
+    IndividualCharFactorRuleExpression4(Parser, Nfa);
 End;
 
 End.
