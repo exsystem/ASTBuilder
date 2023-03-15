@@ -1,5 +1,5 @@
 { Unit CharSetRule; }
-Unit CHSETRULE;
+Unit CHSTRULE;
 
 {$I define.inc}
 
