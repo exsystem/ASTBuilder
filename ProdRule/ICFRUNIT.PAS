@@ -70,15 +70,8 @@ Begin
     End;
   S4:
     If mFrom[1] = '\' Then
-      { TODO extract a util function. and add more chars allowing escaping. }
     Begin
-      Case mFrom[2] Of
-        'n': mFrom[0] := #13;
-        'r': mFrom[0] := #10;
-        't': mFrom[0] := #20;
-        Else
-          mFrom[0] := mFrom[2];
-      End;
+      mFrom[0] := EscapeChar(mFrom[2]);
     End
     Else
     Begin
@@ -86,13 +79,7 @@ Begin
     End;
   If mTo[1] = '\' Then
   Begin
-    Case mTo[2] Of
-      'n': mTo[0] := #13;
-      'r': mTo[0] := #10;
-      't': mTo[0] := #20;
-      Else
-        mTo[0] := mTo[2];
-    End;
+    mTo[0] := EscapeChar(mTo[2]);
   End
   Else
   Begin
@@ -119,6 +106,7 @@ Label
   S1, S2;
 Var
   mCh: PChar;
+  mValue: PChar;
 Begin
   S1:
     If TParser_TermByGrammarTokenKind(Parser, eChar) Then
@@ -131,13 +119,20 @@ Begin
       Exit;
     End;
   S2:
-    TNfa_Create(Nfa);
+    mValue := TParser_GetCurrentToken(Parser)^.Value;
+  TNfa_Create(Nfa);
   mCh := CreateStr(1);
-  mCh[0] := TParser_GetCurrentToken(Parser)^.Value[1];
+  If mValue[1] = '\' Then
+  Begin
+    mCh[0] := EscapeChar(mValue[2]);
+  End
+  Else
+  Begin
+    mCh[0] := mValue[1];
+  End;
   mCh[1] := #0;
   TNfa_AddEdge(Nfa, mCh, 0, 1);
   FreeStr(mCh);
-  { TODO: ['a'] or [a]; and what about ['\n']? }
   TNfa_GetState(Nfa, 1)^.Acceptable := True;
   Result := True;
 End;

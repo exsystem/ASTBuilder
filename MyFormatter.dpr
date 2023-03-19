@@ -8,7 +8,7 @@
 uses
   {$IFDEF USE_FASTMM5}
   FastMM5,
-  {$ENDIF}
+  {$ENDIF }
   {$IFNDEF FPC}
   System.SysUtils,
   System.Rtti,
@@ -65,7 +65,8 @@ uses
   TEST2 in 'Test\TEST2.PAS',
   TEST3 in 'Test\TEST3.PAS',
   TESTUTIL in 'Test\TESTUTIL.PAS',
-  CHSETRULE in 'LexrRule\Grammar\CHSETRULE.PAS';
+  CHSTRULE in 'LexrRule\Grammar\CHSTRULE.PAS',
+  DOTRULE in 'LexrRule\Grammar\DOTRULE.PAS';
 
 Begin
   {$IFDEF USE_FASTMM5}
