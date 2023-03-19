@@ -20,49 +20,8 @@ Uses
   TypeDef, IdNode, TrmNode, GrpNode, TERUnit,
   SFRUnit;
 
-{ termFactor -> stringFactor ( QuestionMark | Plus | Asterisk ) ? }
-Function TermFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
-Var
-  mSavePointS2: TSize;
-Label
-  S1, S2, S3;
-Begin
-  S1:
-    If StringFactorRule(Parser, Nfa) Then
-    Begin
-      { NOP }
-    End
-    Else
-    Begin
-      Result := False; { S1 is a Non-Accepted State Node in DFA. }
-      Exit;
-    End;
-  S2:
-    mSavePointS2 := Parser^.FCurrentToken;
-  If TParser_TermByGrammarTokenKind(Parser, eQuestionMark) Then
-  Begin
-    TNfa_Optional(Nfa);
-  End
-  Else If TParser_TermByGrammarTokenKind(Parser, ePlus) Then
-  Begin
-    TNfa_OneOrMore(Nfa);
-  End
-  Else If TParser_TermByGrammarTokenKind(Parser, eAsterisk) Then
-  Begin
-    TNfa_Multiple(Nfa);
-  End
-  Else
-  Begin
-    Parser^.FCurrentToken := mSavePointS2;
-    Result := True; { S2 is a accpeted state node in DFA. }
-    Exit;
-  End;
-  S3:
-    Result := True;
-End;
-
 { termFactor -> LParen termExpr RParen ( QuestionMark | Plus | Asterisk ) ? }
-Function TermFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
+Function TermFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS4: TSize;
   mNfa: PNfa;
@@ -124,6 +83,48 @@ Begin
   S5:
     Result := True;
 End;
+
+{ termFactor -> stringFactor ( QuestionMark | Plus | Asterisk ) ? }
+Function TermFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
+Var
+  mSavePointS2: TSize;
+Label
+  S1, S2, S3;
+Begin
+  S1:
+    If StringFactorRule(Parser, Nfa) Then
+    Begin
+      { NOP }
+    End
+    Else
+    Begin
+      Result := False; { S1 is a Non-Accepted State Node in DFA. }
+      Exit;
+    End;
+  S2:
+    mSavePointS2 := Parser^.FCurrentToken;
+  If TParser_TermByGrammarTokenKind(Parser, eQuestionMark) Then
+  Begin
+    TNfa_Optional(Nfa);
+  End
+  Else If TParser_TermByGrammarTokenKind(Parser, ePlus) Then
+  Begin
+    TNfa_OneOrMore(Nfa);
+  End
+  Else If TParser_TermByGrammarTokenKind(Parser, eAsterisk) Then
+  Begin
+    TNfa_Multiple(Nfa);
+  End
+  Else
+  Begin
+    Parser^.FCurrentToken := mSavePointS2;
+    Result := True; { S2 is a accpeted state node in DFA. }
+    Exit;
+  End;
+  S3:
+    Result := True;
+End;
+
 
 Function TermFactorRule(Parser: PParser; Var Nfa: PNfa): Boolean;
 Begin

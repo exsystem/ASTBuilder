@@ -10,7 +10,7 @@ Uses
 
 Type
 
-  TGroupType = (eGroup, eOptional, eMultiple);
+  TGroupType = (eGroup, eOptional, eMultiple, eOneOrMore);
 
   PGroupNode = ^TGroupNode;
 

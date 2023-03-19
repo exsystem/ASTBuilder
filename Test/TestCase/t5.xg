@@ -1,0 +1,56 @@
+
+statements
+   : statement (SEMI statement)*
+   ;
+
+statement: simpleStatement;
+
+simpleStatement
+   : assignmentStatement
+   | procedureStatement
+   | gotoStatement
+   | emptyStatement_
+   ;
+
+assignmentStatement
+   : variable ASSIGN NUM_INT 
+   ;
+
+emptyStatement_ : ;
+
+procedureStatement
+   : identifier (LPAREN RPAREN)?
+   ;
+
+gotoStatement
+   : GOTO label
+   ;
+
+label
+   : unsignedInteger
+   ;
+
+ unsignedInteger
+   : NUM_INT
+   ;  
+
+variable
+   : identifier 
+   ;
+
+identifier: IDENT;
+SEMI: ';';
+AT: '@';
+LBRACK : '(';
+COMMA : ','; 
+RBRACK : ')';
+LBRACK2 : '[';
+RBRACK2: ']';
+DOT: '.';
+POINTER : '^';
+GOTO: 'GOTO';
+IDENT: ('A' .. 'Z') ('A' .. 'Z' | '0' .. '9' | '_') * ;
+NUM_INT
+   : ('0' .. '9') +
+   ;
+ASSIGN: ':=';

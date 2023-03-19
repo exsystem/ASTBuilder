@@ -83,8 +83,8 @@ Begin
   If GrammarMode Then
   Begin
     Result^.RuleList := TList_Create(SizeOf(TLexerRule), 10);
-    Result^.Keywords := TTrie_Create(SizeOf(TTokenKind));
   End;
+  Result^.Keywords := TTrie_Create(SizeOf(TTokenKind));
   Result^.Source := CreateStr(StrLen(Source) + 1);
   StrCat(Result^.Source, Source);
   StrCat(Result^.Source, #1);
@@ -221,8 +221,8 @@ Begin
   If Self^.RuleList <> nil Then
   Begin
     TList_Destroy(Self^.RuleList);
-    TTrie_Destroy(Self^.Keywords);
   End;
+  TTrie_Destroy(Self^.Keywords);
   FreeStr(Self^.CurrentToken.Error);
   FreeStr(Self^.CurrentToken.Value);
   FreeStr(Self^.CurrentToken.Kind.TermRule);

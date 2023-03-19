@@ -1,0 +1,6 @@
+signedFactor : (PLUS | MINUS)? factor ;
+factor : IDENT;
+IDENT: 'id';
+
+PLUS: '+';
+MINUS: '-';

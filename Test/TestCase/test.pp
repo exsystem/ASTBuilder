@@ -1,0 +1,13 @@
+PROGRAM TEST;
+
+VAR
+  FOO: BYTE;
+  BAR: STRING;
+BEGIN
+  IF (FOO > 12.345) OR (BAR = 'test') THEN
+  BEGIN
+    READLN;
+    WRITELN;
+  END;
+  EXIT;
+END.

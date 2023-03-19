@@ -36,11 +36,9 @@ Function TParser_IsToken(Self: PParser; TokenKind: TTokenKind): Boolean;
 
 Function TParser_GetCurrentToken(Self: PParser): PToken;
 
-Function TParser_TermByTokenKind(Self: PParser; TokenKind: TTokenKind): Boolean;
+Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
 
 Function TParser_TermByGrammarTokenKind(Self: PParser; GrammarTokenKind: TGrammarTokenKind): Boolean;
-
-Function TParser_Term(Self: PParser; TermRule: PChar): Boolean;
 
 {
   Function TParser_Prod(Self: PParser; Var Ast: PAstNode;
@@ -75,7 +73,7 @@ Begin
   { freepascal compilers with automatically initializing the Out parameters    }
   { with non-Nil ($5555....) values.                                           }
   mTokenKind.TokenKind := eEof;
-  Result := Self^.MainProductionRule(Self, Self^.Ast) And TParser_TermByTokenKind(Self, mTokenKind);
+  Result := Self^.MainProductionRule(Self, Self^.Ast) And TParser_Term(Self, mTokenKind);
 End;
 
 Function TParser_Create(Lexer: PLexer; ProductionRule: TSymbolFunc): PParser;
@@ -111,7 +109,7 @@ Begin
   Dispose(Self);
 End;
 
-Function TParser_TermByTokenKind(Self: PParser; TokenKind: TTokenKind): Boolean;
+Function TParser_Term(Self: PParser; TokenKind: TTokenKind): Boolean;
 Begin
   If (Self^.FLexer^.NextPos > 1) And (Self^.FLexer^.CurrentToken.Kind.TokenKind =
     eUndefined) Then
@@ -145,17 +143,8 @@ Var
 Begin
   mTokenKind.TokenKind := GrammarTokenKind;
   mTokenKind.TermRule := StrNew('');
-  Result := TParser_TermByTokenKind(Self, mTokenKind);
+  Result := TParser_Term(Self, mTokenKind);
   FreeStr(mTokenKind.TermRule);
-End;
-
-Function TParser_Term(Self: PParser; TermRule: PChar): Boolean;
-Var
-  mTokenKind: TTokenKind;
-Begin
-  mTokenKind.TokenKind := eUserDefined;
-  mTokenKind.TermRule := TermRule;
-  Result := TParser_TermByTokenKind(Self, mTokenKind);
 End;
 
 (*

@@ -35,7 +35,7 @@ Var
   mLexer: PLexer;
 Begin
   mGrammar := PropmtForFile('Grammar File Path? (Default = t.xg)', 't.xg');
-  mCode := PropmtForFile('Source Code File Path? (Default = t.pas)', 't.pas');
+  mCode := PropmtForFile('Source Code File Path? (Default = t.pp)', 't.pp');
 
   mGrammarLexer := GetGrammarLexer(mGrammar);
   mParser := TParser_Create(mGrammarLexer, GrammarRule);
@@ -63,7 +63,6 @@ Begin
   TLexer_Destroy(mGrammarLexer);
   FreeStr(mGrammar);
   FreeStr(mCode);
-  ReadLn;
 End;
 
 End.

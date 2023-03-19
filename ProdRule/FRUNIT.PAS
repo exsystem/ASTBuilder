@@ -22,8 +22,8 @@ Uses
   TypeDef, List, ClsUtils, IdNode, TrmNode, GrpNode, ExpRUnit,
  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtils;
 
-{ factor -> id ( QuestionMark | Asterisk ) ? }
-{ DFA: (S1)--[id]->((S2))--[?, *]->((S3))    }
+{ factor -> id ( QuestionMark | Plus | Asterisk ) ? }
+{ DFA: (S1)--[id]->((S2))--[?, +, *]->((S3))    }
 Function FactorRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePointS2: TSize;
@@ -50,6 +50,13 @@ Begin
     PGroupNode(Ast)^.GroupType := eOptional;
     PGroupNode(Ast)^.IsAlternational := False;
   End
+  Else If TParser_TermByGrammarTokenKind(Parser, ePlus) Then
+  Begin
+    TGroupNode_Create(PGroupNode(Ast));
+    TList_PushBack(PGroupNode(Ast)^.Terms, @mIdNode);
+    PGroupNode(Ast)^.GroupType := eOneOrMore;
+    PGroupNode(Ast)^.IsAlternational := False;
+  End
   Else If TParser_TermByGrammarTokenKind(Parser, eAsterisk) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
@@ -68,8 +75,8 @@ Begin
     Result := True;
 End;
 
-{ factor -> term ( QuestionMark | Asterisk ) ? }
-{ DFA: (S1)--[id]->((S2))--[?, *]->((S3))      }
+{ factor -> term ( QuestionMark | Plus | Asterisk ) ? }
+{ DFA: (S1)--[id]->((S2))--[?, +, *]->((S3))      }
 Function FactorRuleExpression2(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePointS2: TSize;
@@ -104,6 +111,13 @@ Begin
     PGroupNode(Ast)^.GroupType := eOptional;
     PGroupNode(Ast)^.IsAlternational := False;
   End
+  Else If TParser_TermByGrammarTokenKind(Parser, ePlus) Then
+  Begin
+    TGroupNode_Create(PGroupNode(Ast));
+    TList_PushBack(PGroupNode(Ast)^.Terms, @mTermNode);
+    PGroupNode(Ast)^.GroupType := eOneOrMore;
+    PGroupNode(Ast)^.IsAlternational := False;
+  End
   Else If TParser_TermByGrammarTokenKind(Parser, eAsterisk) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
@@ -122,7 +136,7 @@ Begin
     Result := True;
 End;
 
-{ factor -> LParen expr RParen ( QuestionMark | Asterisk ) ? }
+{ factor -> LParen expr RParen ( QuestionMark | Plus | Asterisk ) ? }
 Function FactorRuleExpression3(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePointS4: TSize;
@@ -175,6 +189,10 @@ Begin
   If TParser_TermByGrammarTokenKind(Parser, eQuestionMark) Then
   Begin
     PGroupNode(Ast)^.GroupType := eOptional;
+  End
+  Else If TParser_TermByGrammarTokenKind(Parser, ePlus) Then
+  Begin
+    PGroupNode(Ast)^.GroupType := eOneOrMore;
   End
   Else If TParser_TermByGrammarTokenKind(Parser, eAsterisk) Then
   Begin

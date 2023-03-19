@@ -101,6 +101,8 @@ Begin
   Case mNode^.GroupType Of
     eGroup:
       mGroupType := 'Group';
+    eOneOrMore:
+      mGroupType := 'OneOrMore';
     eOptional:
       mGroupType := 'Optional';
     eMultiple:
@@ -218,7 +220,7 @@ Begin
       mState := TNfa_GetState(mNode^.Nfa, I);
       If mState^.Acceptable Then
       Begin
-        mFromState := IntToStr(I) + '[[' + IntToStr(I) + ': Acceptable]]' + #0;
+        mFromState := IntToStr(I) + '[[' + IntToStr(I) + ': Acceptable]]';
       End
       Else
       Begin
@@ -230,8 +232,16 @@ Begin
         For J := 0 To mState^.Edges^.Size - 1 Do
         Begin
           mEdge := PNfaEdge(TList_Get(mState^.Edges, J));
-          mStr := mFromState + ' -->|' +
-            StrPas(mEdge^.Value) + ' |' + IntToStr(mEdge^.ToState) + ';' + #0;
+          mStr := StrPas(mEdge^.Value);
+          If mStr = '' Then
+          Begin
+            mStr := mFromState + ' -->| |' + IntToStr(mEdge^.ToState) + ';' + #0;
+          End
+          Else
+          Begin
+            mStr := mFromState + ' -->|' + StrPas(mEdge^.Value) +
+              ' |' + IntToStr(mEdge^.ToState) + ';' + #0;
+          End;
           mText := @mStr[1];
           TAstViewer_WriteLn(Self, mText);
         End;
