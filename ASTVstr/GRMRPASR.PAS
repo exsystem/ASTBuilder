@@ -116,7 +116,8 @@ Begin
     End;
   End;
   FreeStr(mSelf^.Error);
-  mSelf^.Error := strnew('Error.');
+  mSelf^.Error := strnew(PChar('Error on visiting id: ' + mNode^.Value +
+    '@ token #' + IntToStr(mSelf.FCurrentToken)));
 End;
 
 Procedure TAstViewer_VisitTerm(Self: PAstVisitor; Node: PAstNode);
@@ -135,7 +136,7 @@ Begin
     mCurrToken := TAstViewer_GetCurrentToken(mSelf);
     mTermNode^.Token.Error := StrNew(mCurrToken^.Error);
     mTermNode^.Token.Value := StrNew(mCurrToken^.Value);
-    mTermNode^.Token.Kind.TermRule := StrNew(mCurrToken.Kind.TermRule);
+    mTermNode^.Token.Kind.TermRule := StrNew(mCurrToken^.Kind.TermRule);
     mTermNode^.Children := nil;
     TList_PushBack(mSelf^.FCurrentParseTreeNode^.Children, @mTermNode);
     FreeStr(mSelf^.Error);
@@ -143,7 +144,8 @@ Begin
     Exit;
   End;
   FreeStr(mSelf^.Error);
-  mSelf^.Error := strnew('Error.');
+  mSelf^.Error := strnew(PChar('Error on visiting term: ' + mNode^.Token.Value +
+    '@ token# ' + IntToStr(mSelf^.FCurrentToken)));
 End;
 
 Procedure TAstViewer_VisitGroup(Self: PAstVisitor; Node: PAstNode);
@@ -221,14 +223,10 @@ Begin
             End;
           End;
         Until strcomp(mSelf^.Error, '') <> 0;
-        FreeStr(mSelf^.Error);
         If mPassed Then
         Begin
+          FreeStr(mSelf^.Error);
           mSelf^.Error := strnew('');
-        End
-        Else
-        Begin
-          mSelf^.Error := strnew('ERROR.');
         End;
       End;
       eMultiple:
@@ -338,14 +336,10 @@ Begin
                   PPParseTree(TList_Back(mSelf^.FCurrentParseTreeNode^.Children))^);
                 TList_PopBack(mSelf^.FCurrentParseTreeNode^.Children);
               End;
-              FreeStr(mSelf^.Error);
               If mPassed Then
               Begin
+                FreeStr(mSelf^.Error);
                 mSelf^.Error := strnew('');
-              End
-              Else
-              Begin
-                mSelf^.Error := strnew('ERROR.');
               End;
               Exit;
             End;
@@ -595,5 +589,4 @@ Begin
   mTAstViewer_VMT.VisitRule := TAstViewer_VisitRule;
   mTAstViewer_VMT.VisitTermRule := TAstViewer_VisitTermRule;
   mTAstViewer_VMT.VisitGrammar := TAstViewer_VisitGrammar;
-
 End.
