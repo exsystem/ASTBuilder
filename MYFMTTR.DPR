@@ -53,11 +53,12 @@ uses
   Tfrunit in 'PRODRULE\TFRUNIT.PAS',
   Trrunit in 'PRODRULE\TRRUNIT.PAS',
   Ddtsrule in 'LEXRRULE\GRAMMAR\DDTSRULE.PAS',
-  CHSTRULE in 'LEXRRULE\GRAMMAR\CHSTRULE.PAS';
+  CHSTRULE in 'LEXRRULE\GRAMMAR\CHSTRULE.PAS',
+  DotRule in 'LEXRRULE\GRAMMAR\DOTRULE.PAS';
 
 {$R *.RES}
 
 begin
-  Test2.Test;
+  Test3.Test;
   ReadLn;
 end.

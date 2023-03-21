@@ -102,6 +102,7 @@ Var
   mKeyword: PTokenKind;
   mTermRuleNode: PTermRuleNode;
   mSavePoint: TSize;
+  mNextPos: TSize;
 Begin
   If Self^.CurrentToken.Kind.TokenKind = eEof Then
   Begin
@@ -149,6 +150,7 @@ Begin
   End
   Else
   Begin
+    mNextPos := Self^.NextPos;
     For I := 0 To Pred(Self^.GrammarNode^.TermRules^.Size) Do
     Begin
       mTermRuleNode := PPTermRuleNode(TList_Get(Self^.GrammarNode^.TermRules, I))^;
@@ -168,7 +170,7 @@ Begin
         FreeStr(Self^.CurrentToken.Value);
         Self^.CurrentToken.Value := strnew(mTermRuleNode^.Nfa^.Keyword);
         TLexer_Forward(Self, StrLen(Self^.CurrentToken.Value));
-        Result := (strcomp(Self^.CurrentToken.Error, '') = 0);
+        Result := True;
         Exit;
       End
       Else
@@ -194,11 +196,10 @@ Begin
           Self^.CurrentToken.Kind.TokenKind := eUserDefined;
           FreeStr(Self^.CurrentToken.Kind.TermRule);
           Self^.CurrentToken.Kind.TermRule := strnew(mTermRuleNode^.Name);
-          Result := (strcomp(Self^.CurrentToken.Error, '') = 0);
           TLexer_Retract(Self, mSavePoint - Self^.NextPos);
           Exit;
         End;
-        Self^.CurrentToken.Kind.TokenKind := eUndefined;
+        Self^.NextPos := mNextPos;
       End;
     End;
   End;
