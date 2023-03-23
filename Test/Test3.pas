@@ -15,6 +15,7 @@ Uses {$IFNDEF FPC}
   System.Rtti
   {$ENDIF}
   , {$ENDIF}
+  Stack,
   SysUtils,
   TestUtil,
   Lexer,
@@ -33,6 +34,7 @@ Var
   mParser: PParser;
   mViewer: PAstViewer;
   mLexer: PLexer;
+  mErrorNode: PNode;
 Begin
   mGrammar := PropmtForFile('Grammar File Path? (Default = t.xg)', 't.xg');
   mCode := PropmtForFile('Source Code File Path? (Default = t.pp)', 't.pp');
@@ -53,7 +55,18 @@ Begin
   TAstViewer_Create(mViewer, mLexer);
   mParser^.Ast^.VMT^.Accept(mParser^.Ast, PAstVisitor(mViewer));
   mViewer^.Level := 0;
-  WriteLn(mViewer^.Error);
+  If mViewer^.Error Then
+  Begin
+    mErrorNode := mViewer^.ErrorMessages^.Top;
+    If mErrorNode <> nil Then
+    Begin
+      While mErrorNode^.Next <> nil Do
+      Begin
+        WriteLn(PChar(mErrorNode^.Data^));
+        mErrorNode := mErrorNode^.Next;
+      End;
+    End;
+  End;
   TAstViewer_PrintParseTree(PAstVisitor(mViewer), mViewer^.FParseTree);
   TParseTree_Destroy(mViewer^.FParseTree);
   TAstViewer_Destroy(PAstVisitor(mViewer));
