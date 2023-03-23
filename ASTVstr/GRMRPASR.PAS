@@ -6,9 +6,10 @@ Unit GrmrPasr;
 Interface
 
 Uses
-  TypeDef, List, Lexer, ParseTr, ASTNode, GrmrNode;
+  TypeDef, List, Stack, Lexer, ParseTr, ASTNode, GrmrNode;
 
 Type
+
   PAstViewer = ^TAstViewer;
 
   TAstViewer = Record
@@ -19,7 +20,8 @@ Type
     FParseTree: PParseTree;
     FCurrentToken: TSize;
     FCurrentParseTreeNode: PParseTree;
-    Error: PChar;
+    Error: Boolean;
+    ErrorMessages: PStack; { Of PChar }
     Level: TSize;
   End;
 
@@ -75,7 +77,8 @@ Begin
   Self^.FLexer := Lexer;
   Self^.FTokenList := TList_Create(SizeOf(TToken), 5);
   Self^.FCurrentToken := 0;
-  Self^.Error := strnew('');
+  Self^.Error := False;
+  Self^.ErrorMessages := TStack_Create(SizeOf(PChar));
 End;
 
 Procedure TAstViewer_Destroy(Self: PAstVisitor);
@@ -83,6 +86,7 @@ Var
   mSelf: PAstViewer;
   I: TSize;
   mToken: PToken;
+  mErrMsg: PPChar;
 Begin
   mSelf := PAstViewer(Self);
   For I := 0 To mSelf^.FTokenList^.Size - 1 Do
@@ -93,7 +97,13 @@ Begin
     FreeStr(mToken^.Kind.TermRule);
   End;
   TList_Destroy(mSelf^.FTokenList);
-  FreeStr(mSelf^.Error);
+  While Not TStack_Empty(mSelf^.ErrorMessages) Do
+  Begin
+    mErrMsg := TStack_Pop(mSelf^.ErrorMessages);
+    FreeStr(mErrMsg^);
+    FreeMem(mErrMsg, SizeOf(PPChar));
+  End;
+  TStack_Destroy(mSelf^.ErrorMessages);
   TAstVisitor_Destroy(Self);
 End;
 
@@ -115,9 +125,6 @@ Begin
       Exit;
     End;
   End;
-  FreeStr(mSelf^.Error);
-  mSelf^.Error := strnew(PChar('Error on visiting id: ' + mNode^.Value +
-    '@ token #' + IntToStr(mSelf.FCurrentToken)));
 End;
 
 Procedure TAstViewer_VisitTerm(Self: PAstVisitor; Node: PAstNode);
@@ -126,6 +133,7 @@ Var
   mSelf: PAstViewer;
   mTermNode: PParseTree;
   mCurrToken: PToken;
+  mErrMsg: PChar;
 Begin
   mNode := PTermNode(Node);
   mSelf := PAstViewer(Self);
@@ -139,13 +147,17 @@ Begin
     mTermNode^.Token.Kind.TermRule := StrNew(mCurrToken^.Kind.TermRule);
     mTermNode^.Children := nil;
     TList_PushBack(mSelf^.FCurrentParseTreeNode^.Children, @mTermNode);
-    FreeStr(mSelf^.Error);
-    mSelf^.Error := strnew('');
+    mSelf^.Error := False;
     Exit;
   End;
-  FreeStr(mSelf^.Error);
-  mSelf^.Error := strnew(PChar('Error on visiting term: ' + mNode^.Token.Value +
-    '@ token# ' + IntToStr(mSelf^.FCurrentToken)));
+  mSelf^.Error := True;
+  If mSelf^.FCurrentToken = mSelf^.FTokenList^.Size - 1 Then
+  Begin
+    mCurrToken := PToken(TList_Get(mSelf^.FTokenList, mSelf^.FCurrentToken));
+    mErrMsg := strnew(PChar('Expecting term `' + mNode^.Token.Value +
+      '`, but `' + mCurrToken^.Value + '` was found.'));
+    TStack_Push(mSelf^.ErrorMessages, @mErrMsg);
+  End;
 End;
 
 Procedure TAstViewer_VisitGroup(Self: PAstVisitor; Node: PAstNode);
@@ -172,10 +184,9 @@ Begin
           Begin
             Break;
           End;
-          FreeStr(mSelf^.Error);
-          mSelf^.Error := strnew('');
+          mSelf^.Error := False;
           mItem^.VMT^.Accept(mItem, Self);
-          If strcomp(mSelf^.Error, '') = 0 Then
+          If Not mSelf^.Error Then
           Begin
             Break;
           End;
@@ -190,16 +201,14 @@ Begin
           Begin
             Break;
           End;
-          FreeStr(mSelf^.Error);
-          mSelf^.Error := strnew('');
+          mSelf^.Error := False;
           mItem^.VMT^.Accept(mItem, Self);
-          If strcomp(mSelf^.Error, '') = 0 Then
+          If Not mSelf^.Error Then
           Begin
             Break;
           End;
         End;
-        FreeStr(mSelf^.Error);
-        mSelf^.Error := strnew('');
+        mSelf^.Error := False;
       End;
       eOneOrMore:
       Begin
@@ -207,8 +216,7 @@ Begin
         Repeat
           For I := 0 To mNode^.Terms^.Size - 1 Do
           Begin
-            FreeStr(mSelf^.Error);
-            mSelf^.Error := strnew('');
+            mSelf^.Error := False;
             mItem := PPAstNode(TList_Get(mNode^.Terms, I))^;
             If mItem = nil Then
             Begin
@@ -216,50 +224,45 @@ Begin
               Break;
             End;
             mItem^.VMT^.Accept(mItem, Self);
-            If strcomp(mSelf^.Error, '') = 0 Then
+            If Not mSelf^.Error Then
             Begin
               mPassed := True;
               Break;
             End;
           End;
-        Until strcomp(mSelf^.Error, '') <> 0;
+        Until mSelf^.Error;
         If mPassed Then
         Begin
-          FreeStr(mSelf^.Error);
-          mSelf^.Error := strnew('');
+          mSelf^.Error := False;
         End;
       End;
       eMultiple:
       Begin
-        FreeStr(mSelf^.Error);
-        mSelf^.Error := strnew('');
-        While strcomp(mSelf^.Error, '') = 0 Do
+        mSelf^.Error := False;
+        While Not mSelf^.Error Do
         Begin
           For I := 0 To mNode^.Terms^.Size - 1 Do
           Begin
-            FreeStr(mSelf^.Error);
-            mSelf^.Error := strnew('');
+            mSelf^.Error := False;
             mItem := PPAstNode(TList_Get(mNode^.Terms, I))^;
             If mItem = nil Then
             Begin
               Break;
             End;
             mItem^.VMT^.Accept(mItem, Self);
-            If strcomp(mSelf^.Error, '') = 0 Then
+            If Not mSelf^.Error Then
             Begin
               Break;
             End;
           End;
         End;
-        FreeStr(mSelf^.Error);
-        mSelf^.Error := strnew('');
+        mSelf^.Error := False;
       End;
     End;
   End
   Else
   Begin
-    FreeStr(mSelf^.Error);
-    mSelf^.Error := strnew('');
+    mSelf^.Error := False;
     Case mNode^.GroupType Of
       eGroup:
       Begin
@@ -273,7 +276,7 @@ Begin
             Continue;
           End;
           mItem^.VMT^.Accept(mItem, Self);
-          If strcomp(mSelf^.Error, '') <> 0 Then
+          If mSelf^.Error Then
           Begin
             mSelf^.FCurrentToken := mLexerSavePoint;
             While mSelf^.FCurrentParseTreeNode^.Children^.Size > mSavePoint Do
@@ -298,7 +301,7 @@ Begin
             Continue;
           End;
           mItem^.VMT^.Accept(mItem, Self);
-          If strcomp(mSelf^.Error, '') <> 0 Then
+          If mSelf^.Error Then
           Begin
             mSelf^.FCurrentToken := mLexerSavePoint;
             While mSelf^.FCurrentParseTreeNode^.Children^.Size > mSavePoint Do
@@ -307,8 +310,7 @@ Begin
                 PPParseTree(TList_Back(mSelf^.FCurrentParseTreeNode^.Children))^);
               TList_PopBack(mSelf^.FCurrentParseTreeNode^.Children);
             End;
-            FreeStr(mSelf^.Error);
-            mSelf^.Error := strnew('');
+            mSelf^.Error := False;
             Break;
           End;
         End;
@@ -327,7 +329,7 @@ Begin
               Continue;
             End;
             mItem^.VMT^.Accept(mItem, Self);
-            If strcomp(mSelf^.Error, '') <> 0 Then
+            If mSelf^.Error Then
             Begin
               mSelf^.FCurrentToken := mLexerSavePoint;
               While mSelf^.FCurrentParseTreeNode^.Children^.Size > mSavePoint Do
@@ -338,20 +340,18 @@ Begin
               End;
               If mPassed Then
               Begin
-                FreeStr(mSelf^.Error);
-                mSelf^.Error := strnew('');
+                mSelf^.Error := False;
               End;
               Exit;
             End;
           End;
           mPassed := True;
-        Until strcomp(mSelf^.Error, '') <> 0;
+        Until mSelf^.Error;
       End;
       eMultiple:
       Begin
-        FreeStr(mSelf^.Error);
-        mSelf^.Error := strnew('');
-        While strcomp(mSelf^.Error, '') = 0 Do
+        mSelf^.Error := False;
+        While Not mSelf^.Error Do
         Begin
           mSavePoint := mSelf^.FCurrentParseTreeNode^.Children^.Size;
           mLexerSavePoint := mSelf^.FCurrentToken;
@@ -363,7 +363,7 @@ Begin
               Continue;
             End;
             mItem^.VMT^.Accept(mItem, Self);
-            If strcomp(mSelf^.Error, '') <> 0 Then
+            If mSelf^.Error Then
             Begin
               mSelf^.FCurrentToken := mLexerSavePoint;
               While mSelf^.FCurrentParseTreeNode^.Children^.Size > mSavePoint Do
@@ -372,8 +372,7 @@ Begin
                   PPParseTree(TList_Back(mSelf^.FCurrentParseTreeNode^.Children))^);
                 TList_PopBack(mSelf^.FCurrentParseTreeNode^.Children);
               End;
-              FreeStr(mSelf^.Error);
-              mSelf^.Error := strnew('');
+              mSelf^.Error := False;
               Exit;
             End;
           End;
@@ -431,8 +430,7 @@ Var
 Begin
   mSelf := PAstViewer(Self);
   mNode := PGrammarNode(Node);
-  FreeStr(mSelf^.Error);
-  mSelf^.Error := strnew('');
+  mSelf^.Error := False;
   If mNode^.Rules^.Size = 0 Then
   Begin
     mSelf^.FParseTree := nil;
