@@ -134,6 +134,7 @@ Var
   mTermNode: PParseTree;
   mCurrToken: PToken;
   mErrMsg: PChar;
+  S1, S2, S3: PChar;
 Begin
   mNode := PTermNode(Node);
   mSelf := PAstViewer(Self);
@@ -154,8 +155,15 @@ Begin
   If mSelf^.FCurrentToken = mSelf^.FTokenList^.Size - 1 Then
   Begin
     mCurrToken := PToken(TList_Get(mSelf^.FTokenList, mSelf^.FCurrentToken));
-    mErrMsg := strnew(PChar('Expecting term `' + mNode^.Token.Value +
-      '`, but `' + mCurrToken^.Value + '` was found.'));
+    S1 := 'Expecting term `';
+    S2 := '`, but `';
+    S3 := '`was found.';
+    mErrMsg := CreateStr(StrLen(S1) + StrLen(mNode^.Token.Value) + StrLen(S2) + StrLen(mCurrToken^.Value) + StrLen(S3));
+    strcat(mErrMsg, S1);
+    strcat(mErrMsg, mNode^.Token.Value);
+    strcat(mErrMsg, S2);
+    strcat(mErrMsg, mCurrToken^.Value);
+    strcat(mErrMsg, S3);
     TStack_Push(mSelf^.ErrorMessages, @mErrMsg);
   End;
 End;

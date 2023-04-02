@@ -66,7 +66,8 @@ uses
   TEST3 in 'Test\TEST3.PAS',
   TESTUTIL in 'Test\TESTUTIL.PAS',
   CHSTRULE in 'LexrRule\Grammar\CHSTRULE.PAS',
-  DOTRULE in 'LexrRule\Grammar\DOTRULE.PAS';
+  DOTRULE in 'LexrRule\Grammar\DOTRULE.PAS',
+  STACK in 'Util\STACK.PAS';
 
 Begin
   {$IFDEF USE_FASTMM5}

@@ -42,7 +42,7 @@ Procedure TStack_Destroy(Self: PStack);
 Begin
   While TStack_Pop(Self) <> nil Do
   Begin
-    // NOP 
+    { NOP } 
   End;
   Dispose(Self);
 End;
@@ -87,7 +87,7 @@ Begin
   If Not TStack_Empty(Self) Then
   Begin
     GetMem(Result, Self^.ElementSize);
-    Move(Self^.Top^.Data^, Result^, Self.ElementSize);
+    Move(Self^.Top^.Data^, Result^, Self^.ElementSize);
   End
   Else
   Begin

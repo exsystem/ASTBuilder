@@ -13,6 +13,7 @@ Type
   UIntPtr = Cardinal;
   PByte = ^Byte;
   PBoolean = ^Boolean;
+  PPChar = ^PChar;
   {$ENDIF}
 
   PSize = ^TSize;
