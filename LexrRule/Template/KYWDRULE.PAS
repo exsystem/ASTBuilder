@@ -15,7 +15,7 @@ Function Compose(Lexer: PLexer; Parser: TLexerRuleParser; TokenKind: TTokenKind;
 Implementation
 
 Uses
-  Trie, {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtils;
+  Trie, {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 Function Parse(Lexer: PLexer; Keyword: PChar): Boolean;
 Begin

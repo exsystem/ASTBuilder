@@ -44,7 +44,7 @@ Implementation
 Uses
   List, IdNode, TrmNode, GrpNode, RuleNode,
   TrmRNode, GrmrNode, NFA,
-  SysUtils{$IFDEF USE_STRINGS}, strings{$ENDIF}, StrUtils;
+  SysUtils{$IFDEF USE_STRINGS}, strings{$ENDIF}, StrUtil;
 
 Var
   mTAstViewer_VMT: TAstVisitor_VMT;
@@ -195,11 +195,6 @@ Begin
     mStr := IntToStr(mNode^.Nfa^.StartState);
     mStrPChar := CreateStr(Length(mStr));
     StrPCopy(mStrPChar, mStr);
-    mText := CreateStr(strlen('Start state: ') + StrLen(mStrPChar));
-    strcat(mText, 'Start state: ');
-    strcat(mText, mStrPChar);
-    TAstViewer_WriteLn(Self, mText);
-    FreeStr(mText);
     mText := CreateStr(strlen('Keyword: ') + strlen(mNode^.Nfa^.Keyword));
     strcat(mText, 'Keyword: ');
     strcat(mText, mNode^.Nfa^.Keyword);

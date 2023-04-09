@@ -63,7 +63,7 @@ Implementation
 
 Uses
   IdNode, TrmNode, GrpNode, RuleNode,
- {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtils;
+ {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 Var
   mTAstViewer_VMT: TAstVisitor_VMT;
@@ -157,8 +157,9 @@ Begin
     mCurrToken := PToken(TList_Get(mSelf^.FTokenList, mSelf^.FCurrentToken));
     S1 := 'Expecting term `';
     S2 := '`, but `';
-    S3 := '`was found.';
-    mErrMsg := CreateStr(StrLen(S1) + StrLen(mNode^.Token.Value) + StrLen(S2) + StrLen(mCurrToken^.Value) + StrLen(S3));
+    S3 := '` was found.';
+    mErrMsg := CreateStr(StrLen(S1) + StrLen(mNode^.Token.Value) +
+      StrLen(S2) + StrLen(mCurrToken^.Value) + StrLen(S3));
     strcat(mErrMsg, S1);
     strcat(mErrMsg, mNode^.Token.Value);
     strcat(mErrMsg, S2);

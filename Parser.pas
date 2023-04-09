@@ -51,13 +51,13 @@ Implementation
 
   {$IFDEF DCC}
   {$IFDEF CLASSIC}
-  Uses TypInfo, SysUtils, StrUtils;
+  Uses TypInfo, SysUtils, StrUtil;
   {$ELSE}
-  Uses System.Rtti, SysUtils, StrUtils;
+  Uses System.Rtti, SysUtils, StrUtil;
   {$ENDIF}
   {$ELSE}
 
-Uses SysUtils, StrUtils;
+Uses SysUtils, StrUtil;
 
   {$ENDIF}
 

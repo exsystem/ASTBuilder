@@ -13,7 +13,7 @@ Function Compose: TLexerRule;
 Implementation
 
 Uses
-  TypeDef, StrUtils;
+  TypeDef, StrUtil;
 
 { ' ( \ any-but-not-eof | other-than-eof-and-quote ) ' }
 Function Parse(Lexer: PLexer): Boolean;

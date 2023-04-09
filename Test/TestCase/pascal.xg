@@ -766,17 +766,7 @@ DOTDOT
    : '..'
    ;
 
-
-LCURLY
-   : '{'
-   ;
-
-
-RCURLY
-   : '}'
-   ;
-
-
+   
 UNIT
    : 'UNIT'
    ;
@@ -818,12 +808,12 @@ WS
 
 
 COMMENT_1
-   : '(*' .* '*)' ->skip
+   : '(*' .*? '*)' ->skip
    ;
 
 
 COMMENT_2
-   : '{' .* '}' ->skip
+   : '{' .*? '}' ->skip
    ;
 
 

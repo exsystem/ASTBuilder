@@ -18,7 +18,7 @@ Implementation
 
 Uses
   TypeDef, IdNode, TrmNode, GrpNode, ChFRUnit,
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtils;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 { stringFactor -> charFactor }
 Function StringFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
@@ -46,7 +46,7 @@ Begin
 
       mEscaping := False;
       I := 1;
-      J:=0;
+      J := 0;
       While I < strlen(mToken^.Value) - 1 Do
       Begin
         If mEscaping Then
@@ -63,7 +63,7 @@ Begin
         End
         Else
         Begin
-          mCh[0] := EscapeChar(mToken^.Value[I]);
+          mCh[0] := mToken^.Value[I];
         End;
         TNfa_AddEdge(Nfa, mCh, J, J + 1);
         Inc(J);

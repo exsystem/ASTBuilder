@@ -13,7 +13,7 @@ Function Parse(Lexer: PLexer; Const Ch: Char): Boolean;
 Implementation
 
 Uses
-  StrUtils;
+  StrUtil;
 
 Function Parse(Lexer: PLexer; Const Ch: Char): Boolean;
 Begin

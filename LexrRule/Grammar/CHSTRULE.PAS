@@ -1,5 +1,5 @@
 { Unit CharSetRule; }
-Unit CHSTRULE;
+Unit ChStRule;
 
 {$I define.inc}
 
@@ -15,7 +15,7 @@ Function Compose: TLexerRule;
 Implementation
 
 Uses
-  TypeDef, StrUtils;
+  TypeDef, StrUtil;
 
 Function Parse(Lexer: PLexer): Boolean;
 Var
@@ -70,7 +70,7 @@ Begin
   End;
   S3:
     FreeStr(Lexer^.CurrentToken.Value);
-    Lexer^.CurrentToken.StartPos := Lexer^.NextPos - mOffset;
+  Lexer^.CurrentToken.StartPos := Lexer^.NextPos - mOffset;
   Lexer^.CurrentToken.Value :=
     SubStr(Lexer^.Source, Lexer^.CurrentToken.StartPos, Lexer^.NextPos -
     Lexer^.CurrentToken.StartPos);

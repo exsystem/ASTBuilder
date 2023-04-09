@@ -20,7 +20,7 @@ Uses
   TypeDef, IdNode, TrmNode, GrpNode, TERUnit,
   SFRUnit;
 
-{ termFactor -> LParen termExpr RParen ( QuestionMark | Plus | Asterisk ) ? }
+{ termFactor -> LParen termExpr RParen ( QuestionMark ( QuestionMark ? ) | Plus ( QuestionMark ? ) | Asterisk ( QuestionMark ? ) ) ? }
 Function TermFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS4: TSize;
@@ -64,15 +64,15 @@ Begin
   Nfa := mNfa;
   If TParser_TermByGrammarTokenKind(Parser, eQuestionMark) Then
   Begin
-    TNfa_Optional(Nfa);
+    TNfa_Optional(Nfa, TParser_TermByGrammarTokenKind(Parser, eQuestionMark));
   End
   Else If TParser_TermByGrammarTokenKind(Parser, ePlus) Then
   Begin
-    TNfa_OneOrMore(Nfa);
+    TNfa_OneOrMore(Nfa, TParser_TermByGrammarTokenKind(Parser, eQuestionMark));
   End
   Else If TParser_TermByGrammarTokenKind(Parser, eAsterisk) Then
   Begin
-    TNfa_Multiple(Nfa);
+    TNfa_Multiple(Nfa, TParser_TermByGrammarTokenKind(Parser, eQuestionMark));
   End
   Else
   Begin
@@ -84,7 +84,7 @@ Begin
     Result := True;
 End;
 
-{ termFactor -> stringFactor ( QuestionMark | Plus | Asterisk ) ? }
+{ termFactor -> stringFactor ( QuestionMark ( QuestionMark ? ) | Plus ( QuestionMark ? ) | Asterisk ( QuestionMark ? ) ) ? }
 Function TermFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS2: TSize;
@@ -105,15 +105,15 @@ Begin
     mSavePointS2 := Parser^.FCurrentToken;
   If TParser_TermByGrammarTokenKind(Parser, eQuestionMark) Then
   Begin
-    TNfa_Optional(Nfa);
+    TNfa_Optional(Nfa, Not TParser_TermByGrammarTokenKind(Parser, eQuestionMark));
   End
   Else If TParser_TermByGrammarTokenKind(Parser, ePlus) Then
   Begin
-    TNfa_OneOrMore(Nfa);
+    TNfa_OneOrMore(Nfa, Not TParser_TermByGrammarTokenKind(Parser, eQuestionMark));
   End
   Else If TParser_TermByGrammarTokenKind(Parser, eAsterisk) Then
   Begin
-    TNfa_Multiple(Nfa);
+    TNfa_Multiple(Nfa, Not TParser_TermByGrammarTokenKind(Parser, eQuestionMark));
   End
   Else
   Begin

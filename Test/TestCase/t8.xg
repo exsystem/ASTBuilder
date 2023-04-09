@@ -1,0 +1,4 @@
+main: HELLO BYE ;
+HELLO: 'hello' ;
+BYE: 'bye' ;
+COMMENT: '{' .*? '}' ->skip;

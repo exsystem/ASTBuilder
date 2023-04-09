@@ -22,7 +22,7 @@ Implementation
 
 Uses
   TypeDef, IdNode, TrmNode, GrpNode,
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtils;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 { individualCharFactor -> Char DoubleDots Char }
 Function IndividualCharFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
@@ -228,6 +228,7 @@ Begin
     End;
 End;
 
+{ individualCharFactor -> Dot ; }
 Function IndividualCharFactorRuleExpression4(Parser: PParser; Var Nfa: PNfa): Boolean;
 Label
   S1, S2;
@@ -245,6 +246,7 @@ Begin
   S2:
     TNfa_Create(Nfa);
   TNfa_AnyChar(Nfa, 0, 1);
+  TNfa_GetState(Nfa, 1)^.Acceptable := True;
   Result := True;
 End;
 

@@ -23,7 +23,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="LexerRule;ProductionRule;AST;Test;LexerRule/Template;Util;ASTVisitor;ParseTree;LexerRule/Grammar;Automata;ASTVstr;LexrRule/Grammar;LexrRule/Template;ParseTr;ProdRule"/>
+            <OtherUnitFiles Value="AST;Test;Util;Automata;ASTVstr;LexrRule/Grammar;LexrRule/Template;ParseTr;ProdRule"/>
             <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -60,7 +60,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="LexerRule;ProductionRule;AST;Test;LexerRule/Template;Util;ASTVisitor;ParseTree;LexerRule/Grammar;Automata;ASTVstr;LexrRule/Grammar;LexrRule/Template;ParseTr;ProdRule"/>
+            <OtherUnitFiles Value="AST;Test;Util;Automata;ASTVstr;LexrRule/Grammar;LexrRule/Template;ParseTr;ProdRule"/>
             <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -97,8 +97,9 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="Lexer.pas"/>
+        <Filename Value="lexer.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="Lexer"/>
       </Unit>
       <Unit>
         <Filename Value="Parser.pas"/>
@@ -135,13 +136,14 @@
       <Unit>
         <Filename Value="AST/GRMRNODE.PAS"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="GrmrNode"/>
       </Unit>
       <Unit>
         <Filename Value="AST/GRPNODE.PAS"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="AST/RULENODE.PAS"/>
+        <Filename Value="AST/RuleNode.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
@@ -157,7 +159,7 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="ASTVstr/GRMRVIWR.PAS"/>
+        <Filename Value="ASTVstr/GrmrViwr.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
@@ -179,10 +181,12 @@
       <Unit>
         <Filename Value="LexrRule/Grammar/EOFRULE.PAS"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="EofRule"/>
       </Unit>
       <Unit>
-        <Filename Value="LexrRule/Grammar/IDRULE.PAS"/>
+        <Filename Value="LexrRule/Grammar/Idrule.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="IdRule"/>
       </Unit>
       <Unit>
         <Filename Value="LexrRule/Grammar/LBRKRULE.PAS"/>
@@ -249,12 +253,14 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="ProdRule/ChFRUnit.pas"/>
+        <Filename Value="ProdRule/CHFRUNIT.PAS"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="ChFRUnit"/>
       </Unit>
       <Unit>
-        <Filename Value="ProdRule/ExpRUnit.pas"/>
+        <Filename Value="ProdRule/EXPRUNIT.PAS"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="ExpRUnit"/>
       </Unit>
       <Unit>
         <Filename Value="ProdRule/FRUnit.pas"/>
@@ -263,6 +269,7 @@
       <Unit>
         <Filename Value="ProdRule/GRMRUNIT.PAS"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="GrmRUnit"/>
       </Unit>
       <Unit>
         <Filename Value="ProdRule/ICFRUnit.pas"/>
@@ -281,8 +288,9 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="ProdRule/TFRUnit.pas"/>
+        <Filename Value="ProdRule/TFRUNIT.PAS"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="TFRUnit"/>
       </Unit>
       <Unit>
         <Filename Value="Test/TEST1.PAS"/>
@@ -296,6 +304,10 @@
         <Filename Value="Util/STRUTILS.PAS"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="Util/Utility.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -305,7 +317,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="LexerRule;ProductionRule;AST;Test;LexerRule/Template;Util;ASTVisitor;ParseTree;LexerRule/Grammar;Automata;ASTVstr;LexrRule/Grammar;LexrRule/Template;ParseTr;ProdRule"/>
+      <OtherUnitFiles Value="AST;Test;Util;Automata;ASTVstr;LexrRule/Grammar;LexrRule/Template;ParseTr;ProdRule"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

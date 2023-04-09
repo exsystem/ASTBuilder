@@ -20,7 +20,7 @@ Implementation
 
 Uses
   TypeDef, List, ClsUtils, IdNode, TrmNode, GrpNode, ExpRUnit,
- {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtils;
+ {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 { factor -> id ( QuestionMark | Plus | Asterisk ) ? }
 { DFA: (S1)--[id]->((S2))--[?, +, *]->((S3))    }

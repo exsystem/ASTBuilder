@@ -21,7 +21,7 @@ Uses {$IFNDEF FPC}
   Lexer,
   GrmrPasr,
   Parser, GrmRUnit, ASTNode, ParseTr,
- {$IFDEF USE_STRINGS}strings,{$ENDIF} StrUtils;
+ {$IFDEF USE_STRINGS}strings,{$ENDIF} StrUtil;
 
 Procedure Test;
 Var

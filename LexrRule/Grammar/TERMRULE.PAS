@@ -13,7 +13,7 @@ Function Compose: TLexerRule;
 Implementation
 
 Uses
-  StrUtils;
+  StrUtil;
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
