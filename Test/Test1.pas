@@ -18,7 +18,7 @@ Uses {$IFNDEF FPC}
   SysUtils,
   Lexer,
   TestUtil,
- {$IFDEF USE_STRINGS}strings,{$ENDIF} StrUtils;
+ {$IFDEF USE_STRINGS}strings,{$ENDIF} StrUtil;
 
 Procedure Test;
 Var

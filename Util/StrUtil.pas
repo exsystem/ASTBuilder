@@ -1,5 +1,5 @@
 { StringUtils.pas }
-Unit StrUtils;
+Unit StrUtil;
 
 {$I define.inc}
 

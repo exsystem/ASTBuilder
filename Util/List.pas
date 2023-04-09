@@ -12,7 +12,7 @@ Type
 
   TList = Record
     FElemSize: TSize;
-    {$IFDEF CLASSIC}
+    {$IFDEF VINTAGE}
     FList: Array[0..10240] Of Byte;
     {$ELSE}
     FList: Array Of Byte;
@@ -38,7 +38,7 @@ Function TList_Create(ElementSize: TSize; Capacity: TSize): PList;
 Begin
   New(Result);
   Result^.FElemSize := ElementSize;
-  {$IFNDEF CLASSIC}
+  {$IFNDEF VINTAGE}
   SetLength(Result.FList, Capacity * ElementSize);
   {$ENDIF}
   Result^.Size := 0;
@@ -66,7 +66,7 @@ End;
 
 Procedure TList_PushBack(Self: PList; Element: Pointer);
 Begin
-  {$IFNDEF CLASSIC}
+  {$IFNDEF VINTAGE}
   If Self^.Size * Self^.FElemSize = Length(Self^.FList) Then
   Begin
     SetLength(Self^.FList, Self^.Size * Self^.FElemSize * 2);
@@ -83,7 +83,7 @@ End;
 
 Function TList_EmplaceBack(Self: PList): Pointer;
 Begin
-  {$IFNDEF CLASSIC}
+  {$IFNDEF VINTAGE}
   If Self^.Size * Self^.FElemSize = Length(Self^.FList) Then
   Begin
     SetLength(Self^.FList, Self^.Size * Self^.FElemSize * 2);

@@ -27,7 +27,7 @@ Var
 Implementation
 
 Uses
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtils;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 Procedure TIdNode_Create(Var Self: PIdNode; Value: PChar);
 Begin

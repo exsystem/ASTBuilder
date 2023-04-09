@@ -13,7 +13,7 @@ Function Compose: TLexerRule;
 Implementation
 
 Uses
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtils;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin

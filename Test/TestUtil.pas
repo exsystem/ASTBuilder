@@ -5,7 +5,7 @@ Unit TestUtil;
 Interface
 
 Uses
-  {$IFDEF CLASSIC}WinCrt, {$ENDIF} Lexer;
+  {$IFDEF VINTAGE}WinCrt, {$ENDIF} Lexer;
 
 Function ReadTextFileToString(Path: String): PChar;
 Function PropmtForFile(Prompt: PChar; DefaultFilePath: PChar): PChar;
@@ -17,7 +17,7 @@ Uses
   EofRule, IdRule, TermRule, LParRule, OrRule, ColnRule, AstkRule,
   QMrkRule, PlusRule, TildRule, RParRule, LBrkRule,
   RBrkRule, CharRule, ChStRule, StrRule, DotRule, DDtsRule, SemiRule, SkipRule, SysUtils,
- {$IFDEF USE_STRINGS}strings,{$ENDIF} StrUtils;
+ {$IFDEF USE_STRINGS}strings,{$ENDIF} StrUtil;
 
 Function ReadTextFileToString(Path: String): PChar;
 Var
@@ -52,6 +52,12 @@ Begin
   End;
   {$IFDEF DCC}
   mFilePath := '..\..\Test\TestCase\' + mFilePath;
+  {$IFDEF VER150}
+  mFilePath := 'Test/TestCase/' + mFilePath;
+  {$ENDIF}
+  {$IFDEF VER80}
+  mFilePath := 'Test/TestCase/' + mFilePath;
+  {$ENDIF}
   {$ENDIF}
   {$IFDEF FPC}
   mFilePath := 'Test/TestCase/' + mFilePath;

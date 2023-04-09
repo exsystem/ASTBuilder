@@ -14,7 +14,7 @@ Function Compose: TLexerRule;
 Implementation
 
 Uses
-  TypeDef, StrUtils;
+  TypeDef, StrUtil;
 
 { ' ( other-than-eof-and-quote | \ any-but-not-eof ) * '     }
 { first make a NFA for this regexp, then transform into DFA. }

@@ -74,7 +74,7 @@ Procedure TLexer_Retract(Var Self: PLexer; Const Step: TSize);
 Implementation
 
 Uses
-  SysUtils, StrUtils, NFA, TrmRNode{$IFDEF USE_STRINGS}, strings{$ENDIF};
+  SysUtils, StrUtil, NFA, TrmRNode{$IFDEF USE_STRINGS}, strings{$ENDIF};
 
 Function TLexer_Create(Const Source: PChar; Const GrammarMode: Boolean): PLexer;
 Begin
@@ -103,12 +103,15 @@ Var
   mTermRuleNode: PTermRuleNode;
   mSavePoint: TSize;
   mNextPos: TSize;
+Label
+  S;
 Begin
-  If Self^.CurrentToken.Kind.TokenKind = eEof Then
-  Begin
-    Result := False;
-    Exit;
-  End;
+  S:
+    If Self^.CurrentToken.Kind.TokenKind = eEof Then
+    Begin
+      Result := False;
+      Exit;
+    End;
   While IsSpace(TLexer_PeekNextChar(Self)) Do
   Begin
     TLexer_Forward(Self, 1);
@@ -170,8 +173,15 @@ Begin
         FreeStr(Self^.CurrentToken.Value);
         Self^.CurrentToken.Value := strnew(mTermRuleNode^.Nfa^.Keyword);
         TLexer_Forward(Self, StrLen(Self^.CurrentToken.Value));
-        Result := True;
-        Exit;
+        If mTermRuleNode^.Skipped Then
+        Begin
+          Goto S;
+        End
+        Else
+        Begin
+          Result := True;
+          Exit;
+        End;
       End
       Else
       Begin
@@ -179,7 +189,7 @@ Begin
         Self^.CurrentToken.StartPos := Self^.NextPos;
         While TNfa_Move(mTermRuleNode^.Nfa, TLexer_PeekNextChar(Self)) Do
         Begin
-          TLexer_Forward(Self, 1);
+          TLexer_Forward(Self, 1); // overflow
           If TNfa_Accepted(mTermRuleNode^.Nfa) Then
           Begin
             Result := True;
@@ -197,7 +207,15 @@ Begin
           FreeStr(Self^.CurrentToken.Kind.TermRule);
           Self^.CurrentToken.Kind.TermRule := strnew(mTermRuleNode^.Name);
           TLexer_Retract(Self, mSavePoint - Self^.NextPos);
-          Exit;
+
+          If mTermRuleNode^.Skipped Then
+          Begin
+            Goto S;
+          End
+          Else
+          Begin
+            Exit;
+          End;
         End;
         Self^.NextPos := mNextPos;
       End;

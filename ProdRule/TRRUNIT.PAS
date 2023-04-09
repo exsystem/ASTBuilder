@@ -15,7 +15,7 @@ Implementation
 
 Uses
   IdNode, GrpNode, TrmRNode, TERUnit, NFA,
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtils;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 { termRule -> term Colon termExpr skip? Semi }
 Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
