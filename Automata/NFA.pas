@@ -35,6 +35,17 @@ Type
     Arg: TSize;
   End;
 
+  TNfaPartition = (TNfaPartition_Left, TNfaPartition_Right);
+
+  PNfaStateStatus = ^TNfaStateStatus;
+
+  TNfaStateStatus = Record
+    State: TSize;
+    SameRootState: Boolean;
+    Partition: TNfaPartition;
+    LeftMatched: Boolean;
+  End;
+
   PNfa = ^TNfa;
 
   TNfa = Record
@@ -65,6 +76,7 @@ Procedure TNfa_Optional(Var Self: PNfa; Greedy: Boolean);
 Procedure TNfa_OneOrMore(Var Self: PNfa; Greedy: Boolean);
 Procedure TNfa_Not(Var Self: PNfa);
 Procedure TNfa_Reset(Var Self: PNfa);
+Function TNfa_Match(Var Self: PNfa; Const Ch: Char; Const State: TSize): Boolean;
 Function TNfa_Move(Var Self: PNfa; Const Ch: Char): Boolean;
 Function TNfa_Accepted(Var Self: PNfa): Boolean;
 {
@@ -541,104 +553,139 @@ Begin
   TNfa_ExchangeStates(Self);
 End;
 
-Function TNfa_Move(Var Self: PNfa; Const Ch: Char): Boolean;
+Function TNfa_Match(Var Self: PNfa; Const Ch: Char; Const State: TSize): Boolean;
 Var
   I: TSize;
   mState: PNfaState;
   mEdge: PNfaEdge;
   mRealOthers: Boolean;
-  mOpStatus: PList;
-  mSkip: Boolean;
-  mCurrInst: TNfaStateInstruction;
-  mPrevInst: TNfaStateInstruction;
-  mLeftVisited: Boolean;
 Begin
   Result := False;
+  mState := TNfa_GetState(Self, State);
+  If mState^.Edges^.Size > 0 Then
+  Begin
+    mEdge := PNfaEdge(TList_Get(mState^.Edges, mState^.Edges^.Size - 1));
+    If ((mEdge^.EdgeType = TNfaEdgeType_Others) And
+      (StrComp(mEdge^.Value, '') <> 0)) Then
+    Begin
+      mRealOthers := True;
+      For I := 0 To mState^.Edges^.Size - 2 Do
+      Begin
+        mEdge := PNfaEdge(TList_Get(mState^.Edges, I));
+        If ((strcomp(mEdge^.Value, '') <> 0) And (mEdge^.Value[0] = Ch)) Or
+          (mEdge^.EdgeType = TNfaEdgeType_Any) Then
+        Begin
+          mRealOthers := False;
+          Break;
+        End;
+      End;
+      If mRealOthers Then
+      Begin
+        mEdge := PNfaEdge(TList_Get(mState^.Edges, mState^.Edges^.Size - 1));
+        If Not PBoolean(TList_Get(Self^.FAlreadyOn, mEdge^.ToState))^ Then
+        Begin
+          TNfa_AddState(Self, TStateOp_Root, mEdge^.ToState);
+        End;
+        Result := True;
+      End;
+    End
+    Else
+    Begin
+      For I := 0 To mState^.Edges^.Size - 1 Do
+      Begin
+        mEdge := PNfaEdge(TList_Get(mState^.Edges, I));
+        If (strcomp(mEdge^.Value, '') <> 0) And (mEdge^.Value[0] = Ch) Or
+          (mEdge^.EdgeType = TNfaEdgeType_Any) Then
+        Begin
+          If Not PBoolean(TList_Get(Self^.FAlreadyOn, mEdge^.ToState))^ Then
+          Begin
+            TNfa_AddState(Self, TStateOp_Root, mEdge^.ToState);
+          End;
+          Result := True;
+        End;
+      End;
+    End;
+  End;
+End;
 
-  mOpStatus := TList_Create(SizeOf(TNfaStateInstruction), 1);
-  mLeftVisited := False;
-  mSkip := False;
+
+Function TNfa_Move(Var Self: PNfa; Const Ch: Char): Boolean;
+Var
+  mCurrInst: TNfaStateInstruction;
+  mOpStatus: PList;
+  mStatus: TNfaStateStatus;
+Begin
+  Result := False;
+  mOpStatus := TList_Create(SizeOf(TNfaStateStatus), 1);
 
   While Not TList_IsEmpty(Self^.FOldStates) Do
   Begin
     mCurrInst := PNfaStateInstruction(TList_Back(Self^.FOldStates))^;
     Case mCurrInst.Op Of
-      TStateOp_State, TStateOp_Root:
+      TStateOp_Root:
       Begin
-        If Not mSkip Then
+        If TNfa_Match(Self, Ch, mCurrInst.Arg) Then
         Begin
-          mState := TNfa_GetState(Self, mCurrInst.Arg);
-          If mState^.Edges^.Size > 0 Then
+          Result := True;
+        End;
+      End;
+      TStateOp_State:
+      Begin
+        If mOpStatus^.Size = 0 Then
+        Begin
+          If TNfa_Match(Self, Ch, mCurrInst.Arg) Then
           Begin
-            mEdge := PNfaEdge(TList_Get(mState^.Edges, mState^.Edges^.Size - 1));
-            If ((mEdge^.EdgeType = TNfaEdgeType_Others) And
-              (StrComp(mEdge^.Value, '') <> 0)) Then
+            Result := True;
+          End;
+        End
+        Else
+        Begin
+          mStatus := PNfaStateStatus(TList_Back(mOpStatus))^;
+          If (Not mStatus.SameRootState) Or (mStatus.Partition = TNfaPartition_Left) Or
+            (Not mStatus.LeftMatched) Then
+          Begin
+            If TNfa_Match(Self, Ch, mCurrInst.Arg) Then
             Begin
-              mRealOthers := True;
-              For I := 0 To mState^.Edges^.Size - 2 Do
-              Begin
-                mEdge := PNfaEdge(TList_Get(mState^.Edges, I));
-                If ((strcomp(mEdge^.Value, '') <> 0) And (mEdge^.Value[0] = Ch)) Or
-                  (mEdge^.EdgeType = TNfaEdgeType_Any) Then
-                Begin
-                  mRealOthers := False;
-                  Break;
-                End;
-              End;
-              If mRealOthers Then
-              Begin
-                mEdge := PNfaEdge(TList_Get(mState^.Edges, mState^.Edges^.Size - 1));
-                If Not PBoolean(TList_Get(Self^.FAlreadyOn, mEdge^.ToState))^ Then
-                Begin
-                  TNfa_AddState(Self, TStateOp_Root, mEdge^.ToState);
-                End;
-                Result := True;
-              End;
-            End
-            Else
-            Begin
-              For I := 0 To mState^.Edges^.Size - 1 Do
-              Begin
-                mEdge := PNfaEdge(TList_Get(mState^.Edges, I));
-                If (strcomp(mEdge^.Value, '') <> 0) And (mEdge^.Value[0] = Ch) Or
-                  (mEdge^.EdgeType = TNfaEdgeType_Any) Then
-                Begin
-                  If Not PBoolean(TList_Get(Self^.FAlreadyOn, mEdge^.ToState))^ Then
-                  Begin
-                    TNfa_AddState(Self, TStateOp_Root, mEdge^.ToState);
-                  End;
-                  Result := True;
-                End;
-              End;
+              Result := True;
+              mStatus.LeftMatched := True;
+              TList_PopBack(mOpStatus);
+              TList_PushBack(mOpStatus, @mStatus);
             End;
           End;
         End;
       End;
       TStateOp_Left:
       Begin
-        TList_PushBack(mOpStatus, @mCurrInst);
-        mLeftVisited := True;
+        mStatus.State := mCurrInst.Arg;
+        mStatus.SameRootState := True;
+        mStatus.Partition := TNfaPartition_Left;
+        mStatus.LeftMatched := False;
+        TList_PushBack(mOpStatus, @mStatus);
       End;
       TStateOp_Right:
       Begin
         If mOpStatus^.Size > 0 Then
         Begin
-          mPrevInst := PNfaStateInstruction(TList_Back(mOpStatus))^;
-          If (mPrevInst.Op = TStateOp_Left) And (mPrevInst.Arg = mCurrInst.Arg) Then
+          mStatus := PNfaStateStatus(TList_Back(mOpStatus))^;
+          If mStatus.State = mCurrInst.Arg Then
           Begin
+            mStatus.Partition := TNfaPartition_Right;
+            mStatus.SameRootState := (mCurrInst.Arg = mStatus.State);
             TList_PopBack(mOpStatus);
+            TList_PushBack(mOpStatus, @mStatus);
           End;
-        End;
-        TList_PushBack(mOpStatus, @mCurrInst);
-        If mLeftVisited And Result Then
-        Begin
-          mSkip := True;
         End;
       End;
       TStateOp_End:
       Begin
-        TList_PopBack(mOpStatus);
-        mSkip := False;
+        If mOpStatus^.Size > 0 Then
+        Begin
+          mStatus := PNfaStateStatus(TList_Back(mOpStatus))^;
+          If mStatus.State = mCurrInst.Arg Then
+          Begin
+            TList_PopBack(mOpStatus);
+          End;
+        End;
       End;
     End;
 

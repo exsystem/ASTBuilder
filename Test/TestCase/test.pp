@@ -12,7 +12,7 @@ BEGIN
       P := FUNC1(I);
     END;
     READLN;
-    WRITELN;
+    WRITELN('hello {this is not comment at all {{{}}}}' + ' byebye');
   END;
   EXIT;
   {byebye}
