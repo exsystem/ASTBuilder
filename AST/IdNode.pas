@@ -1,8 +1,6 @@
 Unit IdNode;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
@@ -14,37 +12,44 @@ Type
 
   TIdNode = Record
     Parent: TAstNode;
-    Value: String;
-    _Test: Integer;
+    Value: PChar;
   End;
 
-Procedure TIdNode_Create(Self: PIdNode; Value: String);
+Procedure TIdNode_Create(Var Self: PIdNode; Value: PChar);
 
 Procedure TIdNode_Destroy(Self: PAstNode);
 
 Procedure TIdNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 
+Var
+  mTIdNode_AST: TAstNode_VMT;
+
 Implementation
 
-Procedure TIdNode_Create(Self: PIdNode; Value: String);
-Begin
-  TAstNode_Create(PAstNode(Self));
-  Self.Parent.VMT.Destory := TIdNode_Destroy;
-  Self.Parent.VMT.Accept := TIdNode_Accept;
+Uses
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
-  Self.Value := Value;
-  Self._Test := $55AA;
+Procedure TIdNode_Create(Var Self: PIdNode; Value: PChar);
+Begin
+  New(Self);
+  TAstNode_Create(PAstNode(Self));
+  Self^.Parent.VMT := @mTIdNode_AST;
+
+  Self^.Value := strnew(Value);
 End;
 
 Procedure TIdNode_Destroy(Self: PAstNode);
 Begin
+  FreeStr(PIdNode(Self)^.Value);
   TAstNode_Destroy(Self);
 End;
 
 Procedure TIdNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Begin
-  Visitor.VMT.VisitId(Visitor, Self);
+  Visitor^.VMT^.VisitId(Visitor, Self);
 End;
 
+Begin
+  mTIdNode_AST.Destory := TIdNode_Destroy;
+  mTIdNode_AST.Accept := TIdNode_Accept;
 End.
-

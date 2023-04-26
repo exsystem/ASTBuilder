@@ -1,16 +1,22 @@
 Unit TypeDef;
 
-{$IFDEF FPC}
-{$MODE DELPHI}
-{$ENDIF}
+{$I define.inc}
 
 Interface
 
 Type
-  {$IFDEF VER150}
-  UIntPtr = Cardinal;
+  {$IFDEF TPC}
+  Cardinal = Word;
   {$ENDIF}
 
+  {$IFDEF CLASSIC}
+  UIntPtr = Cardinal;
+  PByte = ^Byte;
+  PBoolean = ^Boolean;
+  PPChar = ^PChar;
+  {$ENDIF}
+
+  PSize = ^TSize;
   TSize = UIntPtr;
 
 Implementation
