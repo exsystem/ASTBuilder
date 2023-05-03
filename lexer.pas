@@ -11,9 +11,11 @@ Type
   PTokenKind = ^TTokenKind;
 
   TGrammarTokenKind = (eUndefined, eUserDefined, eEof, eRoot, eOr,
-    eLParen, eRParen, eLBracket, eRBracket, eQuestionMark, ePlus,
-    eAsterisk, eColon, eSemi, eId,
-    eTerm, eString, eChar, eCharSet, eDot, eDoubleDots, eSingleQuote, eTilde, eSkip);
+    eLParen, eRParen, eLBracket, eRBracket, eLCurlyBracket, eRCurlyBracket,
+    eQuestionMark, ePlus,
+    eAsterisk, eColon, eEqual, eSemi, eId,
+    eTerm, eString, eChar, eCharSet, eDot, eDoubleDots, eSingleQuote,
+    eTilde, eSkip, eOptions);
 
   PToken = ^TToken;
 
@@ -84,6 +86,7 @@ Begin
   Begin
     Result^.RuleList := TList_Create(SizeOf(TLexerRule), 10);
   End;
+  Result^.GrammarNode := nil;
   Result^.Keywords := TTrie_Create(SizeOf(TTokenKind));
   Result^.Source := CreateStr(StrLen(Source) + 1);
   StrCat(Result^.Source, Source);
@@ -171,7 +174,9 @@ Begin
         Self^.CurrentToken.Kind.TermRule := strnew(mTermRuleNode^.Name);
         Self^.CurrentToken.StartPos := Self^.NextPos;
         FreeStr(Self^.CurrentToken.Value);
-        Self^.CurrentToken.Value := strnew(mTermRuleNode^.Nfa^.Keyword);
+        Self^.CurrentToken.Value :=
+          SubStr(Self^.Source, Self^.CurrentToken.StartPos,
+          strlen(mTermRuleNode^.Nfa^.Keyword));
         TLexer_Forward(Self, StrLen(Self^.CurrentToken.Value));
         If mTermRuleNode^.Skipped Then
         Begin
@@ -187,7 +192,8 @@ Begin
       Begin
         TNfa_Reset(mTermRuleNode^.Nfa);
         Self^.CurrentToken.StartPos := Self^.NextPos;
-        While TNfa_Move(mTermRuleNode^.Nfa, TLexer_PeekNextChar(Self)) Do
+        While TNfa_Move(mTermRuleNode^.Nfa, TLexer_PeekNextChar(Self),
+            Self^.GrammarNode^.Options[COption_CaseInsensitive].BooleanValue) Do
         Begin
           TLexer_Forward(Self, 1); // overflow
           If TNfa_Accepted(mTermRuleNode^.Nfa) Then
@@ -275,6 +281,21 @@ Begin
     Result := False;
     Exit;
   End;
+  If (Self^.GrammarNode <> nil) And
+    Self^.GrammarNode^.Options[COption_CaseInsensitive].BooleanValue Then
+  Begin
+    Result := True;
+    For I := 0 To strlen(NextWord) - 1 Do
+    Begin
+      If Lower(NextWord[I]) <> Lower(Self^.Source[Self^.NextPos + I]) Then
+      Begin
+        Result := False;
+        Exit;
+      End;
+    End;
+    Exit;
+  End;
+
   {$IFNDEF CLASSIC}
   Result := CompareMem(@Self^.Source[Self^.NextPos], NextWord,
     strlen(NextWord) * SizeOf(Char));
@@ -285,7 +306,7 @@ Begin
   {$ENDIF}
   For I := 0 To strlen(NextWord) - 1 Do
   Begin
-    If Lower(NextWord[I]) <> Lower(Self^.Source[Self^.NextPos + I]) Then
+    If NextWord[I] <> Self^.Source[Self^.NextPos + I] Then
     Begin
       Result := False;
       Exit;

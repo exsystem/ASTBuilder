@@ -16,7 +16,8 @@ Implementation
 Uses
   EofRule, IdRule, TermRule, LParRule, OrRule, ColnRule, AstkRule,
   QMrkRule, PlusRule, TildRule, RParRule, LBrkRule,
-  RBrkRule, CharRule, ChStRule, StrRule, DotRule, DDtsRule, SemiRule, SkipRule, SysUtils,
+  RBrkRule, LCBRule, RCBRule, CharRule, ChStRule, StrRule, DotRule,
+  DDtsRule, EquRule, SemiRule, SkipRule, OptRule, SysUtils,
  {$IFDEF USE_STRINGS}strings,{$ENDIF} StrUtil;
 
 Function ReadTextFileToString(Path: String): PChar;
@@ -69,6 +70,7 @@ Function GetGrammarLexer(Grammar: PChar): PLexer;
 Begin
   Result := TLexer_Create(Grammar, True);
   TLexer_AddRule(Result, EofRule.Compose);
+  TLexer_AddRule(Result, OptRule.Compose);
   TLexer_AddRule(Result, IdRule.Compose);
   TLexer_AddRule(Result, TermRule.Compose);
   TLexer_AddRule(Result, LParRule.Compose);
@@ -85,8 +87,11 @@ Begin
   TLexer_AddRule(Result, DotRule.Compose);
   TLexer_AddRule(Result, LBrkRule.Compose);
   TLexer_AddRule(Result, RBrkRule.Compose);
+  TLexer_AddRule(Result, LCBRule.Compose);
+  TLexer_AddRule(Result, RCBRule.Compose);
   TLexer_AddRule(Result, PlusRule.Compose);
   TLexer_AddRule(Result, TildRule.Compose);
+  TLexer_AddRule(Result, EquRule.Compose);
   TLexer_AddRule(Result, SemiRule.Compose);
   TLexer_AddRule(Result, SkipRule.Compose);
 End;

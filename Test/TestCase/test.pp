@@ -1,19 +1,19 @@
-PROGRAM TEST;
+Program TEST;
 
-VAR
-  FOO: BYTE;
-  BAR: STRING;
-BEGIN
+Var
+  mFoo: Byte;
+  mBar: String;
+Begin
   {hello}
-  IF (FOO > 12.345) OR (BAR = 'test') THEN
-  BEGIN
-    FOR I := 100 DOWNTO -100 DO
-    BEGIN
-      P := FUNC1(I);
-    END;
-    READLN;
-    WRITELN('hello {this is not comment at all {{{}}}}' + ' byebye');
-  END;
-  EXIT;
+  If (mFoo > 12.345) Or (mBar = 'test') Then
+  Begin
+    For I := 100 Downto -100 Do
+    Begin
+      P := Func1(I);
+    End;
+    ReAdLn;
+    WriteLn('hello {this is not comment at all {{{}}}}' + ' byebye');
+  End;
+  ExIt;
   {byebye}
-END.
+End.

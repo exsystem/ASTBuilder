@@ -14,36 +14,74 @@ Function GrammarRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  TypeDef, List, GrmrNode, RuleNode, RRUnit, TRRUnit;
+  TypeDef, List, Lexer, GrmrNode, TrmRNode, RuleNode, RRUnit, TRRUnit, OptRUnit;
 
-{ grammar -> rule* termRule* }
+{ grammar -> ( Options LCurlyBrack option* RCurlyBrack ) ? rule* termRule* }
 Function GrammarRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
-  mSavePointS1: TSize;
+  mSavePointS1, mSavePointS2: TSize;
   mRuleNode: PAstNode;
   mTermRuleNode: PAstNode;
 Label
-  S1, S2;
+  S1, S2, S3, S4;
 Begin
   TGrammarNode_Create(PGrammarNode(Ast));
   S1:
-    mSavePointS1 := Parser^.FCurrentToken;
-  If RuleRule(Parser, mRuleNode) Then
+  If TParser_TermByGrammarTokenKind(Parser, eOptions) Then
   Begin
-    TList_PushBack(PGrammarNode(Ast)^.Rules, @mRuleNode);
-  End
-  Else If TermRule(Parser, mTermRuleNode) Then
-  Begin
-    TList_PushBack(PGrammarNode(Ast)^.TermRules, @mTermRuleNode);
+    // NOP 
   End
   Else
   Begin
-    Parser^.FCurrentToken := mSavePointS1;
-    Result := True;
+    Goto S3;
+  End;
+  If TParser_TermByGrammarTokenKind(Parser, eLCurlyBracket) Then
+  Begin
+    // NOP 
+  End
+  Else
+  Begin
+    Result := False;
     Exit;
   End;
   S2:
-    Goto S1;
+    mSavePointS2 := Parser^.FCurrentToken;
+  If OptionRule(Parser, Ast) Then
+  Begin
+    Goto S2;
+  End
+  Else
+  Begin
+    Parser^.FCurrentToken := mSavePointS2;
+  End;
+  If TParser_TermByGrammarTokenKind(Parser, eRCurlyBracket) Then
+  Begin
+    { NOP }
+  End
+  Else
+  Begin
+    Result := False;
+    Exit;
+  End;
+
+  S3:
+    mSavePointS1 := Parser^.FCurrentToken;
+    If RuleRule(Parser, mRuleNode) Then
+    Begin
+      TList_PushBack(PGrammarNode(Ast)^.Rules, @mRuleNode);
+    End
+    Else If TermRule(Parser, mTermRuleNode) Then
+    Begin
+      TList_PushBack(PGrammarNode(Ast)^.TermRules, @mTermRuleNode);
+    End
+    Else
+    Begin
+      Parser^.FCurrentToken := mSavePointS1;
+      Result := True;
+      Exit;
+    End;
+  S4:
+    Goto S3;
 End;
 
 Function GrammarRule(Parser: PParser; Var Ast: PAstNode): Boolean;

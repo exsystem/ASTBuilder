@@ -17,7 +17,7 @@ Uses
   IdNode, GrpNode, RuleNode, ExpRUnit,
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
-{ rule -> id Colon expr Semi }
+{ rule -> Id Colon expr Semi }
 Function RuleRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mName: PChar;

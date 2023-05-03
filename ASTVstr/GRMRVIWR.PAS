@@ -262,7 +262,15 @@ Var
   mItem: PAstNode;
 Begin
   mNode := PGrammarNode(Node);
+  TAstViewer_WriteLn(Self, 'Options:');
+  TAstViewer_Indent(Self);
+  If mNode^.Options[COption_CaseInsensitive].BooleanValue Then
+  Begin
+    TAstViewer_WriteLn(Self, 'CaseInsensitive;');
+  End;
+  TAstViewer_Deindent(Self);
   TAstViewer_WriteLn(Self, 'Grammar:');
+  TAstViewer_Indent(Self);
   If mNode^.Rules^.Size <> 0 Then
   Begin
     For I := 0 To mNode^.Rules^.Size - 1 Do

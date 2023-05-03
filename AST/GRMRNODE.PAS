@@ -8,11 +8,24 @@ Interface
 Uses
   ASTNode, List;
 
+Const 
+  COption_CaseInsensitive = Byte($00);
+  COption_End = Byte($FF);
+
 Type
+  TOptionValue = record
+    case Integer of
+      0: (BooleanValue: Boolean);
+      1: (StringValue: PChar);
+  end;
+
+  TOptions = Array[COption_CaseInsensitive..COption_End] Of TOptionValue;
+
   PGrammarNode = ^TGrammarNode;
 
   TGrammarNode = Record
     Parent: TAstNode;
+    Options: TOptions;
     Rules: PList; { Of PRuleNode }
     TermRules: PList; { Of PTermRuleNode }
   End;
@@ -35,6 +48,7 @@ Begin
   TAstNode_Create(PAstNode(Self));
   Self^.Parent.VMT := @mTGrammarNode_VMT;
 
+  Self^.Options[COption_CaseInsensitive].BooleanValue := False;
   Self^.Rules := TList_Create(SizeOf(PRuleNode), 1);
   Self^.TermRules := TList_Create(SizeOf(PTermRuleNode), 1);
 End;

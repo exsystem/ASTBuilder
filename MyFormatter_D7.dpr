@@ -60,7 +60,12 @@ uses
   Lexer in 'lexer.pas',
   Parser in 'Parser.pas',
   StrUtil in 'Util\Strutil.pas',
-  Utility in 'Util\Utility.pas';
+  Utility in 'Util\Utility.pas',
+  OptRUnit in 'ProdRule\Optrunit.pas',
+  EquRule in 'LexrRule\Grammar\Equrule.pas',
+  LCBRule in 'LexrRule\Grammar\Lcbrule.pas',
+  OptRule in 'LexrRule\Grammar\Optrule.pas',
+  RCBRule in 'LexrRule\Grammar\Rcbrule.pas';
 
 Begin
   Test3.Test();

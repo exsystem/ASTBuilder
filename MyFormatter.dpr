@@ -58,7 +58,7 @@ uses
   TRRUNIT in 'ProdRule\TRRUNIT.PAS',
   CLSUTILS in 'Util\CLSUTILS.PAS',
   LIST in 'Util\LIST.PAS',
-  STRUTILS in 'Util\STRUTILS.PAS',
+  STRUTILS in 'Util\STRUTILS.pas',
   TRIE in 'Util\TRIE.PAS',
   TYPEDEF in 'Util\TYPEDEF.PAS',
   TEST1 in 'Test\TEST1.PAS',
@@ -67,7 +67,14 @@ uses
   TESTUTIL in 'Test\TESTUTIL.PAS',
   CHSTRULE in 'LexrRule\Grammar\CHSTRULE.PAS',
   DOTRULE in 'LexrRule\Grammar\DOTRULE.PAS',
-  STACK in 'Util\STACK.PAS';
+  STACK in 'Util\STACK.PAS',
+  OPTRUNIT in 'ProdRule\OPTRUNIT.PAS',
+  EQURULE in 'LexrRule\Grammar\EQURULE.PAS',
+  LCBRULE in 'LexrRule\Grammar\LCBRULE.PAS',
+  OPTRULE in 'LexrRule\Grammar\OPTRULE.PAS',
+  RCBRULE in 'LexrRule\Grammar\RCBRULE.PAS',
+  StrUtil in 'Util\StrUtil.pas',
+  Utility in 'Util\Utility.pas';
 
 Begin
   {$IFDEF USE_FASTMM5}

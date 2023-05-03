@@ -76,13 +76,18 @@ Procedure TNfa_Optional(Var Self: PNfa; Greedy: Boolean);
 Procedure TNfa_OneOrMore(Var Self: PNfa; Greedy: Boolean);
 Procedure TNfa_Not(Var Self: PNfa);
 Procedure TNfa_Reset(Var Self: PNfa);
-Function TNfa_Match(Var Self: PNfa; Const Ch: Char; Const State: TSize): Boolean;
-Function TNfa_Move(Var Self: PNfa; Const Ch: Char): Boolean;
+Function TNfa_MatchEdge(Edge: PNfaEdge; Ch: Char;
+  Const CaseInsensitive: Boolean): Boolean;
+Function TNfa_Match(Var Self: PNfa; Const Ch: Char; Const State: TSize;
+  Const CaseInsensitive: Boolean): Boolean;
+Function TNfa_Move(Var Self: PNfa; Const Ch: Char;
+  Const CaseInsensitive: Boolean): Boolean;
 Function TNfa_Accepted(Var Self: PNfa): Boolean;
 {
   SEE: <<Compilers: Principles, Techniques, and Tools (2nd Edition)>>: Chapter.3.7.2 / Page.156~158
 }
-Function TNfa_Validate(Var Self: PNfa; Input: PChar): Boolean;
+Function TNfa_Validate(Var Self: PNfa; Input: PChar;
+  Const CaseInsensitive: Boolean): Boolean;
 {
   TODO: rename to TNfa_AddEpsilonClosureStates?
 }
@@ -553,7 +558,31 @@ Begin
   TNfa_ExchangeStates(Self);
 End;
 
-Function TNfa_Match(Var Self: PNfa; Const Ch: Char; Const State: TSize): Boolean;
+Function TNfa_MatchEdge(Edge: PNfaEdge; Ch: Char;
+  Const CaseInsensitive: Boolean): Boolean;
+Begin
+  If Edge^.EdgeType = TNfaEdgeType_Any Then
+  Begin
+    Result := True;
+    Exit;
+  End;
+  If strcomp(Edge^.Value, '') = 0 Then
+  Begin
+    Result := False;
+    Exit;
+  End;
+  If CaseInsensitive Then
+  Begin
+    Result := (Lower(Edge^.Value[0]) = Lower(Ch));
+  End
+  Else
+  Begin
+    Result := (Edge^.Value[0] = Ch);
+  End;
+End;
+
+Function TNfa_Match(Var Self: PNfa; Const Ch: Char; Const State: TSize;
+  Const CaseInsensitive: Boolean): Boolean;
 Var
   I: TSize;
   mState: PNfaState;
@@ -572,8 +601,7 @@ Begin
       For I := 0 To mState^.Edges^.Size - 2 Do
       Begin
         mEdge := PNfaEdge(TList_Get(mState^.Edges, I));
-        If ((strcomp(mEdge^.Value, '') <> 0) And (mEdge^.Value[0] = Ch)) Or
-          (mEdge^.EdgeType = TNfaEdgeType_Any) Then
+        If TNfa_MatchEdge(mEdge, Ch, CaseInsensitive) Then
         Begin
           mRealOthers := False;
           Break;
@@ -594,8 +622,7 @@ Begin
       For I := 0 To mState^.Edges^.Size - 1 Do
       Begin
         mEdge := PNfaEdge(TList_Get(mState^.Edges, I));
-        If (strcomp(mEdge^.Value, '') <> 0) And (mEdge^.Value[0] = Ch) Or
-          (mEdge^.EdgeType = TNfaEdgeType_Any) Then
+        If TNfa_MatchEdge(mEdge, Ch, CaseInsensitive) Then
         Begin
           If Not PBoolean(TList_Get(Self^.FAlreadyOn, mEdge^.ToState))^ Then
           Begin
@@ -608,8 +635,8 @@ Begin
   End;
 End;
 
-
-Function TNfa_Move(Var Self: PNfa; Const Ch: Char): Boolean;
+Function TNfa_Move(Var Self: PNfa; Const Ch: Char;
+  Const CaseInsensitive: Boolean): Boolean;
 Var
   mCurrInst: TNfaStateInstruction;
   mOpStatus: PList;
@@ -624,7 +651,7 @@ Begin
     Case mCurrInst.Op Of
       TStateOp_Root:
       Begin
-        If TNfa_Match(Self, Ch, mCurrInst.Arg) Then
+        If TNfa_Match(Self, Ch, mCurrInst.Arg, CaseInsensitive) Then
         Begin
           Result := True;
         End;
@@ -633,7 +660,7 @@ Begin
       Begin
         If mOpStatus^.Size = 0 Then
         Begin
-          If TNfa_Match(Self, Ch, mCurrInst.Arg) Then
+          If TNfa_Match(Self, Ch, mCurrInst.Arg, CaseInsensitive) Then
           Begin
             Result := True;
           End;
@@ -644,7 +671,7 @@ Begin
           If (Not mStatus.SameRootState) Or (mStatus.Partition = TNfaPartition_Left) Or
             (Not mStatus.LeftMatched) Then
           Begin
-            If TNfa_Match(Self, Ch, mCurrInst.Arg) Then
+            If TNfa_Match(Self, Ch, mCurrInst.Arg, CaseInsensitive) Then
             Begin
               Result := True;
               mStatus.LeftMatched := True;
@@ -722,7 +749,8 @@ Begin
   End;
 End;
 
-Function TNfa_Validate(Var Self: PNfa; Input: PChar): Boolean;
+Function TNfa_Validate(Var Self: PNfa; Input: PChar;
+  Const CaseInsensitive: Boolean): Boolean;
 Var
   I: TSize;
 Begin
@@ -734,7 +762,7 @@ Begin
   End;
   TNfa_Reset(Self);
   I := 0;
-  While TNfa_Move(Self, Input[I]) Do
+  While TNfa_Move(Self, Input[I], CaseInsensitive) Do
   Begin
     Inc(I);
   End;

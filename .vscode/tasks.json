@@ -41,15 +41,17 @@
             "label": "build",
             "problemMatcher": {
                 "owner": "external",
-                "fileLocation": ["absolute"],
+                "fileLocation": [
+                    "absolute"
+                ],
                 "pattern": {
-                   "regexp": "(\\/?(?:[^\\/:*?\\\"<>|\\r\\n]+\\/)*[^\\/\\s\\(:*?\\\"<>|\\r\\n]*)\\((\\d+),(\\d+)\\)\\s.*(Fatal|Error|Warning|Hint|Note):\\s\\((\\d+)\\)\\s(.*)$",
-                   "file": 1,
-                   "line": 2,
-                   "column": 3,
-                   "severity": 4,
-                   "code": 5,
-                   "message": 6
+                    "regexp": "(\\/?(?:[^\\/:*?\\\"<>|\\r\\n]+\\/)*[^\\/\\s\\(:*?\\\"<>|\\r\\n]*)\\((\\d+),(\\d+)\\)\\s.*(Fatal|Error|Warning|Hint|Note):\\s\\((\\d+)\\)\\s(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "code": 5,
+                    "message": 6
                 },
                 "severity": "info"
             },
@@ -73,15 +75,17 @@
             "label": "test",
             "problemMatcher": {
                 "owner": "external",
-                 "fileLocation": ["absolute"],
-                 "pattern": {
-                   "regexp": "(\\/?(?:[^\\/:*?\\\"<>|\\r\\n]+\\/)*[^\\/\\s\\(:*?\\\"<>|\\r\\n]*)\\((\\d+),(\\d+)\\)\\s.*(Fatal|Error|Warning|Hint|Note):\\s\\((\\d+)\\)\\s(.*)$",
-                   "file": 1,
-                   "line": 2,
-                   "column": 3,
-                   "severity": 4,
-                   "code": 5,
-                   "message": 6
+                "fileLocation": [
+                    "absolute"
+                ],
+                "pattern": {
+                    "regexp": "(\\/?(?:[^\\/:*?\\\"<>|\\r\\n]+\\/)*[^\\/\\s\\(:*?\\\"<>|\\r\\n]*)\\((\\d+),(\\d+)\\)\\s.*(Fatal|Error|Warning|Hint|Note):\\s\\((\\d+)\\)\\s(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "code": 5,
+                    "message": 6
                 },
                 "severity": "info"
             },
@@ -89,6 +93,6 @@
                 "kind": "test",
                 "isDefault": true
             }
-        }
+        },
     ]
 }

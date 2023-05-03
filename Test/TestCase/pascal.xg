@@ -1,3 +1,7 @@
+options {
+   caseInsensitive = true;
+}
+
 program
    : programHeading (INTERFACE)? block DOT 
    ;
