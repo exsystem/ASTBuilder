@@ -195,7 +195,7 @@ Begin
         While TNfa_Move(mTermRuleNode^.Nfa, TLexer_PeekNextChar(Self),
             Self^.GrammarNode^.Options[COption_CaseInsensitive].BooleanValue) Do
         Begin
-          TLexer_Forward(Self, 1); // overflow
+          TLexer_Forward(Self, 1); { overflow }
           If TNfa_Accepted(mTermRuleNode^.Nfa) Then
           Begin
             Result := True;

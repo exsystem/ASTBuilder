@@ -51,13 +51,15 @@ Begin
   Begin
     mFilePath := StrPas(DefaultFilePath);
   End;
-  {$IFDEF DCC}
-  mFilePath := '..\..\Test\TestCase\' + mFilePath;
   {$IFDEF VER150}
   mFilePath := 'Test/TestCase/' + mFilePath;
   {$ENDIF}
   {$IFDEF VER80}
   mFilePath := 'Test/TestCase/' + mFilePath;
+  {$ENDIF}
+  {$IFDEF DCC}
+  {$IFNDEF VINTAGE}
+  mFilePath := '..\..\Test\TestCase\' + mFilePath;
   {$ENDIF}
   {$ENDIF}
   {$IFDEF FPC}

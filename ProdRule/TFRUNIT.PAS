@@ -20,7 +20,8 @@ Uses
   TypeDef, IdNode, TrmNode, GrpNode, TERUnit,
   SFRUnit;
 
-{ termFactor -> LParen termExpr RParen ( QuestionMark ( QuestionMark ? ) | Plus ( QuestionMark ? ) | Asterisk ( QuestionMark ? ) ) ? }
+{ termFactor -> LParen termExpr RParen ( QuestionMark ( QuestionMark ? ) |
+                Plus ( QuestionMark ? ) | Asterisk ( QuestionMark ? ) ) ? }
 Function TermFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS4: TSize;

@@ -12,15 +12,13 @@ Type
 
   TList = Record
     FElemSize: TSize;
-    {$IFDEF VINTAGE}
-    FList: Array[0..10240] Of Byte;
-    {$ELSE}
-    FList: Array Of Byte;
-    {$ENDIF}
+    FList: {$IFDEF VINTAGE}PChar{$ELSE}PByte{$ENDIF};
+    FCapacity: TSize;
     Size: TSize;
   End;
 
 Function TList_Create(ElementSize: TSize; Capacity: TSize): PList;
+Procedure TList_Grow(Self: PList);
 Function TList_IsEmpty(Self: PList): Boolean;
 Procedure TList_Clear(Self: PList);
 Function TList_Get(Self: PList; Const Index: TSize): Pointer;
@@ -34,14 +32,29 @@ Procedure TList_Destroy(Self: PList);
 
 Implementation
 
+Uses
+  SysUtils;
+
 Function TList_Create(ElementSize: TSize; Capacity: TSize): PList;
 Begin
   New(Result);
+  GetMem(Result^.FList, Capacity * ElementSize);
   Result^.FElemSize := ElementSize;
-  {$IFNDEF VINTAGE}
-  SetLength(Result.FList, Capacity * ElementSize);
-  {$ENDIF}
+  Result^.FCapacity := Capacity;
   Result^.Size := 0;
+End;
+
+Procedure TList_Grow(Self: PList);
+Begin
+  If Self^.Size = Self^.FCapacity Then
+  Begin
+    {$IFDEF VINTAGE}
+    Self^.FList := ReallocMem(Self^.FList, Self^.FCapacity * Self^.FElemSize, Self^.FCapacity * 2 * Self^.FElemSize);
+    {$ELSE}
+    ReallocMem(Self^.FList, Self^.FCapacity * 2 * Self^.FElemSize);
+    {$ENDIF}
+    Self^.FCapacity := Self^.Size * 2;
+  End;
 End;
 
 Function TList_IsEmpty(Self: PList): Boolean;
@@ -66,12 +79,7 @@ End;
 
 Procedure TList_PushBack(Self: PList; Element: Pointer);
 Begin
-  {$IFNDEF VINTAGE}
-  If Self^.Size * Self^.FElemSize = Length(Self^.FList) Then
-  Begin
-    SetLength(Self^.FList, Self^.Size * Self^.FElemSize * 2);
-  End;
-  {$ENDIF}
+  TList_Grow(Self);
   Move(Element^, Self^.FList[Self^.Size * Self^.FElemSize], Self^.FElemSize);
   Inc(Self^.Size);
 End;
@@ -83,12 +91,7 @@ End;
 
 Function TList_EmplaceBack(Self: PList): Pointer;
 Begin
-  {$IFNDEF VINTAGE}
-  If Self^.Size * Self^.FElemSize = Length(Self^.FList) Then
-  Begin
-    SetLength(Self^.FList, Self^.Size * Self^.FElemSize * 2);
-  End;
-  {$ENDIF}
+  TList_Grow(Self);
   Result := @Self^.FList[Self^.Size * Self^.FElemSize];
   Inc(Self^.Size);
 End;
@@ -111,6 +114,7 @@ End;
 
 Procedure TList_Destroy(Self: PList);
 Begin
+  FreeMem(Self^.FList, Self^.FCapacity * Self^.FElemSize);
   Dispose(Self);
 End;
 

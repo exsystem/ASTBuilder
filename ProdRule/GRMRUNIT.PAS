@@ -29,7 +29,7 @@ Begin
   S1:
   If TParser_TermByGrammarTokenKind(Parser, eOptions) Then
   Begin
-    // NOP 
+    { NOP }
   End
   Else
   Begin
@@ -37,7 +37,7 @@ Begin
   End;
   If TParser_TermByGrammarTokenKind(Parser, eLCurlyBracket) Then
   Begin
-    // NOP 
+    { NOP } 
   End
   Else
   Begin

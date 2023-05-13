@@ -127,9 +127,9 @@ Var
 Begin
   If Self^.FAlreadyOn <> nil Then
   Begin
-    Dispose(Self^.FAlreadyOn);
-    Dispose(Self^.FOldStates);
-    Dispose(Self^.FNewStates);
+    TList_Destroy(Self^.FAlreadyOn);
+    TList_Destroy(Self^.FOldStates);
+    TList_Destroy(Self^.FNewStates);
   End;
   FreeStr(Self^.Keyword);
   For I := 0 To Self^.States^.Size - 1 Do
@@ -542,9 +542,9 @@ Var
 Begin
   If Self^.FAlreadyOn <> nil Then
   Begin
-    Dispose(Self^.FAlreadyOn);
-    Dispose(Self^.FOldStates);
-    Dispose(Self^.FNewStates);
+    TList_Destroy(Self^.FAlreadyOn);
+    TList_Destroy(Self^.FOldStates);
+    TList_Destroy(Self^.FNewStates);
   End;
   Self^.FOldStates := TList_Create(SizeOf(TNfaStateInstruction), Self^.States^.Size);
   Self^.FNewStates := TList_Create(SizeOf(TNfaStateInstruction), Self^.States^.Size);
