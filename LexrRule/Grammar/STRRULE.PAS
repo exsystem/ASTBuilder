@@ -6,7 +6,7 @@ Unit StrRule;
 Interface
 
 Uses
-  Lexer;
+  Lexer, GLexer;
 
 Function Parse(Lexer: PLexer): Boolean;
 Function Compose: TLexerRule;
@@ -14,7 +14,7 @@ Function Compose: TLexerRule;
 Implementation
 
 Uses
-  TypeDef, StrUtil;
+  TypeDef;
 
 { ' ( other-than-eof-and-quote | \ any-but-not-eof ) * '     }
 { first make a NFA for this regexp, then transform into DFA. }
@@ -38,7 +38,7 @@ Begin
   S2:
     If TLexer_PeekNextChar(Lexer) = '''' Then
     Begin
-      Lexer^.CurrentToken.StartPos := Lexer^.NextPos - mOffset;
+      Lexer^.CurrentToken.StartPos := TLexer_GetNextPos(Lexer) - mOffset;
       TLexer_Forward(Lexer, 1);
       Inc(mOffset);
       Goto S4;
@@ -76,16 +76,12 @@ Begin
     End;
   S4:
     Result := True;
-  FreeStr(Lexer^.CurrentToken.Value);
-  Lexer^.CurrentToken.Value :=
-    SubStr(Lexer^.Source, Lexer^.CurrentToken.StartPos, Lexer^.NextPos -
-    Lexer^.CurrentToken.StartPos);
+  TLexer_FetchNextToken(Lexer, TLexer_GetNextPos(Lexer) - Lexer^.CurrentToken.StartPos);
 End;
 
 Function Compose: TLexerRule;
 Begin
-  Result.TokenKind.TokenKind := eString;
-  Result.TokenKind.TermRule := nil;
+  Result.TokenKind := eString;
   Result.Parser := Parse;
 End;
 

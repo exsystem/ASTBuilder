@@ -6,7 +6,7 @@ Unit TFRUnit;
 Interface
 
 Uses
-  Parser, Lexer, NFA;
+  Parser, NFA;
 
 Function TermFactorRule(Parser: PParser; Var Nfa: PNfa): Boolean;
 
@@ -18,7 +18,7 @@ Implementation
 
 Uses
   TypeDef, IdNode, TrmNode, GrpNode, TERUnit,
-  SFRUnit;
+  SFRUnit, GLEXER, GPARSER;
 
 { termFactor -> LParen termExpr RParen ( QuestionMark ( QuestionMark ? ) |
                 Plus ( QuestionMark ? ) | Asterisk ( QuestionMark ? ) ) ? }
@@ -30,7 +30,7 @@ Label
   S1, S2, S3, S4, S5;
 Begin
   S1:
-    If TParser_TermByGrammarTokenKind(Parser, eLParen) Then
+    If TGrammarParser_Term(Parser, eLParen) Then
     Begin
       { NOP }
     End
@@ -50,7 +50,7 @@ Begin
       Exit;
     End;
   S3:
-    If TParser_TermByGrammarTokenKind(Parser, eRParen) Then
+    If TGrammarParser_Term(Parser, eRParen) Then
     Begin
       { NOP }
     End
@@ -63,17 +63,17 @@ Begin
   S4:
     mSavePointS4 := Parser^.FCurrentToken;
   Nfa := mNfa;
-  If TParser_TermByGrammarTokenKind(Parser, eQuestionMark) Then
+  If TGrammarParser_Term(Parser, eQuestionMark) Then
   Begin
-    TNfa_Optional(Nfa, TParser_TermByGrammarTokenKind(Parser, eQuestionMark));
+    TNfa_Optional(Nfa, TGrammarParser_Term(Parser, eQuestionMark));
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, ePlus) Then
+  Else If TGrammarParser_Term(Parser, ePlus) Then
   Begin
-    TNfa_OneOrMore(Nfa, TParser_TermByGrammarTokenKind(Parser, eQuestionMark));
+    TNfa_OneOrMore(Nfa, TGrammarParser_Term(Parser, eQuestionMark));
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, eAsterisk) Then
+  Else If TGrammarParser_Term(Parser, eAsterisk) Then
   Begin
-    TNfa_Multiple(Nfa, TParser_TermByGrammarTokenKind(Parser, eQuestionMark));
+    TNfa_Multiple(Nfa, TGrammarParser_Term(Parser, eQuestionMark));
   End
   Else
   Begin
@@ -104,17 +104,17 @@ Begin
     End;
   S2:
     mSavePointS2 := Parser^.FCurrentToken;
-  If TParser_TermByGrammarTokenKind(Parser, eQuestionMark) Then
+  If TGrammarParser_Term(Parser, eQuestionMark) Then
   Begin
-    TNfa_Optional(Nfa, Not TParser_TermByGrammarTokenKind(Parser, eQuestionMark));
+    TNfa_Optional(Nfa, Not TGrammarParser_Term(Parser, eQuestionMark));
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, ePlus) Then
+  Else If TGrammarParser_Term(Parser, ePlus) Then
   Begin
-    TNfa_OneOrMore(Nfa, Not TParser_TermByGrammarTokenKind(Parser, eQuestionMark));
+    TNfa_OneOrMore(Nfa, Not TGrammarParser_Term(Parser, eQuestionMark));
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, eAsterisk) Then
+  Else If TGrammarParser_Term(Parser, eAsterisk) Then
   Begin
-    TNfa_Multiple(Nfa, Not TParser_TermByGrammarTokenKind(Parser, eQuestionMark));
+    TNfa_Multiple(Nfa, Not TGrammarParser_Term(Parser, eQuestionMark));
   End
   Else
   Begin

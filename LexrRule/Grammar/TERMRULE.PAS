@@ -5,7 +5,7 @@ Unit TermRule;
 Interface
 
 Uses
-  Lexer;
+  Lexer, GLexer;
 
 Function Parse(Lexer: PLexer): Boolean;
 Function Compose: TLexerRule;
@@ -13,9 +13,11 @@ Function Compose: TLexerRule;
 Implementation
 
 Uses
-  StrUtil;
+  StrUtil, TypeDef;
 
 Function Parse(Lexer: PLexer): Boolean;
+Var
+  I: TSize;
 Begin
   If Not IsTermIdInitialChar(TLexer_PeekNextChar(Lexer)) Then
   Begin
@@ -24,23 +26,20 @@ Begin
   End;
 
   Result := True;
-  Lexer^.CurrentToken.StartPos := Lexer^.NextPos;
+  Lexer^.CurrentToken.StartPos := TLexer_GetNextPos(Lexer);
   TLexer_Forward(Lexer, 1);
+  I := 1;
   While IsIdChar(TLexer_PeekNextChar(Lexer)) Do
   Begin
     TLexer_Forward(Lexer, 1);
+    Inc(I);
   End;
-
-  FreeStr(Lexer^.CurrentToken.Value);
-  Lexer^.CurrentToken.Value :=
-    SubStr(Lexer^.Source, Lexer^.CurrentToken.StartPos, Lexer^.NextPos -
-    Lexer^.CurrentToken.StartPos);
+  TLexer_FetchNextToken(Lexer, I);
 End;
 
 Function Compose: TLexerRule;
 Begin
-  Result.TokenKind.TokenKind := eTerm;
-  Result.TokenKind.TermRule := nil;
+  Result.TokenKind := eTerm;
   Result.Parser := Parse;
 End;
 

@@ -189,17 +189,6 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="ASTNode.pas"/>
-        <DCCReference Include="Lexer.pas"/>
-        <DCCReference Include="Parser.pas"/>
-        <DCCReference Include="AST\GRMRNODE.PAS"/>
-        <DCCReference Include="AST\GRPNODE.PAS"/>
-        <DCCReference Include="AST\IDNODE.PAS"/>
-        <DCCReference Include="AST\RULENODE.PAS"/>
-        <DCCReference Include="AST\TRMNODE.PAS"/>
-        <DCCReference Include="AST\TRMRNODE.PAS"/>
-        <DCCReference Include="ASTVstr\GRMRPASR.PAS"/>
-        <DCCReference Include="ASTVstr\GRMRVIWR.PAS"/>
         <DCCReference Include="Automata\NFA.PAS"/>
         <DCCReference Include="LexrRule\Grammar\ASTKRULE.PAS"/>
         <DCCReference Include="LexrRule\Grammar\CHARRULE.PAS"/>
@@ -232,25 +221,40 @@
         <DCCReference Include="ProdRule\TERUNIT.PAS"/>
         <DCCReference Include="ProdRule\TFRUNIT.PAS"/>
         <DCCReference Include="ProdRule\TRRUNIT.PAS"/>
-        <DCCReference Include="Util\CLSUTILS.PAS"/>
-        <DCCReference Include="Util\LIST.PAS"/>
         <DCCReference Include="Util\STRUTILS.pas"/>
-        <DCCReference Include="Util\TRIE.PAS"/>
-        <DCCReference Include="Util\TYPEDEF.PAS"/>
         <DCCReference Include="Test\TEST1.PAS"/>
         <DCCReference Include="Test\TEST2.PAS"/>
         <DCCReference Include="Test\TEST3.PAS"/>
         <DCCReference Include="Test\TESTUTIL.PAS"/>
         <DCCReference Include="LexrRule\Grammar\CHSTRULE.PAS"/>
         <DCCReference Include="LexrRule\Grammar\DOTRULE.PAS"/>
-        <DCCReference Include="Util\STACK.PAS"/>
         <DCCReference Include="ProdRule\OPTRUNIT.PAS"/>
         <DCCReference Include="LexrRule\Grammar\EQURULE.PAS"/>
         <DCCReference Include="LexrRule\Grammar\LCBRULE.PAS"/>
         <DCCReference Include="LexrRule\Grammar\OPTRULE.PAS"/>
         <DCCReference Include="LexrRule\Grammar\RCBRULE.PAS"/>
+        <DCCReference Include="LEXER\CLEXER.PAS"/>
+        <DCCReference Include="LEXER\GLEXER.PAS"/>
+        <DCCReference Include="LEXER\LEXER.PAS"/>
+        <DCCReference Include="AST\ASTNode.pas"/>
+        <DCCReference Include="AST\GRMRNODE.PAS"/>
+        <DCCReference Include="AST\GRPNODE.PAS"/>
+        <DCCReference Include="AST\IdNode.pas"/>
+        <DCCReference Include="AST\RuleNode.pas"/>
+        <DCCReference Include="AST\TRMNODE.PAS"/>
+        <DCCReference Include="AST\TRMRNODE.PAS"/>
+        <DCCReference Include="Util\CLSUTILS.PAS"/>
+        <DCCReference Include="Util\LIST.PAS"/>
+        <DCCReference Include="Util\STACK.PAS"/>
+        <DCCReference Include="Util\STREAM.PAS"/>
         <DCCReference Include="Util\StrUtil.pas"/>
+        <DCCReference Include="Util\Trie.pas"/>
+        <DCCReference Include="Util\TypeDef.pas"/>
         <DCCReference Include="Util\Utility.pas"/>
+        <DCCReference Include="PARSER\GPARSER.pas"/>
+        <DCCReference Include="PARSER\GRMRPASR.PAS"/>
+        <DCCReference Include="PARSER\GRMRVIWR.PAS"/>
+        <DCCReference Include="PARSER\PARSER.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -295,6 +299,12 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="Win32\Debug\MyFormatter.exe" Configuration="Debug" Class="ProjectOutput"/>
+                <DeployFile LocalName="Win32\Debug\MyFormatter.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>MyFormatter.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Win64\Debug\MyFormatter.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="iOSSimulator">

@@ -83,7 +83,7 @@ End;
 
 Procedure TGrammarNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Begin
-  Visitor^.VMT^.VisitGrammar(Visitor, Self);
+  Visitor^.Methods^.VisitGrammar(Visitor, Self);
 End;
 
 Begin

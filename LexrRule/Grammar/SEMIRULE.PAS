@@ -5,7 +5,7 @@ Unit SemiRule;
 Interface
 
 Uses
-  Lexer;
+  Lexer, GLexer;
 
 Function Parse(Lexer: PLexer): Boolean;
 Function Compose: TLexerRule;
@@ -22,8 +22,7 @@ End;
 
 Function Compose: TLexerRule;
 Begin
-  Result.TokenKind.TokenKind := eSemi;
-  Result.TokenKind.TermRule := nil;
+  Result.TokenKind := eSemi;
   Result.Parser := Parse;
 End;
 

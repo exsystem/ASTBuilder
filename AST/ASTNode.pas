@@ -9,7 +9,9 @@ Type
 
   PAstNode = ^TAstNode;
 
-  PAstVisitor = ^TAstVisitor;
+  PAstVisitor = ^IAstVisitor;
+
+  PAstVisitor_Methods = ^TAstVisitor_Methods;
 
   TAstNode_Destroy_Proc = Procedure(Self: PAstNode);
 
@@ -26,14 +28,14 @@ Type
     VMT: PAstNode_VMT;
   End;
 
-  PAstVisitor_VMT = ^TAstVisitor_VMT;
+  IAstVisitor = Record
+    Instance: Pointer;
+    Methods: PAstVisitor_Methods;
+  End;
 
-  TAstVisitor_Destroy_Proc = Procedure(Self: PAstVisitor);
+  TAstVisitor_Visit_Proc = Procedure(Intf: PAstVisitor; Node: PAstNode);
 
-  TAstVisitor_Visit_Proc = Procedure(Self: PAstVisitor; Node: PAstNode);
-
-  TAstVisitor_VMT = Record
-    Destory: TAstVisitor_Destroy_Proc;
+  TAstVisitor_Methods = Record
     VisitId: TAstVisitor_Visit_Proc;
     VisitTerm: TAstVisitor_Visit_Proc;
     VisitGroup: TAstVisitor_Visit_Proc;
@@ -42,21 +44,13 @@ Type
     VisitGrammar: TAstVisitor_Visit_Proc;
   End;
 
-  TAstVisitor = Record
-    VMT: PAstVisitor_VMT;
-  End;
-
 Procedure TAstNode_Create(Var Self: PAstNode);
 Procedure TAstNode_Destroy(Self: PAstNode);
-
-Procedure TAstVisitor_Create(Var Self: PAstVisitor);
-Procedure TAstVisitor_Destroy(Self: PAstVisitor);
 
 Implementation
 
 Var
   mTAstNode_VMT: TAstNode_VMT;
-  mTAstVisitor_VMT: TAstVisitor_VMT;
 
 Procedure TAstNode_Create(Var Self: PAstNode);
 Begin
@@ -69,17 +63,6 @@ Begin
   { NOP }
 End;
 
-Procedure TAstVisitor_Create(Var Self: PAstVisitor);
-Begin
-  Self^.VMT := @mTAstVisitor_VMT;
-End;
-
-Procedure TAstVisitor_Destroy(Self: PAstVisitor);
-Begin
-  { NOP }
-End;
-
 Begin
   mTAstNode_VMT.Destory := TAstNode_Destroy;
-  mTAstVisitor_VMT.Destory := TAstVisitor_Destroy;
 End.

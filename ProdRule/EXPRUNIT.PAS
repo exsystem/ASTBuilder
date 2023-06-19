@@ -6,7 +6,7 @@ Unit ExpRUnit;
 Interface
 
 Uses
-  Parser, Lexer, ASTNode;
+  Parser, ASTNode;
 
 Function ExprRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 
@@ -15,7 +15,7 @@ Function ExprRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  TypeDef, List, IdNode, GrpNode, FRUnit;
+  TypeDef, List, IdNode, GrpNode, FRUnit, GLEXER, GPARSER;
 
 { expr -> factor* ( Or factor* )* }
 Function ExprRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
@@ -49,7 +49,7 @@ Begin
     End;
     Goto S1;
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, eOr) Then
+  Else If TGrammarParser_Term(Parser, eOr) Then
   Begin
     If mExprNode = nil Then
     Begin
@@ -86,7 +86,7 @@ Begin
     End;
     Goto S2;
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, eOr) Then
+  Else If TGrammarParser_Term(Parser, eOr) Then
   Begin
     TList_PushBack(PGroupNode(mExprNode)^.Terms, @mGroupNodeN);
     mGroupNodeN := nil;

@@ -6,10 +6,10 @@ Unit KywdRule;
 Interface
 
 Uses
-  Lexer;
+  Lexer, GLexer;
 
 Function Parse(Lexer: PLexer; Keyword: PChar): Boolean;
-Function Compose(Lexer: PLexer; Parser: TLexerRuleParser; TokenKind: TTokenKind;
+Function Compose(Lexer: PLexer; Parser: TLexerRuleParser; TokenKind: TGrammarTokenKind;
   Keyword: PChar): TLexerRule;
 
 Implementation
@@ -24,19 +24,19 @@ Begin
   Begin
     FreeStr(Lexer^.CurrentToken.Value);
     Lexer^.CurrentToken.Value := strnew(Keyword);
-    Lexer^.CurrentToken.StartPos := Lexer^.NextPos;
+    Lexer^.CurrentToken.StartPos := TLexer_GetNextPos(Lexer);
     TLexer_Forward(Lexer, StrLen(Keyword));
   End;
 End;
 
-Function Compose(Lexer: PLexer; Parser: TLexerRuleParser; TokenKind: TTokenKind;
+Function Compose(Lexer: PLexer; Parser: TLexerRuleParser; TokenKind: TGrammarTokenKind;
   Keyword: PChar): TLexerRule;
 Begin
   Result.TokenKind := TokenKind;
   Result.Parser := Parser;
   If StrComp(Keyword, '') <> 0 Then
   Begin
-    TTrie_Set(Lexer^.Keywords, Keyword, @TokenKind);
+    TTrie_Set(PGrammarLexer(Lexer)^.Keywords, Keyword, @TokenKind);
   End;
 End;
 

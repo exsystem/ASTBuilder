@@ -46,7 +46,7 @@ End;
 
 Procedure TIdNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Begin
-  Visitor^.VMT^.VisitId(Visitor, Self);
+  Visitor^.Methods^.VisitId(Visitor, Self);
 End;
 
 Begin

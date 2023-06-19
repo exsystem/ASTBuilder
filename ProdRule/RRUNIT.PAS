@@ -15,8 +15,7 @@ Implementation
 
 Uses
   IdNode, GrpNode, RuleNode, ExpRUnit,
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
-
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
 { rule -> Id Colon expr Semi }
 Function RuleRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
@@ -26,7 +25,7 @@ Label
   S1, S2;
 Begin
   S1:
-    If TParser_TermByGrammarTokenKind(Parser, eId) Then
+    If TGrammarParser_Term(Parser, eId) Then
     Begin
       mName := strnew(TParser_GetCurrentToken(Parser)^.Value);
     End
@@ -35,7 +34,7 @@ Begin
       Result := False;
       Exit;
     End;
-  If TParser_TermByGrammarTokenKind(Parser, eColon) Then
+  If TGrammarParser_Term(Parser, eColon) Then
   Begin
     { NOP }
   End
@@ -55,7 +54,7 @@ Begin
     Result := False;
     Exit;
   End;
-  If TParser_TermByGrammarTokenKind(Parser, eSemi) Then
+  If TGrammarParser_Term(Parser, eSemi) Then
   Begin
     TRuleNode_Create(PRuleNode(Ast));
     FreeStr(PRuleNode(Ast)^.Name);

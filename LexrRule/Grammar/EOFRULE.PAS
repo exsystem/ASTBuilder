@@ -5,7 +5,7 @@ Unit EofRule;
 Interface
 
 Uses
-  Lexer;
+  Lexer, GLexer;
 
 Function Parse(Lexer: PLexer): Boolean;
 
@@ -18,13 +18,12 @@ Uses
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := SymbRule.Parse(Lexer, #1); { #0 }
+  Result := SymbRule.Parse(Lexer, #0); { #0 }
 End;
 
 Function Compose: TLexerRule;
 Begin
-  Result.TokenKind.TokenKind := eEof;
-  Result.TokenKind.TermRule := nil;
+  Result.TokenKind := eEof;
   Result.Parser := Parse;
 End;
 

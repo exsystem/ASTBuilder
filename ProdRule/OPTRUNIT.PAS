@@ -15,7 +15,7 @@ Implementation
 
 Uses
   IdNode, GRMRNODE, TrmRNode, 
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
 
 { optionRule -> Id Equal Id Semi }
 Function OptionRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
@@ -26,7 +26,7 @@ Label
   S1, S2;
 Begin
   S1:
-    If TParser_TermByGrammarTokenKind(Parser, eId) Then
+    If TGrammarParser_Term(Parser, eId) Then
     Begin
       mKey := strnew(TParser_GetCurrentToken(Parser)^.Value);
     End
@@ -35,7 +35,7 @@ Begin
       Result := False;
       Exit;
     End;
-  If TParser_TermByGrammarTokenKind(Parser, eEqual) Then
+  If TGrammarParser_Term(Parser, eEqual) Then
   Begin
     { NOP }
   End
@@ -45,7 +45,7 @@ Begin
     Result := False;
     Exit;
   End;
-  If TParser_TermByGrammarTokenKind(Parser, eId) Then
+  If TGrammarParser_Term(Parser, eId) Then
   Begin
     mValue := strnew(TParser_GetCurrentToken(Parser)^.Value);
   End
@@ -55,7 +55,7 @@ Begin
     Result := False;
     Exit;
   End;
-  If TParser_TermByGrammarTokenKind(Parser, eSemi) Then
+  If TGrammarParser_Term(Parser, eSemi) Then
   Begin
     If StrComp(mKey, 'caseInsensitive') = 0 Then
     Begin

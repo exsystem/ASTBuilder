@@ -5,7 +5,7 @@ Unit CharRule;
 Interface
 
 Uses
-  Lexer;
+  Lexer, GLexer;
 
 Function Parse(Lexer: PLexer): Boolean;
 Function Compose: TLexerRule;
@@ -13,7 +13,7 @@ Function Compose: TLexerRule;
 Implementation
 
 Uses
-  TypeDef, StrUtil;
+  TypeDef;
 
 { ' ( \ any-but-not-eof | other-than-eof-and-quote ) ' }
 Function Parse(Lexer: PLexer): Boolean;
@@ -69,7 +69,7 @@ Begin
   S4:
     If TLexer_PeekNextChar(Lexer) = '''' Then
     Begin
-      Lexer^.CurrentToken.StartPos := Lexer^.NextPos - mOffset;
+      Lexer^.CurrentToken.StartPos := TLexer_GetNextPos(Lexer) - mOffset;
       TLexer_Forward(Lexer, 1);
       Goto S5;
     End
@@ -80,17 +80,14 @@ Begin
       Exit;
     End;
   S5:
-    FreeStr(Lexer^.CurrentToken.Value);
-  Lexer^.CurrentToken.Value :=
-    SubStr(Lexer^.Source, Lexer^.CurrentToken.StartPos, Lexer^.NextPos -
+    TLexer_FetchNextToken(Lexer, TLexer_GetNextPos(Lexer) -
     Lexer^.CurrentToken.StartPos);
   Result := True;
 End;
 
 Function Compose: TLexerRule;
 Begin
-  Result.TokenKind.TokenKind := eChar;
-  Result.TokenKind.TermRule := nil;
+  Result.TokenKind := eChar;
   Result.Parser := Parse;
 End;
 

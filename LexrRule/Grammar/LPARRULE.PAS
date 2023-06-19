@@ -6,7 +6,7 @@ Unit LParRule;
 Interface
 
 Uses
-  Lexer;
+  Lexer, GLexer;
 
 Function Parse(Lexer: PLexer): Boolean;
 Function Compose: TLexerRule;
@@ -23,8 +23,7 @@ End;
 
 Function Compose: TLexerRule;
 Begin
-  Result.TokenKind.TokenKind := eLParen;
-  Result.TokenKind.TermRule := nil;
+  Result.TokenKind := eLParen;
   Result.Parser := Parse;
 End;
 

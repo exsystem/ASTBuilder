@@ -6,7 +6,7 @@ Unit RBrkRule;
 Interface
 
 Uses
-  Lexer;
+  Lexer, GLexer;
 
 Function Parse(Lexer: PLexer): Boolean;
 Function Compose: TLexerRule;
@@ -23,8 +23,7 @@ End;
 
 Function Compose: TLexerRule;
 Begin
-  Result.TokenKind.TokenKind := eRBracket;
-  Result.TokenKind.TermRule := nil;
+  Result.TokenKind := eRBracket;
   Result.Parser := Parse;
 End;
 

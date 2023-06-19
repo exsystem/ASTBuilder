@@ -55,7 +55,7 @@ End;
 
 Procedure TTermRuleNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Begin
-  Visitor^.VMT^.VisitTermRule(Visitor, Self);
+  Visitor^.Methods^.VisitTermRule(Visitor, Self);
 End;
 
 Begin

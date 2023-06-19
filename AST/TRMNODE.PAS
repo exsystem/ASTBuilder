@@ -28,7 +28,7 @@ Var
 Implementation
 
 Uses
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, CLEXER;
 
 Procedure TTermNode_Create(Var Self: PTermNode);
 Begin
@@ -37,20 +37,20 @@ Begin
   Self^.Parent.VMT := @mTTermNode_AST;
   Self^.Token.Error := strnew('');
   Self^.Token.Value := strnew('');
-  Self^.Token.Kind.TermRule := strnew('');
+  TTermRule(Self^.Token.Kind) := strnew('');
 End;
 
 Procedure TTermNode_Destroy(Self: PAstNode);
 Begin
   FreeStr(PTermNode(Self)^.Token.Error);
   FreeStr(PTermNode(Self)^.Token.Value);
-  FreeStr(PTermNode(Self)^.Token.Kind.TermRule);
+  FreeStr(TTermRule(PTermNode(Self)^.Token.Kind));
   TAstNode_Destroy(Self);
 End;
 
 Procedure TTermNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Begin
-  Visitor^.VMT^.VisitTerm(Visitor, Self);
+  Visitor^.Methods^.VisitTerm(Visitor, Self);
 End;
 
 Begin

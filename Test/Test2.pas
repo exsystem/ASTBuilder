@@ -15,38 +15,37 @@ Uses {$IFNDEF FPC}
   System.Rtti
   {$ENDIF}
   , {$ENDIF}
-  SysUtils, Lexer, Parser, GrmrViwr, GrmRUnit, ASTNode, TestUtil,
- {$IFDEF USE_STRINGS}strings,{$ENDIF} StrUtil;
+ {$IFDEF USE_STRINGS}strings,{$ENDIF}SysUtils, Lexer, PARSER, GrmrViwr, GrmRUnit, ASTNode, TestUtil,
+  GLEXER, GPARSER, STREAM;
 
 Procedure Test;
 Var
-  mSource: PChar;
+  mSource: PStream;
   mGrammarLexer: PLexer;
-  mParser: PParser;
+  mParser: PGrammarParser;
   mViewer: PAstViewer;
 Begin
   mSource := PropmtForFile('Grammar File Path? (Default = t.xg)', 't.xg');
-  mGrammarLexer := GetGrammarLexer(mSource);
-  mParser := TParser_Create(mGrammarLexer, GrammarRule);
-  If TParser_Parse(mParser) Then
+  mGrammarLexer := PLexer(GetGrammarLexer(mSource));
+  TGrammarParser_Create(mParser, mGrammarLexer, GrammarRule);
+  If TGrammarParser_Parse(mParser) Then
     WriteLn('ACCEPTED')
   Else
   Begin
-    WriteLn(Format('ERROR: Parser Message: %s', [mParser^.Error]));
+    WriteLn(Format('ERROR: Parser Message: %s', [mParser^.Parent.Error]));
     WriteLn(Format('ERROR: Current Token at Pos = %d, Value = [%s], Message: %s',
       [mGrammarLexer^.CurrentToken.StartPos, mGrammarLexer^.CurrentToken.Value,
       mGrammarLexer^.CurrentToken.Error]));
   End;
 
   TAstViewer_Create(mViewer);
-  mParser^.Ast^.VMT^.Accept(mParser^.Ast, PAstVisitor(mViewer));
-  TAstViewer_Destroy(PAstVisitor(mViewer));
+  mParser^.Ast^.VMT^.Accept(mParser^.Ast, mViewer^.As_IAstVisitor);
+  TAstViewer_Destroy(mViewer);
   Dispose(mViewer);
 
   Writeln;
-  TParser_Destroy(mParser);
+  TGrammarParser_Destroy(PParser(mParser));
   TLexer_Destroy(mGrammarLexer);
-  FreeStr(mSource);
 End;
 
 End.

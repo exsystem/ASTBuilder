@@ -18,7 +18,7 @@ Implementation
 
 Uses
   TypeDef, IdNode, TrmNode, GrpNode, ChFRUnit,
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
 
 { stringFactor -> charFactor }
 Function StringFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
@@ -37,7 +37,7 @@ Label
   S1, S2;
 Begin
   S1:
-    If TParser_TermByGrammarTokenKind(Parser, eString) Then
+    If TGrammarParser_Term(Parser, eString) Then
     Begin
       TNfa_Create(Nfa);
       mToken := TParser_GetCurrentToken(Parser);

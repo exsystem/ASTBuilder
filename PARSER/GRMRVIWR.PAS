@@ -13,31 +13,31 @@ Type
   PAstViewer = ^TAstViewer;
 
   TAstViewer = Record
-    Parent: TAstVisitor;
+    As_IAstVisitor: PAstVisitor;
     Level: TSize;
   End;
 
 Procedure TAstViewer_Create(Var Self: PAstViewer);
 
-Procedure TAstViewer_Destroy(Self: PAstVisitor);
+Procedure TAstViewer_Destroy(Self: PAstViewer);
 
-Procedure TAstViewer_VisitId(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitId(Intf: PAstVisitor; Node: PAstNode);
 
-Procedure TAstViewer_VisitTerm(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitTerm(Intf: PAstVisitor; Node: PAstNode);
 
-Procedure TAstViewer_VisitGroup(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitGroup(Intf: PAstVisitor; Node: PAstNode);
 
-Procedure TAstViewer_VisitRule(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitRule(Intf: PAstVisitor; Node: PAstNode);
 
-Procedure TAstViewer_VisitTermRule(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitTermRule(Intf: PAstVisitor; Node: PAstNode);
 
-Procedure TAstViewer_VisitGrammar(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitGrammar(Intf: PAstVisitor; Node: PAstNode);
 
-Procedure TAstViewer_WriteLn(Self: PAstVisitor; Content: PChar);
+Procedure TAstViewer_WriteLn(Self: PAstViewer; Content: PChar);
 
-Procedure TAstViewer_Indent(Self: PAstVisitor);
+Procedure TAstViewer_Indent(Self: PAstViewer);
 
-Procedure TAstViewer_Deindent(Self: PAstVisitor);
+Procedure TAstViewer_Deindent(Self: PAstViewer);
 
 Implementation
 
@@ -47,22 +47,24 @@ Uses
   SysUtils{$IFDEF USE_STRINGS}, strings{$ENDIF}, StrUtil;
 
 Var
-  mTAstViewer_VMT: TAstVisitor_VMT;
+  mTAstViewer_Methods: TAstVisitor_Methods;
 
 Procedure TAstViewer_Create(Var Self: PAstViewer);
 Begin
   New(Self); { Final }
-  TAstVisitor_Create(PAstVisitor(Self));
-  Self^.Parent.VMT := @mTAstViewer_VMT;
+  New(Self^.As_IAstVisitor);
+  Self^.As_IAstVisitor.Instance := Self; 
+  Self^.As_IAstVisitor.Methods := @mTAstViewer_Methods;
+
   Self^.Level := 0;
 End;
 
-Procedure TAstViewer_Destroy(Self: PAstVisitor);
+Procedure TAstViewer_Destroy(Self: PAstViewer);
 Begin
-  TAstVisitor_Destroy(Self);
+  Dispose(Self^.As_IAstVisitor);
 End;
 
-Procedure TAstViewer_VisitId(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitId(Intf: PAstVisitor; Node: PAstNode);
 Var
   mNode: PIdNode;
   mText: PChar;
@@ -71,11 +73,11 @@ Begin
   mText := strnew('Non-Terminal: ');
   mText := ReallocStr(mText, strlen(mText) + strlen(mNode^.Value));
   strcat(mText, mNode^.Value);
-  TAstViewer_WriteLn(Self, mText);
+  TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
 End;
 
-Procedure TAstViewer_VisitTerm(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitTerm(Intf: PAstVisitor; Node: PAstNode);
 Var
   mNode: PTermNode;
   mText: PChar;
@@ -84,11 +86,11 @@ Begin
   mText := strnew('Terminal: ');
   mText := ReallocStr(mText, StrLen(mText) + StrLen(mNode^.Token.Value));
   strcat(mText, mNode^.Token.Value);
-  TAstViewer_WriteLn(Self, mText);
+  TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
 End;
 
-Procedure TAstViewer_VisitGroup(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitGroup(Intf: PAstVisitor; Node: PAstNode);
 Var
   mNode: PGroupNode;
   I: TSize;
@@ -122,26 +124,26 @@ Begin
     strlen(':'));
   strcat(mText, mTermsRelationship);
   strcat(mText, ':');
-  TAstViewer_WriteLn(Self, mText);
+  TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
 
   For I := 0 To mNode^.Terms^.Size - 1 Do
   Begin
     mItem := PPAstNode(TList_Get(mNode^.Terms, I))^;
-    TAstViewer_Indent(Self);
+    TAstViewer_Indent(PAstViewer(Intf^.Instance));
     If mItem = nil Then
     Begin
-      TAstViewer_WriteLn(Self, '<empty term>');
+      TAstViewer_WriteLn(PAstViewer(Intf^.Instance), '<empty term>');
     End
     Else
     Begin
-      mItem^.VMT^.Accept(mItem, Self);
+      mItem^.VMT^.Accept(mItem, Intf);
     End;
-    TAstViewer_Deindent(Self);
+    TAstViewer_Deindent(PAstViewer(Intf^.Instance));
   End;
 End;
 
-Procedure TAstViewer_VisitRule(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitRule(Intf: PAstVisitor; Node: PAstNode);
 Var
   mNode: PRuleNode;
   mText: PChar;
@@ -150,21 +152,21 @@ Begin
   mText := strnew(mNode^.Name);
   mText := ReallocStr(mText, strlen(mNode^.Name) + strlen(':'));
   strcat(mText, ':');
-  TAstViewer_WriteLn(Self, mText);
+  TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
-  TAstViewer_Indent(Self);
+  TAstViewer_Indent(PAstViewer(Intf^.Instance));
   If mNode^.Expr = nil Then
   Begin
-    TAstViewer_WriteLn(Self, '<empty syntax rule>');
+    TAstViewer_WriteLn(PAstViewer(Intf^.Instance), '<empty syntax rule>');
   End
   Else
   Begin
-    mNode^.Expr^.Parent.VMT^.Accept(PAstNode(mNode^.Expr), Self);
+    mNode^.Expr^.Parent.VMT^.Accept(PAstNode(mNode^.Expr), Intf);
   End;
-  TAstViewer_Deindent(Self);
+  TAstViewer_Deindent(PAstViewer(Intf^.Instance));
 End;
 
-Procedure TAstViewer_VisitTermRule(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitTermRule(Intf: PAstVisitor; Node: PAstNode);
 Var
   mNode: PTermRuleNode;
   mState: PNfaState;
@@ -179,18 +181,18 @@ Begin
   mText := CreateStr(strlen(mNode^.Name) + 1);
   strcat(mText, mNode^.Name);
   strcat(mText, ':');
-  TAstViewer_WriteLn(Self, mText);
+  TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
-  TAstViewer_Indent(Self);
+  TAstViewer_Indent(PAstViewer(Intf^.Instance));
   If mNode^.Nfa = nil Then
   Begin
-    TAstViewer_WriteLn(Self, '<empty lex rule>');
+    TAstViewer_WriteLn(PAstViewer(Intf^.Instance), '<empty lex rule>');
   End
   Else
   Begin
     If mNode^.Skipped Then
     Begin
-      TAstViewer_WriteLn(Self, 'Ignored');
+      TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Ignored');
     End;
     mStr := IntToStr(mNode^.Nfa^.StartState);
     mStrPChar := CreateStr(Length(mStr));
@@ -198,18 +200,18 @@ Begin
     mText := CreateStr(strlen('Keyword: ') + strlen(mNode^.Nfa^.Keyword));
     strcat(mText, 'Keyword: ');
     strcat(mText, mNode^.Nfa^.Keyword);
-    TAstViewer_WriteLn(Self, mText);
+    TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
     FreeStr(mText);
     mText := CreateStr(strlen('Start state: ') + StrLen(mStrPChar));
     strcat(mText, 'Start state: ');
     strcat(mText, mStrPChar);
     FreeStr(mStrPChar);
-    TAstViewer_WriteLn(Self, mText);
+    TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
     FreeStr(mText);
-    TAstViewer_WriteLn(Self, 'Moves: ');
-    TAstViewer_Indent(Self);
-    TAstViewer_WriteLn(Self, '```mermaid');
-    TAstViewer_WriteLn(Self, 'graph LR');
+    TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Moves: ');
+    TAstViewer_Indent(PAstViewer(Intf^.Instance));
+    TAstViewer_WriteLn(PAstViewer(Intf^.Instance), '```mermaid');
+    TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'graph LR');
     For I := 0 To mNode^.Nfa^.States^.Size - 1 Do
     Begin
       mState := TNfa_GetState(mNode^.Nfa, I);
@@ -221,7 +223,7 @@ Begin
       Begin
         mFromState := IntToStr(I);
       End;
-      TAstViewer_Indent(Self);
+      TAstViewer_Indent(PAstViewer(Intf^.Instance));
       If mState^.Edges^.Size > 0 Then
       Begin
         For J := 0 To mState^.Edges^.Size - 1 Do
@@ -238,47 +240,47 @@ Begin
               ' |' + IntToStr(mEdge^.ToState) + ';' + #0;
           End;
           mText := @mStr[1];
-          TAstViewer_WriteLn(Self, mText);
+          TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
         End;
       End
       Else
       Begin
         mStr := mFromState + ';' + #0;
         mText := @mStr[1];
-        TAstViewer_WriteLn(Self, mText);
+        TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
       End;
-      TAstViewer_Deindent(Self);
+      TAstViewer_Deindent(PAstViewer(Intf^.Instance));
     End;
-    TAstViewer_WriteLn(Self, '```');
-    TAstViewer_Deindent(Self);
+    TAstViewer_WriteLn(PAstViewer(Intf^.Instance), '```');
+    TAstViewer_Deindent(PAstViewer(Intf^.Instance));
   End;
-  TAstViewer_Deindent(Self);
+  TAstViewer_Deindent(PAstViewer(Intf^.Instance));
 End;
 
-Procedure TAstViewer_VisitGrammar(Self: PAstVisitor; Node: PAstNode);
+Procedure TAstViewer_VisitGrammar(Intf: PAstVisitor; Node: PAstNode);
 Var
   mNode: PGrammarNode;
   I: TSize;
   mItem: PAstNode;
 Begin
   mNode := PGrammarNode(Node);
-  TAstViewer_WriteLn(Self, 'Options:');
-  TAstViewer_Indent(Self);
+  TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Options:');
+  TAstViewer_Indent(PAstViewer(Intf^.Instance));
   If mNode^.Options[COption_CaseInsensitive].BooleanValue Then
   Begin
-    TAstViewer_WriteLn(Self, 'CaseInsensitive;');
+    TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'CaseInsensitive;');
   End;
-  TAstViewer_Deindent(Self);
-  TAstViewer_WriteLn(Self, 'Grammar:');
-  TAstViewer_Indent(Self);
+  TAstViewer_Deindent(PAstViewer(Intf^.Instance));
+  TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Grammar:');
+  TAstViewer_Indent(PAstViewer(Intf^.Instance));
   If mNode^.Rules^.Size <> 0 Then
   Begin
     For I := 0 To mNode^.Rules^.Size - 1 Do
     Begin
       mItem := PPAstNode(TList_Get(mNode^.Rules, I))^;
-      TAstViewer_Indent(Self);
-      mItem^.VMT^.Accept(mItem, Self);
-      TAstViewer_Deindent(Self);
+      TAstViewer_Indent(PAstViewer(Intf^.Instance));
+      mItem^.VMT^.Accept(mItem, Intf);
+      TAstViewer_Deindent(PAstViewer(Intf^.Instance));
     End;
   End;
   If mNode^.TermRules^.Size <> 0 Then
@@ -286,20 +288,20 @@ Begin
     For I := 0 To mNode^.TermRules^.Size - 1 Do
     Begin
       mItem := PPAstNode(TList_Get(mNode^.TermRules, I))^;
-      TAstViewer_Indent(Self);
-      mItem^.VMT^.Accept(mItem, Self);
-      TAstViewer_Deindent(Self);
+      TAstViewer_Indent(PAstViewer(Intf^.Instance));
+      mItem^.VMT^.Accept(mItem, Intf);
+      TAstViewer_Deindent(PAstViewer(Intf^.Instance));
     End;
   End;
 End;
 
-Procedure TAstViewer_WriteLn(Self: PAstVisitor; Content: PChar);
+Procedure TAstViewer_WriteLn(Self: PAstViewer; Content: PChar);
 Var
   I: TSize;
 Begin
-  If PAstViewer(Self)^.Level > 0 Then
+  If Self^.Level > 0 Then
   Begin
-    For I := 0 To PAstViewer(Self)^.Level - 1 Do
+    For I := 0 To Self^.Level - 1 Do
     Begin
       Write('  ');
     End;
@@ -307,22 +309,21 @@ Begin
   Writeln(Content);
 End;
 
-Procedure TAstViewer_Indent(Self: PAstVisitor);
+Procedure TAstViewer_Indent(Self: PAstViewer);
 Begin
-  Inc(PAstViewer(Self)^.Level);
+  Inc(Self^.Level);
 End;
 
-Procedure TAstViewer_Deindent(Self: PAstVisitor);
+Procedure TAstViewer_Deindent(Self: PAstViewer);
 Begin
-  Dec(PAstViewer(Self)^.Level);
+  Dec(Self^.Level);
 End;
 
 Begin
-  mTAstViewer_VMT.Destory := TAstViewer_Destroy;
-  mTAstViewer_VMT.VisitId := TAstViewer_VisitId;
-  mTAstViewer_VMT.VisitTerm := TAstViewer_VisitTerm;
-  mTAstViewer_VMT.VisitGroup := TAstViewer_VisitGroup;
-  mTAstViewer_VMT.VisitRule := TAstViewer_VisitRule;
-  mTAstViewer_VMT.VisitTermRule := TAstViewer_VisitTermRule;
-  mTAstViewer_VMT.VisitGrammar := TAstViewer_VisitGrammar;
+  mTAstViewer_Methods.VisitId := TAstViewer_VisitId;
+  mTAstViewer_Methods.VisitTerm := TAstViewer_VisitTerm;
+  mTAstViewer_Methods.VisitGroup := TAstViewer_VisitGroup;
+  mTAstViewer_Methods.VisitRule := TAstViewer_VisitRule;
+  mTAstViewer_Methods.VisitTermRule := TAstViewer_VisitTermRule;
+  mTAstViewer_Methods.VisitGrammar := TAstViewer_VisitGrammar;
 End.

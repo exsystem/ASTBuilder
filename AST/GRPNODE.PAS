@@ -64,7 +64,7 @@ End;
 
 Procedure TGroupNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Begin
-  Visitor^.VMT^.VisitGroup(Visitor, Self);
+  Visitor^.Methods^.VisitGroup(Visitor, Self);
 End;
 
 Begin

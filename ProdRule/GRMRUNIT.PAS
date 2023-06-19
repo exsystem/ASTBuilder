@@ -14,7 +14,7 @@ Function GrammarRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  TypeDef, List, Lexer, GrmrNode, TrmRNode, RuleNode, RRUnit, TRRUnit, OptRUnit;
+  TypeDef, List, GrmrNode, TrmRNode, RuleNode, RRUnit, TRRUnit, OptRUnit, GLEXER, GPARSER;
 
 { grammar -> ( Options LCurlyBrack option* RCurlyBrack ) ? rule* termRule* }
 Function GrammarRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
@@ -27,7 +27,7 @@ Label
 Begin
   TGrammarNode_Create(PGrammarNode(Ast));
   S1:
-  If TParser_TermByGrammarTokenKind(Parser, eOptions) Then
+  If TGrammarParser_Term(Parser, eOptions) Then
   Begin
     { NOP }
   End
@@ -35,7 +35,7 @@ Begin
   Begin
     Goto S3;
   End;
-  If TParser_TermByGrammarTokenKind(Parser, eLCurlyBracket) Then
+  If TGrammarParser_Term(Parser, eLCurlyBracket) Then
   Begin
     { NOP } 
   End
@@ -54,7 +54,7 @@ Begin
   Begin
     Parser^.FCurrentToken := mSavePointS2;
   End;
-  If TParser_TermByGrammarTokenKind(Parser, eRCurlyBracket) Then
+  If TGrammarParser_Term(Parser, eRCurlyBracket) Then
   Begin
     { NOP }
   End

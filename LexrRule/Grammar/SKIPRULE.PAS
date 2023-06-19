@@ -5,7 +5,7 @@ Unit SkipRule;
 Interface
 
 Uses
-  Lexer;
+  Lexer, GLexer;
 
 Function Parse(Lexer: PLexer): Boolean;
 Function Compose: TLexerRule;
@@ -22,8 +22,7 @@ End;
 
 Function Compose: TLexerRule;
 Begin
-  Result.TokenKind.TokenKind := eSkip;
-  Result.TokenKind.TermRule := nil;
+  Result.TokenKind := eSkip;
   Result.Parser := Parse;
 End;
 

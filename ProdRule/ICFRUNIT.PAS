@@ -22,7 +22,7 @@ Implementation
 
 Uses
   TypeDef, IdNode, TrmNode, GrpNode,
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
 
 { individualCharFactor -> Char DoubleDots Char }
 Function IndividualCharFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
@@ -36,7 +36,7 @@ Label
 Begin
   S1:
     mSavePointS1 := Parser^.FCurrentToken;
-  If TParser_TermByGrammarTokenKind(Parser, eChar) Then
+  If TGrammarParser_Term(Parser, eChar) Then
   Begin
     mFrom := strnew(TParser_GetCurrentToken(Parser)^.Value);
   End
@@ -46,7 +46,7 @@ Begin
     Exit;
   End;
   S2:
-    If TParser_TermByGrammarTokenKind(Parser, eDoubleDots) Then
+    If TGrammarParser_Term(Parser, eDoubleDots) Then
     Begin
     End
     Else
@@ -57,7 +57,7 @@ Begin
       Exit;
     End;
   S3:
-    If TParser_TermByGrammarTokenKind(Parser, eChar) Then
+    If TGrammarParser_Term(Parser, eChar) Then
     Begin
       mTo := strnew(TParser_GetCurrentToken(Parser)^.Value);
     End
@@ -109,7 +109,7 @@ Var
   mValue: PChar;
 Begin
   S1:
-    If TParser_TermByGrammarTokenKind(Parser, eChar) Then
+    If TGrammarParser_Term(Parser, eChar) Then
     Begin
       { NOP }
     End
@@ -152,7 +152,7 @@ Var
   mCh: PChar;
 Begin
   S1:
-    If TParser_TermByGrammarTokenKind(Parser, eCharSet) Then
+    If TGrammarParser_Term(Parser, eCharSet) Then
     Begin
       mTerm := TParser_GetCurrentToken(Parser)^.Value;
       mCurr := SubStr(mTerm, 1, StrLen(mTerm) - 2);
@@ -219,6 +219,7 @@ Begin
       FreeStr(mCh);
       mDestStart^ := '.';
       FreeStr(mChList);
+      TNfa_GetState(Nfa, 1)^.Acceptable := True;
       Result := True;
     End
     Else
@@ -234,7 +235,7 @@ Label
   S1, S2;
 Begin
   S1:
-    If TParser_TermByGrammarTokenKind(Parser, eDot) Then
+    If TGrammarParser_Term(Parser, eDot) Then
     Begin
       { NOP }
     End

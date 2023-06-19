@@ -15,7 +15,7 @@ Implementation
 
 Uses
   IdNode, GrpNode, TrmRNode, TERUnit, NFA,
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
 
 { termRule -> term Colon termExpr skip? Semi }
 Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
@@ -27,7 +27,7 @@ Label
   S1, S2;
 Begin
   S1:
-    If TParser_TermByGrammarTokenKind(Parser, eTerm) Then
+    If TGrammarParser_Term(Parser, eTerm) Then
     Begin
       mName := strnew(TParser_GetCurrentToken(Parser)^.Value);
     End
@@ -36,7 +36,7 @@ Begin
       Result := False;
       Exit;
     End;
-  If TParser_TermByGrammarTokenKind(Parser, eColon) Then
+  If TGrammarParser_Term(Parser, eColon) Then
   Begin
     { NOP }
   End
@@ -56,8 +56,8 @@ Begin
     Result := False;
     Exit;
   End;
-  mSkipped := TParser_TermByGrammarTokenKind(Parser, eSkip);
-  If TParser_TermByGrammarTokenKind(Parser, eSemi) Then
+  mSkipped := TGrammarParser_Term(Parser, eSkip);
+  If TGrammarParser_Term(Parser, eSemi) Then
   Begin
     TTermRuleNode_Create(PTermRuleNode(Ast));
     FreeStr(PTermRuleNode(Ast)^.Name);

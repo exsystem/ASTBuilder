@@ -20,7 +20,7 @@ Implementation
 
 Uses
   TypeDef, List, ClsUtils, IdNode, TrmNode, GrpNode, ExpRUnit,
- {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
+ {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER, CLEXER;
 
 { factor -> id ( QuestionMark | Plus | Asterisk ) ? }
 { DFA: (S1)--[id]->((S2))--[?, +, *]->((S3))    }
@@ -32,7 +32,7 @@ Label
   S1, S2, S3;
 Begin
   S1:
-    If TParser_TermByGrammarTokenKind(Parser, eId) Then
+    If TGrammarParser_Term(Parser, eId) Then
     Begin
       TIdNode_Create(PIdNode(mIdNode), TParser_GetCurrentToken(Parser)^.Value);
     End
@@ -43,21 +43,21 @@ Begin
     End;
   S2:
     mSavePointS2 := Parser^.FCurrentToken;
-  If TParser_TermByGrammarTokenKind(Parser, eQuestionMark) Then
+  If TGrammarParser_Term(Parser, eQuestionMark) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast)^.Terms, @mIdNode);
     PGroupNode(Ast)^.GroupType := eOptional;
     PGroupNode(Ast)^.IsAlternational := False;
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, ePlus) Then
+  Else If TGrammarParser_Term(Parser, ePlus) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast)^.Terms, @mIdNode);
     PGroupNode(Ast)^.GroupType := eOneOrMore;
     PGroupNode(Ast)^.IsAlternational := False;
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, eAsterisk) Then
+  Else If TGrammarParser_Term(Parser, eAsterisk) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast)^.Terms, @mIdNode);
@@ -85,17 +85,17 @@ Label
   S1, S2, S3;
 Begin
   S1:
-    If TParser_TermByGrammarTokenKind(Parser, eTerm) Then
+    If TGrammarParser_Term(Parser, eTerm) Then
     Begin
       TTermNode_Create(PTermNode(mTermNode));
       FreeStr(PTermNode(mTermNode)^.Token.Error);
       FreeStr(PTermNode(mTermNode)^.Token.Value);
-      FreeStr(PTermNode(mTermNode)^.Token.Kind.TermRule);
+      FreeStr(TTermRule(PTermNode(mTermNode)^.Token.Kind));
       PTermNode(mTermNode)^.Token := TParser_GetCurrentToken(Parser)^;
       PTermNode(mTermNode)^.Token.Error := StrNew(PTermNode(mTermNode)^.Token.Error);
       PTermNode(mTermNode)^.Token.Value := StrNew(PTermNode(mTermNode)^.Token.Value);
-      PTermNode(mTermNode)^.Token.Kind.TermRule :=
-        StrNew(PTermNode(mTermNode)^.Token.Kind.TermRule);
+      TTermRule(PTermNode(mTermNode)^.Token.Kind) :=
+        StrNew(TTermRule(PTermNode(mTermNode)^.Token.Kind));
     End
     Else
     Begin
@@ -104,21 +104,21 @@ Begin
     End;
   S2:
     mSavePointS2 := Parser^.FCurrentToken;
-  If TParser_TermByGrammarTokenKind(Parser, eQuestionMark) Then
+  If TGrammarParser_Term(Parser, eQuestionMark) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast)^.Terms, @mTermNode);
     PGroupNode(Ast)^.GroupType := eOptional;
     PGroupNode(Ast)^.IsAlternational := False;
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, ePlus) Then
+  Else If TGrammarParser_Term(Parser, ePlus) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast)^.Terms, @mTermNode);
     PGroupNode(Ast)^.GroupType := eOneOrMore;
     PGroupNode(Ast)^.IsAlternational := False;
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, eAsterisk) Then
+  Else If TGrammarParser_Term(Parser, eAsterisk) Then
   Begin
     TGroupNode_Create(PGroupNode(Ast));
     TList_PushBack(PGroupNode(Ast)^.Terms, @mTermNode);
@@ -146,7 +146,7 @@ Var
   mExprNode: PAstNode;
 Begin
   S1:
-    If TParser_TermByGrammarTokenKind(Parser, eLParen) Then
+    If TGrammarParser_Term(Parser, eLParen) Then
     Begin
       { NOP }
     End
@@ -166,7 +166,7 @@ Begin
       Exit;
     End;
   S3:
-    If TParser_TermByGrammarTokenKind(Parser, eRParen) Then
+    If TGrammarParser_Term(Parser, eRParen) Then
     Begin
       If InstanceOf(mExprNode, @mTGroupNode_VMT) Then
       Begin
@@ -186,15 +186,15 @@ Begin
     End;
   S4:
     mSavePointS4 := Parser^.FCurrentToken;
-  If TParser_TermByGrammarTokenKind(Parser, eQuestionMark) Then
+  If TGrammarParser_Term(Parser, eQuestionMark) Then
   Begin
     PGroupNode(Ast)^.GroupType := eOptional;
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, ePlus) Then
+  Else If TGrammarParser_Term(Parser, ePlus) Then
   Begin
     PGroupNode(Ast)^.GroupType := eOneOrMore;
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, eAsterisk) Then
+  Else If TGrammarParser_Term(Parser, eAsterisk) Then
   Begin
     PGroupNode(Ast)^.GroupType := eMultiple;
   End

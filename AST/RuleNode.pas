@@ -52,7 +52,7 @@ End;
 
 Procedure TRuleNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Begin
-  Visitor^.VMT^.VisitRule(Visitor, Self);
+  Visitor^.Methods^.VisitRule(Visitor, Self);
 End;
 
 Begin

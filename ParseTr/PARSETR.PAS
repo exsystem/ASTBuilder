@@ -24,14 +24,14 @@ Procedure TParseTree_Destroy(Self: PParseTree);
 Implementation
 
 Uses
- {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
+ {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, CLEXER;
 
 Procedure TParseTree_Destroy(Self: PParseTree);
 Begin
   FreeStr(Self^.RuleName);
   FreeStr(Self^.Token.Error);
   FreeStr(Self^.Token.Value);
-  FreeStr(Self^.Token.Kind.TermRule);
+  FreeStr(TTermRule(Self^.Token.Kind));
   If Self^.Children <> nil Then
   Begin
     While Not TList_IsEmpty(Self^.Children) Do

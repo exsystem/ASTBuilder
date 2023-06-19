@@ -6,7 +6,7 @@ Unit ChStRule;
 Interface
 
 Uses
-  Lexer;
+  Lexer, GLexer;
 
 Function Parse(Lexer: PLexer): Boolean;
 
@@ -15,7 +15,7 @@ Function Compose: TLexerRule;
 Implementation
 
 Uses
-  TypeDef, StrUtil;
+  TypeDef;
 
 Function Parse(Lexer: PLexer): Boolean;
 Var
@@ -69,18 +69,14 @@ Begin
     Goto S2;
   End;
   S3:
-    FreeStr(Lexer^.CurrentToken.Value);
-  Lexer^.CurrentToken.StartPos := Lexer^.NextPos - mOffset;
-  Lexer^.CurrentToken.Value :=
-    SubStr(Lexer^.Source, Lexer^.CurrentToken.StartPos, Lexer^.NextPos -
-    Lexer^.CurrentToken.StartPos);
+  Lexer^.CurrentToken.StartPos := TLexer_GetNextPos(Lexer) - mOffset;
+  TLexer_FetchNextToken(Lexer, TLexer_GetNextPos(Lexer) - Lexer^.CurrentToken.StartPos);
   Result := True;
 End;
 
 Function Compose: TLexerRule;
 Begin
-  Result.TokenKind.TokenKind := eCharSet;
-  Result.TokenKind.TermRule := nil;
+  Result.TokenKind := eCharSet;
   Result.Parser := Parse;
 End;
 

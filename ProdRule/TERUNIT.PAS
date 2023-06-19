@@ -6,7 +6,7 @@ Unit TERUnit;
 Interface
 
 Uses
-  Parser, Lexer, NFA;
+  Parser, NFA;
 
 Function TermExprRule(Parser: PParser; Var Nfa: PNfa): Boolean;
 
@@ -15,7 +15,7 @@ Function TermExprRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 Implementation
 
 Uses
-  TypeDef, IdNode, TrmNode, GrpNode, TFRUnit;
+  TypeDef, IdNode, TrmNode, GrpNode, TFRUnit, GLEXER, GPARSER;
 
 { termExpr -> termFactor* ( Or termFactor* )* }
 Function TermExprRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
@@ -46,7 +46,7 @@ Begin
     End;
     Goto S1;
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, eOr) Then
+  Else If TGrammarParser_Term(Parser, eOr) Then
   Begin
     If mExprNode = nil Then
     Begin
@@ -77,7 +77,7 @@ Begin
     End;
     Goto S2;
   End
-  Else If TParser_TermByGrammarTokenKind(Parser, eOr) Then
+  Else If TGrammarParser_Term(Parser, eOr) Then
   Begin
     TNfa_Alternative(mExprNode, mGroupNodeN);
     mGroupNodeN := nil;
