@@ -14,11 +14,18 @@ Function Compose: TLexerRule;
 Implementation
 
 Uses
-  SymbRule;
+  StrUtil, SysUtils;
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := SymbRule.Parse(Lexer, #0); { #0 }
+  Result := (TLexer_PeekNextChar(Lexer) = #0);
+  If Result Then
+  Begin
+    FreeStr(Lexer^.CurrentToken.Value);
+    Lexer^.CurrentToken.Value := StrNew('');
+    Lexer^.CurrentToken.StartPos := TLexer_GetNextPos(Lexer);
+    TLexer_Forward(Lexer, 1);
+  End;
 End;
 
 Function Compose: TLexerRule;

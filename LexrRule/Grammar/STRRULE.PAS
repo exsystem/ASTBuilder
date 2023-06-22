@@ -40,7 +40,7 @@ Begin
     Begin
       Lexer^.CurrentToken.StartPos := TLexer_GetNextPos(Lexer) - mOffset;
       TLexer_Forward(Lexer, 1);
-      Inc(mOffset);
+      { Inc(mOffset); }
       Goto S4;
     End
     Else If TLexer_PeekNextChar(Lexer) = '\' Then

@@ -67,7 +67,9 @@ Begin
 
   AssignFile(Self^.FFile, Filename);
   Reset(Self^.FFile);
+  {$IFDEF UTF16_TEXT}
   Seek(Self^.FFile, 1);
+  {$ENDIF}
 End;
 
 Procedure TFileStream_Destroy(Const Self: PStream);
@@ -77,17 +79,17 @@ End;
 
 Function TFileStream_GetLength(Const Self: PStream): TSize;
 Begin
-  Result := FileSize(PFileStream(Self)^.FFile) - 1;
+  Result := FileSize(PFileStream(Self)^.FFile) {$IFDEF UTF16_TEXT} - 1 {$ENDIF};
 End;
 
 Function TFileStream_GetPosition(Const Self: PStream): TSize;
 Begin
-  Result := FilePos(PFileStream(Self)^.FFile) - 1;
+  Result := FilePos(PFileStream(Self)^.FFile) {$IFDEF UTF16_TEXT} - 1 {$ENDIF};
 End;
 
 Procedure TFileStream_SetPosition(Const Self: PStream; Value: TSize);
 Begin
-  Seek(PFileStream(Self)^.FFile, Value + 1);
+  Seek(PFileStream(Self)^.FFile, Value {$IFDEF UTF16_TEXT} + 1 {$ENDIF});
 End;
 
 Function TFileStream_Forward(Const Self: PStream; Offset: TSize): Boolean;

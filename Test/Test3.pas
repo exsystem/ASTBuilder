@@ -72,8 +72,13 @@ Begin
   TAstViewer_Destroy(PParser(mViewer));
   Dispose(mViewer);
   TCodeLexer_Destroy(PLexer(mLexer));
+  Dispose(mLexer);
   TGrammarParser_Destroy(PParser(mParser));
+  Dispose(mParser);
   TGrammarLexer_Destroy(mGrammarLexer);
+  Dispose(mGrammarLexer);
+  Dispose(mGrammar);
+  Dispose(mCode);
 End;
 
 End.

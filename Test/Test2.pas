@@ -45,7 +45,10 @@ Begin
 
   Writeln;
   TGrammarParser_Destroy(PParser(mParser));
+  Dispose(mParser);
   TLexer_Destroy(mGrammarLexer);
+  Dispose(mGrammarLexer);
+  Dispose(mSource);
 End;
 
 End.

@@ -56,8 +56,10 @@ Begin
   Self^.Parent.VMT := @mTGrammarLexer_VMT;
 
   Self^.Keywords := TTrie_Create(SizeOf(TGrammarTokenKind));
+  Self^.Keywords.Root^.Data := Nil;
   Self^.RuleList := TList_Create(SizeOf(TLexerRule), 10);
   GetMem(Self^.Parent.CurrentToken.Kind, SizeOf(TGrammarTokenKind));
+  PGrammarTokenKind(Self^.Parent.CurrentToken.Kind)^ := eUndefined;
 End;
 
 Procedure TGrammarLexer_Destroy(Self: PLexer);

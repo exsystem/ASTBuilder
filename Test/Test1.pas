@@ -60,6 +60,8 @@ Begin
       [mLexer^.Parent.CurrentToken.Value, mLexer^.Parent.CurrentToken.StartPos]));
   Until TLexer_PeekNextChar(PLexer(mLexer)) = #0;
   mLexer^.Parent.VMT^.Destory(PLexer(mLexer));
+  Dispose(mSource);
+  Dispose(mLexer);
 End;
 
 End.

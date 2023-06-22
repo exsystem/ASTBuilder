@@ -1,4 +1,4 @@
-Unit Parser;
+Unit PARSER;
 
 {$I define.inc}
 {.$DEFINE DEBUG}
@@ -112,9 +112,11 @@ End;
 
 Function TParser_GetNextToken(Self: PParser): Boolean;
 Var
+(*
 {$IFDEF DEBUG}
   t: String;
 {$ENDIF}
+*)
   mToken: PToken;
 Begin
   If Self^.FCurrentToken = Self^.FTokenList^.Size Then
@@ -127,7 +129,7 @@ Begin
       mToken^ := Self^.FLexer^.CurrentToken;
       mToken^.Error := StrNew(Self^.FLexer^.CurrentToken.Error);
       mToken^.Value := StrNew(Self^.FLexer^.CurrentToken.Value);
-      mToken^.Kind:=Self^.VMT^.CopyTokenKind(Self^.FLexer^.CurrentToken.Kind);
+      mToken^.Kind := Self^.VMT^.CopyTokenKind(Self^.FLexer^.CurrentToken.Kind);
       (*
       {$IFDEF DEBUG}
       {$IFDEF FPC}

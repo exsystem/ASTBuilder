@@ -73,12 +73,20 @@ Procedure TGrammarParser_Destroy(Const Self: PParser);
 Var
   I: TSize;
   mToken: PToken;
+  mSelf: PGrammarParser;
 Begin
   For I := 0 To Self^.FTokenList^.Size - 1 Do
   Begin
     mToken := PToken(TList_Get(Self^.FTokenList, I));
     Dispose(PGrammarTokenKind(mToken.Kind));
   End;
+  mSelf := PGrammarParser(Self);
+  If mSelf^.Ast <> nil Then
+  Begin
+    mSelf^.Ast^.VMT^.Destory(mSelf^.Ast);
+    Dispose(mSelf^.Ast);
+  End;
+  TParser_Destroy(Self);
 End;
 
 Function TGrammarParser_IsTokenKindUndefined(Const TokenKind: Pointer): Boolean;
