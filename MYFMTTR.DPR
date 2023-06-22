@@ -1,9 +1,6 @@
 program Myfmttr;
 
 uses
-  Parser in 'PARSER.PAS',
-  ASTNode in 'ASTNODE.PAS',
-  Lexer in 'LEXER.PAS',
   Grmrnode in 'AST\GRMRNODE.PAS',
   Grpnode in 'AST\GRPNODE.PAS',
   IdNode in 'AST\IDNODE.PAS',
@@ -19,8 +16,6 @@ uses
   List in 'UTIL\LIST.PAS',
   Trie in 'UTIL\TRIE.PAS',
   TypeDef in 'UTIL\TYPEDEF.PAS',
-  Grmrpasr in 'ASTVSTR\GRMRPASR.PAS',
-  Grmrviwr in 'ASTVSTR\GRMRVIWR.PAS',
   Astkrule in 'LEXRRULE\GRAMMAR\ASTKRULE.PAS',
   CharRule in 'LEXRRULE\GRAMMAR\CHARRULE.PAS',
   Colnrule in 'LEXRRULE\GRAMMAR\COLNRULE.PAS',
@@ -61,7 +56,16 @@ uses
   RCBRule in 'LEXRRULE\GRAMMAR\RCBRULE.PAS',
   EquRule in 'LEXRRULE\GRAMMAR\EQURULE.PAS',
   OptRule in 'LEXRRULE\GRAMMAR\OPTRULE.PAS',
-  OptRUnit in 'PRODRULE\OPTRUNIT.PAS';
+  OptRUnit in 'PRODRULE\OPTRUNIT.PAS',
+  GPARSER in 'PARSER\GPARSER.PAS',
+  PARSER in 'PARSER\PARSER.PAS',
+  CLexer in 'LEXER\CLEXER.PAS',
+  GLexer in 'LEXER\GLEXER.PAS',
+  Lexer in 'LEXER\LEXER.PAS',
+  ASTNode in 'AST\ASTNODE.PAS',
+  Stream in 'UTIL\STREAM.PAS',
+  GrmrViwr in 'PARSER\GRMRVIWR.PAS',
+  GrmrPasr in 'PARSER\GRMRPASR.PAS';
 
 {$R *.RES}
 

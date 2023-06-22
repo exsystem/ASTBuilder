@@ -15,7 +15,7 @@ Uses {$IFNDEF FPC}
   System.Rtti
   {$ENDIF}
   , {$ENDIF}
- {$IFDEF USE_STRINGS}strings,{$ENDIF}SysUtils, Lexer, PARSER, GrmrViwr, GrmRUnit, ASTNode, TestUtil,
+ {$IFDEF USE_STRINGS}strings,{$ENDIF}SysUtils, Lexer, PARSER, GRMRVIWR, GrmRUnit, ASTNode, TestUtil,
   GLEXER, GPARSER, STREAM;
 
 Procedure Test;

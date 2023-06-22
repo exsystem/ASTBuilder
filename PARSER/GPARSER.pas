@@ -78,7 +78,7 @@ Begin
   For I := 0 To Self^.FTokenList^.Size - 1 Do
   Begin
     mToken := PToken(TList_Get(Self^.FTokenList, I));
-    Dispose(PGrammarTokenKind(mToken.Kind));
+    Dispose(PGrammarTokenKind(mToken^.Kind));
   End;
   mSelf := PGrammarParser(Self);
   If mSelf^.Ast <> nil Then

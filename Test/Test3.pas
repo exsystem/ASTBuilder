@@ -53,7 +53,7 @@ Begin
 
   TCodeLexer_Create(mLexer, mCode);
   TAstViewer_Create(mViewer, PLexer(mLexer));
-  mParser^.Ast^.VMT^.Accept(mParser^.Ast, mViewer.As_IAstVisitor);
+  mParser^.Ast^.VMT^.Accept(mParser^.Ast, mViewer^.As_IAstVisitor);
   mViewer^.Level := 0;
   If mViewer^.Error Then
   Begin

@@ -41,7 +41,7 @@ Type
 
   TFileStream = Record
     Parent: TStream;
-    FFile: File Of Char;
+    FFile: File {Of Char};
   End;
 
 Procedure TFileStream_Create(Var Self: PFileStream; Filename: String);
@@ -66,7 +66,7 @@ Begin
   Self^.Parent.VMT := @mTFileStream_VMT;
 
   AssignFile(Self^.FFile, Filename);
-  Reset(Self^.FFile);
+  Reset(Self^.FFile, SizeOf(Char));
   {$IFDEF UTF16_TEXT}
   Seek(Self^.FFile, 1);
   {$ENDIF}

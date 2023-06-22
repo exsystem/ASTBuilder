@@ -29,14 +29,10 @@ Begin
   Begin
     mFilePath := StrPas(DefaultFilePath);
   End;
-  {$IFDEF VER150}
-  mFilePath := 'Test/TestCase/' + mFilePath;
-  {$ENDIF}
-  {$IFDEF VER80}
-  mFilePath := 'Test/TestCase/' + mFilePath;
-  {$ENDIF}
   {$IFDEF DCC}
-  {$IFNDEF VINTAGE}
+  {$IFDEF CLASSIC}
+  mFilePath := 'Test\TestCase\' + mFilePath;
+  {$ELSE}
   mFilePath := '..\..\Test\TestCase\' + mFilePath;
   {$ENDIF}
   {$ENDIF}
@@ -47,7 +43,7 @@ Begin
 End;
 
 Function GetGrammarLexer(Grammar: PStream): PGrammarLexer;
-var 
+Var
   mLexer: PLexer;
 Begin
   TGrammarLexer_Create(Result, Grammar);

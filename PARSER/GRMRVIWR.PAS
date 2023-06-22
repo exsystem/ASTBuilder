@@ -53,8 +53,8 @@ Procedure TAstViewer_Create(Var Self: PAstViewer);
 Begin
   New(Self); { Final }
   New(Self^.As_IAstVisitor);
-  Self^.As_IAstVisitor.Instance := Self; 
-  Self^.As_IAstVisitor.Methods := @mTAstViewer_Methods;
+  Self^.As_IAstVisitor^.Instance := Self;
+  Self^.As_IAstVisitor^.Methods := @mTAstViewer_Methods;
 
   Self^.Level := 0;
 End;

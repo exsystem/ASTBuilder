@@ -74,8 +74,8 @@ Begin
   TParser_Create(PParser(Self), Lexer);
   New(Self^.As_IAstVisitor);
   Self^.Parent.VMT := @mTAstViewer_VMT;
-  Self^.As_IAstVisitor.Instance := Self;
-  Self^.As_IAstVisitor.Methods := @mTAstViewer_Methods;
+  Self^.As_IAstVisitor^.Instance := Self;
+  Self^.As_IAstVisitor^.Methods := @mTAstViewer_Methods;
 
   { TODO: Merge with PChar Error fields in the parent class. }
   Self^.Error := False;
@@ -447,7 +447,7 @@ Begin
   End;
   mSelf^.FGrammar := mNode;
   PCodeLexer(mSelf^.Parent.FLexer)^.GrammarNode := mNode;
-  mSelf^.Parent.FLexer.FCaseSensitive := Not mNode^.Options[COption_CaseInsensitive].BooleanValue;
+  mSelf^.Parent.FLexer^.FCaseSensitive := Not mNode^.Options[COption_CaseInsensitive].BooleanValue;
   New(mSelf^.FParseTree);
   mSelf^.FCurrentParseTreeNode := mSelf^.FParseTree;
   mSelf^.FCurrentParseTreeNode^.RuleName := strnew('*');
