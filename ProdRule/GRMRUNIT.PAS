@@ -14,12 +14,13 @@ Function GrammarRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  TypeDef, List, GrmrNode, TrmRNode, RuleNode, RRUnit, TRRUnit, OptRUnit, GLEXER, GPARSER;
+  TypeDef, List, GrmrNode, TrmRNode, RuleNode, RRUnit, TRRUnit, OptRUnit,
+  TRSRUNIT, GLEXER, GPARSER;
 
-{ grammar -> ( Options LCurlyBrack option* RCurlyBrack ) ? rule* termRule* }
+{ grammar -> ( Options LCurlyBrack option* RCurlyBrack ) ? rule* termRules }
 Function GrammarRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
-  mSavePointS1, mSavePointS2: TSize;
+  mSavePointS2, mSavePointS3: TSize;
   mRuleNode: PAstNode;
   mTermRuleNode: PAstNode;
 Label
@@ -27,17 +28,17 @@ Label
 Begin
   TGrammarNode_Create(PGrammarNode(Ast));
   S1:
-  If TGrammarParser_Term(Parser, eOptions) Then
-  Begin
-    { NOP }
-  End
-  Else
-  Begin
-    Goto S3;
-  End;
+    If TGrammarParser_Term(Parser, eOptions) Then
+    Begin
+      { NOP }
+    End
+    Else
+    Begin
+      Goto S3;
+    End;
   If TGrammarParser_Term(Parser, eLCurlyBracket) Then
   Begin
-    { NOP } 
+    { NOP }
   End
   Else
   Begin
@@ -65,23 +66,29 @@ Begin
   End;
 
   S3:
-    mSavePointS1 := Parser^.FCurrentToken;
-    If RuleRule(Parser, mRuleNode) Then
+    mSavePointS3 := Parser^.FCurrentToken;
+  If RuleRule(Parser, mRuleNode) Then
+  Begin
+    TList_PushBack(PGrammarNode(Ast)^.Rules, @mRuleNode);
+    Goto S3;
+  End
+  Else
+  Begin
+    Parser^.FCurrentToken := mSavePointS3;
+    Result := True;
+    Goto S4;
+  End;
+  S4:
+    If TermRules(Parser, Ast) Then
     Begin
-      TList_PushBack(PGrammarNode(Ast)^.Rules, @mRuleNode);
-    End
-    Else If TermRule(Parser, mTermRuleNode) Then
-    Begin
-      TList_PushBack(PGrammarNode(Ast)^.TermRules, @mTermRuleNode);
+      Result := True;
+      Exit;
     End
     Else
     Begin
-      Parser^.FCurrentToken := mSavePointS1;
-      Result := True;
+      Result := False;
       Exit;
     End;
-  S4:
-    Goto S3;
 End;
 
 Function GrammarRule(Parser: PParser; Var Ast: PAstNode): Boolean;

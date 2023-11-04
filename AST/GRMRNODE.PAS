@@ -6,18 +6,18 @@ Unit GrmrNode;
 Interface
 
 Uses
-  ASTNode, List;
+  ASTNode, TRMRNODE, List, Trie;
 
-Const 
+Const
   COption_CaseInsensitive = Byte($00);
   COption_End = Byte($FF);
 
 Type
-  TOptionValue = record
-    case Integer of
+  TOptionValue = Record
+    Case Integer Of
       0: (BooleanValue: Boolean);
       1: (StringValue: PChar);
-  end;
+  End;
 
   TOptions = Array[COption_CaseInsensitive..COption_End] Of TOptionValue;
 
@@ -27,12 +27,14 @@ Type
     Parent: TAstNode;
     Options: TOptions;
     Rules: PList; { Of PRuleNode }
-    TermRules: PList; { Of PTermRuleNode }
+    TermRules: PTrie; { Of PList<PTermRuleNode> }
   End;
 
 Procedure TGrammarNode_Create(Var Self: PGrammarNode);
 Procedure TGrammarNode_Destroy(Self: PAstNode);
 Procedure TGrammarNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
+Procedure TGrammarNode_AddTermRule(Self: PGrammarNode; Mode: PChar;
+  TermRuleNode: PTermRuleNode);
 
 Var
   mTGrammarNode_VMT: TAstNode_VMT;
@@ -40,7 +42,26 @@ Var
 Implementation
 
 Uses
-  TypeDef, RuleNode, TrmRNode;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, TypeDef, RuleNode;
+
+Procedure TermRulesElementDestructor(Const Element: Pointer);
+Var
+  I: TSize;
+  mElem: PAstNode;
+  mList: PList;
+Begin
+  mList := PList(Element^);
+  If mList^.Size > 0 Then
+  Begin
+    For I := 0 To mList^.Size - 1 Do
+    Begin
+      mElem := PPAstNode(TList_Get(mList, I))^;
+      mElem^.VMT^.Destory(mElem);
+      Dispose(mElem);
+    End;
+  End;
+  TList_Destroy(mList);
+End;
 
 Procedure TGrammarNode_Create(Var Self: PGrammarNode);
 Begin
@@ -50,7 +71,7 @@ Begin
 
   Self^.Options[COption_CaseInsensitive].BooleanValue := False;
   Self^.Rules := TList_Create(SizeOf(PRuleNode), 1);
-  Self^.TermRules := TList_Create(SizeOf(PTermRuleNode), 1);
+  Self^.TermRules := TTrie_Create(SizeOf(PList), TermRulesElementDestructor);
 End;
 
 Procedure TGrammarNode_Destroy(Self: PAstNode);
@@ -68,22 +89,32 @@ Begin
     End;
   End;
   TList_Destroy(PGrammarNode(Self)^.Rules);
-  If PGrammarNode(Self)^.TermRules^.Size > 0 Then
-  Begin
-    For I := 0 To PGrammarNode(Self)^.TermRules^.Size - 1 Do
-    Begin
-      mElem := PPAstNode(TList_Get(PGrammarNode(Self)^.TermRules, I))^;
-      mElem^.VMT^.Destory(mElem);
-      Dispose(mElem);
-    End;
-  End;
-  TList_Destroy(PGrammarNode(Self)^.TermRules);
+  TTrie_Destroy(PGrammarNode(Self)^.TermRules);
   TAstNode_Destroy(Self);
 End;
 
 Procedure TGrammarNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Begin
   Visitor^.Methods^.VisitGrammar(Visitor, Self);
+End;
+
+Procedure TGrammarNode_AddTermRule(Self: PGrammarNode; Mode: PChar;
+  TermRuleNode: PTermRuleNode);
+Var
+  mPElem: PPList;
+  mElem: PList;
+Begin
+  mPElem := PPList(TTrie_Get(Self^.TermRules, Mode));
+  If mPElem = nil Then
+  Begin
+    mElem := TList_Create(SizeOf(PTermRuleNode), 1);
+    TTrie_Set(Self^.TermRules, Mode, @mElem);
+  End
+  Else
+  Begin
+    mElem := mPElem^;
+  End;
+  TList_PushBack(mElem, @TermRuleNode);
 End;
 
 Begin

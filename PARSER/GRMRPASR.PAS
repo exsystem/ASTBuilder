@@ -79,7 +79,7 @@ Begin
 
   { TODO: Merge with PChar Error fields in the parent class. }
   Self^.Error := False;
-  Self^.ErrorMessages := TStack_Create(SizeOf(PChar));
+  Self^.ErrorMessages := TStack_Create(SizeOf(PChar), Nil);
 End;
 
 Procedure TAstViewer_Destroy(Const Self: PParser);

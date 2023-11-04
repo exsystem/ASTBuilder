@@ -17,7 +17,7 @@ Uses
   EofRule, IdRule, TermRule, LParRule, OrRule, ColnRule, AstkRule,
   QMrkRule, PlusRule, TildRule, RParRule, LBrkRule,
   RBrkRule, LCBRule, RCBRule, CharRule, ChStRule, StrRule, DotRule,
-  DDtsRule, EquRule, SemiRule, SkipRule, OptRule, SysUtils;
+  DDtsRule, EquRule, SemiRule, SkipRule, OptRule, MODERULE, SysUtils;
 
 Function PropmtForFile(Prompt: PChar; DefaultFilePath: PChar): PStream;
 Var
@@ -50,6 +50,7 @@ Begin
   mLexer := PLexer(Result);
   TGrammarLexer_AddRule(mLexer, EofRule.Compose);
   TGrammarLexer_AddRule(mLexer, OptRule.Compose);
+  TGrammarLexer_AddRule(mLexer, MODERULE.Compose);
   TGrammarLexer_AddRule(mLexer, IdRule.Compose);
   TGrammarLexer_AddRule(mLexer, TermRule.Compose);
   TGrammarLexer_AddRule(mLexer, LParRule.Compose);

@@ -5,9 +5,10 @@ Unit Trie;
 Interface
 
 Uses
-  TypeDef;
+  TypeDef, STACK;
 
 Type
+
   PNode = ^TNode;
 
   TNode = Record
@@ -21,9 +22,27 @@ Type
   TTrie = Record
     FElemSize: TSize;
     Root: PNode;
+    ElementDestructor: TElementDestructor;
   End;
 
-Function TTrie_Create(Const ElementSize: TSize): PTrie;
+  PSuffixNodePair = ^TSuffixNodePair;
+
+  TSuffixNodePair = Record
+    Suffix: PChar;
+    SuffixSize: TSize;
+    Node: PNode;
+  End;
+
+  PTrieIterator = ^TTrieIterator;
+
+  TTrieIterator = Record
+    FTrie: PTrie;
+    FNodeStack: PStack; { Of TSuffixNodePair }
+    FCurrent: TSuffixNodePair;
+  End;
+
+Function TTrie_Create(Const ElementSize: TSize;
+  Const ElementDestructor: TElementDestructor): PTrie;
 Procedure TTrie_Clear(Self: PTrie);
 Function TTrie_Get(Self: PTrie; Const Key: PChar): Pointer;
 Procedure TTrie_Set(Self: PTrie; Const Key: PChar; Value: Pointer);
@@ -32,18 +51,29 @@ Procedure TTrie_Destroy(Self: PTrie);
 Function TTrie_CreateNode: PNode;
 Function TTrie_Empty(Root: PNode): Boolean;
 Function TTrie_Delete(Self: PTrie; Root: PNode; Key: PChar; Depth: TSize): PNode;
-Procedure TTrie_DoClear(Root: PNode);
+Function TTrie_Begin(Self: PTrie): PTrieIterator;
+Function TTrie_End(Self: PTrie): PTrieIterator;
+Procedure TTrie_DoClear(Const Self: PTrie; Root: PNode);
+
+Procedure NodeStackElementDestructor(Const Element: Pointer);
+Procedure TTrieIterator_Create(Var Self: PTrieIterator; Const Trie: PTrie);
+Procedure TTrieIterator_Destroy(Const Self: PTrieIterator);
+Procedure TTrieIterator_Next(Const Self: PTrieIterator);
+Function TTrieIterator_Current(Const Self: PTrieIterator): TSuffixNodePair;
 
 Implementation
 
 Uses
 {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF};
 
-Function TTrie_Create(Const ElementSize: TSize): PTrie;
+Function TTrie_Create(Const ElementSize: TSize;
+  Const ElementDestructor: TElementDestructor): PTrie;
 Begin
   New(Result);
   Result^.FElemSize := ElementSize;
-  Result^.Root := TTrie_CreateNode;
+  Result^.Root := TTrie_CreateNode();
+  Result^.Root^.Leaf := False;
+  Result^.ElementDestructor := ElementDestructor;
 End;
 
 Procedure TTrie_Clear(Self: PTrie);
@@ -52,8 +82,17 @@ Var
 Begin
   For I := Low(Byte) To High(Byte) Do
   Begin
-    TTrie_DoClear(Self^.Root^.Next[I]);
+    TTrie_DoClear(Self, Self^.Root^.Next[I]);
   End;
+  If Self^.Root^.Leaf And (Self^.Root^.Data <> nil) Then
+  Begin
+    If @Self^.ElementDestructor <> nil Then
+    Begin
+      Self^.ElementDestructor(Self^.Root^.Data);
+    End;
+    FreeMem(Self^.Root^.Data, SizeOf(Self^.FElemSize));
+  End;
+  Self^.Root^.Leaf := False;
 End;
 
 Function TTrie_Get(Self: PTrie; Const Key: PChar): Pointer;
@@ -73,9 +112,15 @@ Begin
       Result := nil;
       Exit;
     End;
-    Inc(mKey, I);
+    Inc(mKey, SizeOf(Byte));
+    Inc(I, SizeOf(Byte));
   End;
-  Result := mNode^.Data;
+  If mNode^.Leaf Then
+  Begin
+    Result := mNode^.Data;
+    Exit;
+  End;
+  Result := nil;
 End;
 
 Procedure TTrie_Set(Self: PTrie; Const Key: PChar; Value: Pointer);
@@ -92,19 +137,24 @@ Begin
     If mNode^.Next[mKey^] = nil Then
     Begin
       mNode^.Next[mKey^] := TTrie_CreateNode;
-      mNode^.Next[mKey^]^.Data := nil;
+      mNode^.Next[mKey^].Leaf := False;
     End;
     mNode := mNode^.Next[mKey^];
-    Inc(mKey, I);
+    Inc(mKey, SizeOf(Byte));
+    Inc(I, SizeOf(Byte));
   End;
 
-  If mNode^.Data <> nil Then
+  If mNode^.Leaf And (mNode^.Data <> nil) Then
   Begin
+    If @Self^.ElementDestructor <> nil Then
+    Begin
+      Self^.ElementDestructor(mNode^.Data);
+    End;
     FreeMem(mNode^.Data, Self^.FElemSize);
   End;
+  mNode^.Leaf := True;
   GetMem(mNode^.Data, Self^.FElemSize);
   Move(Value^, mNode^.Data^, Self^.FElemSize);
-  mNode^.Leaf := True;
 End;
 
 Procedure TTrie_Erase(Self: PTrie; Const Key: PChar);
@@ -143,12 +193,22 @@ Begin
 
   If Depth = Succ(StrLen(Key) * SizeOf(Char)) Then
   Begin
-    Root^.Leaf := False;
-    If TTrie_Empty(Root) Then
+    If Root^.Leaf Then
     Begin
-      FreeMem(Root^.Data, Self^.FElemSize);
-      Dispose(Root);
-      Root := nil;
+      Root^.Leaf := False;
+      If Root^.Data <> nil Then
+      Begin
+        If @Self^.ElementDestructor <> nil Then
+        Begin
+          Self^.ElementDestructor(Root^.Data);
+        End;
+        FreeMem(Root^.Data, Self^.FElemSize);
+      End;
+      If TTrie_Empty(Root) Then
+      Begin
+        Dispose(Root);
+        Root := nil;
+      End;
     End;
     Result := Root;
     Exit;
@@ -159,7 +219,6 @@ Begin
 
   If TTrie_Empty(Root) And (Not Root^.Leaf) Then
   Begin
-    FreeMem(Root^.Data, Self^.FElemSize);
     Dispose(Root);
     Root := nil;
   End;
@@ -181,7 +240,30 @@ Begin
   Result := True;
 End;
 
-Procedure TTrie_DoClear(Root: PNode);
+Function TTrie_Begin(Self: PTrie): PTrieIterator;
+Begin
+  TTrieIterator_Create(Result, Self);
+  Result^.FCurrent.Suffix := StrNew('');
+  Result^.FCurrent.SuffixSize := 0;
+  Result^.FCurrent.Node := Self^.Root;
+End;
+
+Function TTrie_End(Self: PTrie): PTrieIterator;
+Const
+  CEnd: TTrieIterator = (
+    FTrie: nil;
+    FNodeStack: nil;
+    FCurrent: (
+    Suffix: nil;
+    SuffixSize: 0;
+    Node: nil;
+    );
+    );
+Begin
+  Result := @CEnd;
+End;
+
+Procedure TTrie_DoClear(Const Self: PTrie; Root: PNode);
 Var
   I: TSize;
 Begin
@@ -191,10 +273,102 @@ Begin
   End;
   For I := Low(Byte) To High(Byte) Do
   Begin
-    TTrie_DoClear(Root^.Next[I]);
+    TTrie_DoClear(Self, Root^.Next[I]);
   End;
-  FreeMem(Root^.Data, SizeOf(TNode));
+  If Root^.Leaf And (Root^.Data <> nil) Then
+  Begin
+    If @Self^.ElementDestructor <> nil Then
+    Begin
+      Self^.ElementDestructor(Root^.Data);
+    End;
+    FreeMem(Root^.Data, SizeOf(Self^.FElemSize));
+  End;
   Dispose(Root);
+End;
+
+Procedure NodeStackElementDestructor(Const Element: Pointer);
+Begin
+  FreeMem(TSuffixNodePair(Element^).Suffix);
+  Dispose(PSuffixNodePair(Element));
+End;
+
+Procedure TTrieIterator_Create(Var Self: PTrieIterator; Const Trie: PTrie);
+Begin
+  New(Self); { Final }
+  Self^.FTrie := Trie;
+  Self^.FNodeStack := TStack_Create(SizeOf(TSuffixNodePair), NodeStackElementDestructor);
+End;
+
+Procedure TTrieIterator_Destroy(Const Self: PTrieIterator);
+Begin
+  If Self^.FCurrent.Suffix <> nil Then
+  Begin
+    FreeMem(Self^.FCurrent.Suffix);
+  End;
+  TStack_Destroy(Self^.FNodeStack);
+End;
+
+Procedure TTrieIterator_Next(Const Self: PTrieIterator);
+Var
+  I: Byte;
+  mPair: PSuffixNodePair;
+  mDst: PByte;
+Begin
+  If Self^.FCurrent.Node = nil Then
+  Begin
+    Exit;
+  End;
+  While True Do
+  Begin
+    For I := High(Byte) Downto Low(Byte) Do
+    Begin
+      If Self^.FCurrent.Node.Next[I] <> nil Then
+      Begin
+        mPair := TStack_Emplace(Self^.FNodeStack);
+        If Self^.FCurrent.Suffix = nil Then
+        Begin
+          GetMem(mPair^.Suffix, SizeOf(Char));
+          mPair^.SuffixSize := SizeOf(Char);
+          mDst := PByte(mPair^.Suffix);
+        End
+        Else
+        Begin
+          mPair^.SuffixSize := Succ(Self^.FCurrent.SuffixSize);
+          GetMem(mPair^.Suffix, mPair^.SuffixSize);
+          mDst := PByte(mPair^.Suffix);
+          Move(Self^.FCurrent.Suffix^, mDst^, Self^.FCurrent.SuffixSize);
+          mDst := PByte(mPair^.Suffix);
+          Inc(mDst, Self^.FCurrent.SuffixSize);
+        End;
+        mDst^ := I;
+        mPair^.Node := Self^.FCurrent.Node^.Next[I];
+      End;
+    End;
+
+    FreeMem(Self^.FCurrent.Suffix);
+    If TStack_Empty(Self^.FNodeStack) Then
+    Begin
+      Self^.FCurrent.Suffix := nil;
+      Self^.FCurrent.SuffixSize := 0;
+      Self^.FCurrent.Node := nil;
+      Exit;
+    End
+    Else
+    Begin
+      mPair := PSuffixNodePair(TStack_Pop(Self^.FNodeStack));
+      Self^.FCurrent := mPair^;
+      FreeMem(mPair);
+      If Self^.FCurrent.Node^.Leaf Then
+      Begin
+        Exit;
+      End;
+    End;
+  End;
+End;
+
+Function TTrieIterator_Current(Const Self: PTrieIterator): TSuffixNodePair;
+Begin
+  Result := Self^.FCurrent;
 End;
 
 End.

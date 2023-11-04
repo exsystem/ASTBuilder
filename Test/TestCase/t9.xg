@@ -1,0 +1,12 @@
+main: HELLO BYE ;
+HELLO: 'nonhoh' ;
+BYE: 'tzewe' ;
+COMMENT: '{' .*? '}' ->skip;
+
+mode phuthonreraur;
+HELLO: 'nihao';
+BYE: 'zaijian';
+
+mode yinven; 
+HELLO: 'nonhoh';
+BYE: 'tzewe';

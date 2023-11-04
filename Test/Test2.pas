@@ -46,7 +46,7 @@ Begin
   Writeln;
   TGrammarParser_Destroy(PParser(mParser));
   Dispose(mParser);
-  TLexer_Destroy(mGrammarLexer);
+  mGrammarLexer^.VMT^.Destory(mGrammarLexer);
   Dispose(mGrammarLexer);
   Dispose(mSource);
 End;

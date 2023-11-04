@@ -17,6 +17,8 @@ Type
     Size: TSize;
   End;
 
+  PPList = ^PList;
+
 Function TList_Create(ElementSize: TSize; Capacity: TSize): PList;
 Procedure TList_Grow(Self: PList);
 Function TList_IsEmpty(Self: PList): Boolean;

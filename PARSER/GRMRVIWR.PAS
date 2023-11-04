@@ -42,7 +42,7 @@ Procedure TAstViewer_Deindent(Self: PAstViewer);
 Implementation
 
 Uses
-  List, IdNode, TrmNode, GrpNode, RuleNode,
+  List, Trie, IdNode, TrmNode, GrpNode, RuleNode,
   TrmRNode, GrmrNode, NFA,
   SysUtils{$IFDEF USE_STRINGS}, strings{$ENDIF}, StrUtil;
 
@@ -262,8 +262,14 @@ Var
   mNode: PGrammarNode;
   I: TSize;
   mItem: PAstNode;
+  mIterator, mEndIterator: PTrieIterator;
+  mList: PList;
+  mText: PChar;
+  mStr: String;
+  mMode: PChar;
 Begin
   mNode := PGrammarNode(Node);
+
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Options:');
   TAstViewer_Indent(PAstViewer(Intf^.Instance));
   If mNode^.Options[COption_CaseInsensitive].BooleanValue Then
@@ -271,7 +277,8 @@ Begin
     TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'CaseInsensitive;');
   End;
   TAstViewer_Deindent(PAstViewer(Intf^.Instance));
-  TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Grammar:');
+
+  TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Grammar (Non-Term Rules):');
   TAstViewer_Indent(PAstViewer(Intf^.Instance));
   If mNode^.Rules^.Size <> 0 Then
   Begin
@@ -283,16 +290,40 @@ Begin
       TAstViewer_Deindent(PAstViewer(Intf^.Instance));
     End;
   End;
-  If mNode^.TermRules^.Size <> 0 Then
+  TAstViewer_Deindent(PAstViewer(Intf^.Instance));
+
+  TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Grammar (Term Rules):');
+  TAstViewer_Indent(PAstViewer(Intf^.Instance));
+  mIterator := TTrie_Begin(mNode^.TermRules);
+  mEndIterator := TTrie_End(mNode^.TermRules);
+  While Not CompareMem(@(mIterator^.FCurrent), @(mEndIterator^.FCurrent),
+      SizeOf(TSuffixNodePair)) Do
   Begin
-    For I := 0 To mNode^.TermRules^.Size - 1 Do
+    GetMem(mMode, mIterator^.FCurrent.SuffixSize + SizeOf(Char));
+    Move(mIterator^.FCurrent.Suffix^, mMode^, mIterator^.FCurrent.SuffixSize);
+    mMode[mIterator^.FCurrent.SuffixSize] := #0;
+    mStr := StrPas(mMode);
+    FreeMem(mMode);
+    mStr := 'Mode [' + mStr + ']';
+    mText := @mStr[1];
+    TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
+    TAstViewer_Indent(PAstViewer(Intf^.Instance));
+    mList := PList(mIterator^.FCurrent.Node^.Data^);
+    If mList^.Size <> 0 Then
     Begin
-      mItem := PPAstNode(TList_Get(mNode^.TermRules, I))^;
-      TAstViewer_Indent(PAstViewer(Intf^.Instance));
-      mItem^.VMT^.Accept(mItem, Intf);
-      TAstViewer_Deindent(PAstViewer(Intf^.Instance));
+      For I := 0 To mList^.Size - 1 Do
+      Begin
+        mItem := PPAstNode(TList_Get(mList, I))^;
+        TAstViewer_Indent(PAstViewer(Intf^.Instance));
+        mItem^.VMT^.Accept(mItem, Intf);
+        TAstViewer_Deindent(PAstViewer(Intf^.Instance));
+      End;
     End;
+    TAstViewer_Deindent(PAstViewer(Intf^.Instance));
+    TTrieIterator_Next(mIterator);
   End;
+  TTrieIterator_Destroy(mIterator);
+  Dispose(mIterator);
 End;
 
 Procedure TAstViewer_WriteLn(Self: PAstViewer; Content: PChar);

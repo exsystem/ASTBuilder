@@ -16,7 +16,7 @@ Type
     eQuestionMark, ePlus,
     eAsterisk, eColon, eEqual, eSemi, eId,
     eTerm, eString, eChar, eCharSet, eDot, eDoubleDots, eSingleQuote,
-    eTilde, eSkip, eOptions);
+    eTilde, eSkip, eOptions, eMode);
 
   PGrammarLexer = ^TGrammarLexer;
 
@@ -55,8 +55,7 @@ Begin
   TLexer_Create(PLexer(Self), Source, True);
   Self^.Parent.VMT := @mTGrammarLexer_VMT;
 
-  Self^.Keywords := TTrie_Create(SizeOf(TGrammarTokenKind));
-  Self^.Keywords^.Root^.Data := Nil;
+  Self^.Keywords := TTrie_Create(SizeOf(TGrammarTokenKind), nil);
   Self^.RuleList := TList_Create(SizeOf(TLexerRule), 10);
   GetMem(Self^.Parent.CurrentToken.Kind, SizeOf(TGrammarTokenKind));
   PGrammarTokenKind(Self^.Parent.CurrentToken.Kind)^ := eUndefined;

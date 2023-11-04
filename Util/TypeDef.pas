@@ -19,6 +19,9 @@ Type
   PSize = ^TSize;
   TSize = UIntPtr;
 
+  { TODO Allocator? }
+  TElementDestructor = Procedure(Const Element: Pointer);
+
 Implementation
 
 End.

@@ -179,6 +179,7 @@ Begin
   Begin
     mState := PNfaState(TList_EmplaceBack(Self^.States));
     mState^.Edges := TList_Create(SizeOf(TNfaEdge), 1);
+    mState^.Acceptable := False;
     mState^.Greedy := True;
   End;
 End;

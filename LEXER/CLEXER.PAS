@@ -5,7 +5,7 @@ Unit CLexer;
 Interface
 
 Uses
-  List, TypeDef, Stream, GrmrNode, Lexer;
+  List, STACK, TypeDef, Stream, GrmrNode, Lexer;
 
 Type
   TTermRule = PChar;
@@ -15,17 +15,22 @@ Type
   TCodeLexer = Record
     Parent: TLexer;
     GrammarNode: PGrammarNode;
+    Mode: PStack; { Of PChar }
   End;
 
 Procedure TCodeLexer_Create(Var Self: PCodeLexer; Const Source: PStream);
 Procedure TCodeLexer_Destroy(Self: PLexer);
 Function TCodeLexer_IsToken(Var Self: PLexer; Const TokenKind: Pointer): Boolean;
 Function TCodeLexer_GetNextToken(Var Self: PLexer): Boolean;
+Procedure TCodeLexer_PushMode(Var Self: PLexer; Mode: PChar);
+Procedure TCodeLexer_PopMode(Var Self: PLexer);
+
+Procedure ModeStackElementDestructor(Const Element: Pointer);
 
 Implementation
 
 Uses
-  SysUtils, StrUtil, NFA, TrmRNode{$IFDEF USE_STRINGS}, strings{$ENDIF};
+  SysUtils, StrUtil, Trie, NFA, TrmRNode{$IFDEF USE_STRINGS}, strings{$ENDIF};
 
 Var
   mTCodeLexer_VMT: TLexer_VMT;
@@ -36,13 +41,15 @@ Begin
   TLexer_Create(PLexer(Self), Source, False);
   Self^.Parent.VMT := @mTCodeLexer_VMT;
 
-  Self^.GrammarNode := Nil;
+  Self^.GrammarNode := nil;
+  Self^.Mode := TStack_Create(SizeOf(PChar), ModeStackElementDestructor);
   TTermRule(Self^.Parent.CurrentToken.Kind) := StrNew('');
 End;
 
 Procedure TCodeLexer_Destroy(Self: PLexer);
 Begin
   FreeStr(TTermRule(Self^.CurrentToken.Kind));
+  TStack_Destroy(PCodeLexer(Self)^.Mode);
   TLexer_Destroy(Self);
 End;
 
@@ -58,6 +65,8 @@ Var
   mSavePoint: TSize;
   mNextPos: TSize;
   mSelf: PCodeLexer;
+  mMode: PChar;
+  mTermRules: PList;
 Label
   S;
 Begin
@@ -80,9 +89,11 @@ Begin
       Exit;
     End;
   mNextPos := Self^.FStream^.VMT^.GetPosition(Self^.FStream);
-  For I := 0 To Pred(mSelf^.GrammarNode^.TermRules^.Size) Do
+  mMode := PPChar(TStack_Top(mSelf^.Mode))^;
+  mTermRules := PPList(TTrie_Get(mSelf^.GrammarNode^.TermRules, mMode))^;
+  For I := 0 To Pred(mTermRules^.Size) Do
   Begin
-    mTermRuleNode := PPTermRuleNode(TList_Get(mSelf^.GrammarNode^.TermRules, I))^;
+    mTermRuleNode := PPTermRuleNode(TList_Get(mTermRules, I))^;
     FreeStr(Self^.CurrentToken.Error);
     Self^.CurrentToken.Error := strnew('');
     Result := False;
@@ -156,6 +167,27 @@ Begin
   Self^.CurrentToken.Error := strnew('Illegal token.');
   TLexer_FetchNextToken(Self, I);
   Result := False;
+End;
+
+Procedure TCodeLexer_PushMode(Var Self: PLexer; Mode: PChar);
+Var
+  mMode: PChar;
+Begin
+  mMode := StrNew(Mode);
+  TStack_Push(PCodeLexer(Self)^.Mode, @mMode);
+End;
+
+Procedure TCodeLexer_PopMode(Var Self: PLexer);
+Var
+  mMode: PChar;
+Begin
+  mMode := PPChar(TStack_Pop(PCodeLexer(Self)^.Mode))^;
+  FreeStr(mMode);
+End;
+
+Procedure ModeStackElementDestructor(Const Element: Pointer);
+Begin
+  FreeStr(PPChar(Element)^);
 End;
 
 Initialization
