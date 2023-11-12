@@ -1,4 +1,4 @@
-Unit SkipRule;
+Unit ArrwRule;
 
 {$I define.inc}
 
@@ -17,12 +17,12 @@ Uses
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := KywdRule.Parse(Lexer, 'skip');
+  Result := KywdRule.Parse(Lexer, '->');
 End;
 
 Function Compose: TLexerRule;
 Begin
-  Result.TokenKind := eSkip;
+  Result.TokenKind := eArrow;
   Result.Parser := Parse;
 End;
 

@@ -16,7 +16,7 @@ Type
     eQuestionMark, ePlus,
     eAsterisk, eColon, eEqual, eSemi, eId,
     eTerm, eString, eChar, eCharSet, eDot, eDoubleDots, eSingleQuote,
-    eTilde, eSkip, eOptions, eMode);
+    eTilde, eArrow, eComma, eSkip, eOptions, eMode, ePushMode, ePopMode);
 
   PGrammarLexer = ^TGrammarLexer;
 

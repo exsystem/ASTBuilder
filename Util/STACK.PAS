@@ -100,31 +100,28 @@ Function TStack_Pop(Var Self: PStack): Pointer;
 Var
   P: PNode;
 Begin
-  If Not TStack_Empty(Self) Then
+  If TStack_Empty(Self) Then
   Begin
-    GetMem(Result, Self^.ElementSize);
-    Move(Self^.Top^.Data^, Result^, Self^.ElementSize);
-    P := Self^.Top;
-    Self^.Top := Self^.Top^.Next;
-    FreeMem(P^.Data, Self^.ElementSize);
-    Dispose(P);
+    Result := nil;
   End
   Else
   Begin
-    Result := nil;
+    Result := Self^.Top^.Data;
+    P := Self^.Top;
+    Self^.Top := Self^.Top^.Next;
+    Dispose(P);
   End;
 End;
 
 Function TStack_Top(Self: PStack): Pointer;
 Begin
-  If Not TStack_Empty(Self) Then
+  If TStack_Empty(Self) Then
   Begin
-    GetMem(Result, Self^.ElementSize);
-    Move(Self^.Top^.Data^, Result^, Self^.ElementSize);
+    Result := nil;
   End
   Else
   Begin
-    Result := nil;
+    Result := Self^.Top^.Data;
   End;
 End;
 

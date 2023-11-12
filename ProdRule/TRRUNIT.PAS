@@ -14,17 +14,16 @@ Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  IdNode, GrpNode, TrmRNode, TERUnit, NFA,
+  IdNode, GrpNode, TrmRNode, TERUnit, ASRUNIT, NFA,
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
 
-{ termRule -> term Colon termExpr skip? Semi }
+{ termRule -> term Colon termExpr (Arrow actions)? Semi }
 Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mName: PChar;
   mNfa: PNfa;
-  mSkipped: Boolean;
 Label
-  S1, S2;
+  S1, S2, S3;
 Begin
   S1:
     If TGrammarParser_Term(Parser, eTerm) Then
@@ -56,23 +55,42 @@ Begin
     Result := False;
     Exit;
   End;
-  mSkipped := TGrammarParser_Term(Parser, eSkip);
-  If TGrammarParser_Term(Parser, eSemi) Then
+  TTermRuleNode_Create(PTermRuleNode(Ast));
+  FreeStr(PTermRuleNode(Ast)^.Name);
+  PTermRuleNode(Ast)^.Name := mName;
+  PTermRuleNode(Ast)^.Nfa := mNfa;
+  If TGrammarParser_Term(Parser, eArrow) Then
   Begin
-    TTermRuleNode_Create(PTermRuleNode(Ast));
-    FreeStr(PTermRuleNode(Ast)^.Name);
-    PTermRuleNode(Ast)^.Name := mName;
-    PTermRuleNode(Ast)^.Nfa := mNfa;
-    PTermRuleNode(Ast)^.Skipped := mSkipped;
+    {NOP}
   End
   Else
   Begin
-    TNfa_Destroy(mNfa);
-    FreeStr(mName);
+    Goto S2;
+  End;
+  If ActionsRule(Parser, Ast) Then
+  Begin
+    {NOP}
+  End
+  Else
+  Begin
+    TTermRuleNode_Destroy(Ast);
+    Dispose(PTermRuleNode(Ast));
     Result := False;
     Exit;
   End;
   S2:
+    If TGrammarParser_Term(Parser, eSemi) Then
+    Begin
+      {NOP}
+    End
+    Else
+    Begin
+      TTermRuleNode_Destroy(Ast);
+      Dispose(PTermRuleNode(Ast));
+      Result := False;
+      Exit;
+    End;
+  S3:
     Result := True;
 End;
 

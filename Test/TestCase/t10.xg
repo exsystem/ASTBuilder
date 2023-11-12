@@ -1,0 +1,6 @@
+string: STARTHEREDOC CHAR* HEREDOCEND;
+STARTHEREDOC: '<<<' -> pushMode(hereDoc) ;
+WS: [ \t\r\n] ->skip;
+mode hereDoc;
+CHAR: (~(';'))* ;
+HEREDOCEND: ';' -> popMode;

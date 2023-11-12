@@ -10,5 +10,5 @@ Uses
 // {$R *.res}
 
 Begin
-  Test2.Test();
+  Test3.Test();
 End.

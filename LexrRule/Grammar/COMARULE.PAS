@@ -1,4 +1,4 @@
-Unit SkipRule;
+Unit ComaRule;
 
 {$I define.inc}
 
@@ -17,12 +17,12 @@ Uses
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := KywdRule.Parse(Lexer, 'skip');
+  Result := KywdRule.Parse(Lexer, ',');
 End;
 
 Function Compose: TLexerRule;
 Begin
-  Result.TokenKind := eSkip;
+  Result.TokenKind := eComma;
   Result.Parser := Parse;
 End;
 

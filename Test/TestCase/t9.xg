@@ -1,7 +1,7 @@
 main: HELLO BYE ;
 HELLO: 'nonhoh' ;
 BYE: 'tzewe' ;
-COMMENT: '{' .*? '}' ->skip;
+COMMENT: '{' .*? '}' -> skip;
 
 mode phuthonreraur;
 HELLO: 'nihao';

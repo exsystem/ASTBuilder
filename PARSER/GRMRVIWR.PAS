@@ -176,6 +176,7 @@ Var
   mText: PChar;
   mStr: String;
   mStrPChar: PChar;
+  mCommand: PCommand;
 Begin
   mNode := PTermRuleNode(Node);
   mText := CreateStr(strlen(mNode^.Name) + 1);
@@ -190,9 +191,27 @@ Begin
   End
   Else
   Begin
-    If mNode^.Skipped Then
+    If Not TList_IsEmpty(mNode^.CommandList) Then
     Begin
-      TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Ignored');
+      For J := 0 To Pred(mNode^.CommandList^.Size) Do
+      Begin
+        mCommand := PCommand(TList_Get(mNode^.CommandList, J));
+        Case mCommand^.CommandType Of
+          eSkipCommand:
+          Begin
+            TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Ignored');
+          End;
+          ePushModeCommand:
+          Begin
+            TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Push Mode:');
+            TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mCommand^.Arg);
+          End;
+          ePopModeCommand:
+          Begin
+            TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Pop Mode');
+          End;
+        End;
+      End;
     End;
     mStr := IntToStr(mNode^.Nfa^.StartState);
     mStrPChar := CreateStr(Length(mStr));

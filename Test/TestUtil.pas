@@ -17,7 +17,8 @@ Uses
   EofRule, IdRule, TermRule, LParRule, OrRule, ColnRule, AstkRule,
   QMrkRule, PlusRule, TildRule, RParRule, LBrkRule,
   RBrkRule, LCBRule, RCBRule, CharRule, ChStRule, StrRule, DotRule,
-  DDtsRule, EquRule, SemiRule, SkipRule, OptRule, MODERULE, SysUtils;
+  DDtsRule, EquRule, SemiRule, SkipRule, OptRule, MODERULE, ARRWRULE,
+  PPMDRULE, PUMDRULE, COMARULE, SysUtils;
 
 Function PropmtForFile(Prompt: PChar; DefaultFilePath: PChar): PStream;
 Var
@@ -51,6 +52,9 @@ Begin
   TGrammarLexer_AddRule(mLexer, EofRule.Compose);
   TGrammarLexer_AddRule(mLexer, OptRule.Compose);
   TGrammarLexer_AddRule(mLexer, MODERULE.Compose);
+  TGrammarLexer_AddRule(mLexer, SkipRule.Compose);
+  TGrammarLexer_AddRule(mLexer, PUMDRULE.Compose);
+  TGrammarLexer_AddRule(mLexer, PPMDRULE.Compose);
   TGrammarLexer_AddRule(mLexer, IdRule.Compose);
   TGrammarLexer_AddRule(mLexer, TermRule.Compose);
   TGrammarLexer_AddRule(mLexer, LParRule.Compose);
@@ -73,7 +77,8 @@ Begin
   TGrammarLexer_AddRule(mLexer, TildRule.Compose);
   TGrammarLexer_AddRule(mLexer, EquRule.Compose);
   TGrammarLexer_AddRule(mLexer, SemiRule.Compose);
-  TGrammarLexer_AddRule(mLexer, SkipRule.Compose);
+  TGrammarLexer_AddRule(mLexer, ARRWRULE.Compose);
+  TGrammarLexer_AddRule(mLexer, COMARULE.Compose);
 End;
 
 End.

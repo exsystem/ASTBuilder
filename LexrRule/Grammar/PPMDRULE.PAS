@@ -1,4 +1,4 @@
-Unit SkipRule;
+Unit PPMDRULE;
 
 {$I define.inc}
 
@@ -17,12 +17,12 @@ Uses
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := KywdRule.Parse(Lexer, 'skip');
+  Result := KywdRule.Parse(Lexer, 'popMode');
 End;
 
 Function Compose: TLexerRule;
 Begin
-  Result.TokenKind := eSkip;
+  Result.TokenKind := ePopMode;
   Result.Parser := Parse;
 End;
 

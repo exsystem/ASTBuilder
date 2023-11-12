@@ -36,6 +36,8 @@ Var
   mTCodeLexer_VMT: TLexer_VMT;
 
 Procedure TCodeLexer_Create(Var Self: PCodeLexer; Const Source: PStream);
+Var
+  mMode: PChar;
 Begin
   New(Self); { Final }
   TLexer_Create(PLexer(Self), Source, False);
@@ -43,6 +45,8 @@ Begin
 
   Self^.GrammarNode := nil;
   Self^.Mode := TStack_Create(SizeOf(PChar), ModeStackElementDestructor);
+  mMode := StrNew('');
+  TStack_Push(Self^.Mode, @mMode);
   TTermRule(Self^.Parent.CurrentToken.Kind) := StrNew('');
 End;
 
@@ -60,13 +64,15 @@ End;
 
 Function TCodeLexer_GetNextToken(Var Self: PLexer): Boolean;
 Var
-  I: TSize;
+  I, J: TSize;
   mTermRuleNode: PTermRuleNode;
   mSavePoint: TSize;
   mNextPos: TSize;
   mSelf: PCodeLexer;
   mMode: PChar;
   mTermRules: PList;
+  mSkip: Boolean;
+  mCommand: PCommand;
 Label
   S;
 Begin
@@ -110,7 +116,31 @@ Begin
       Self^.CurrentToken.Value := CreateStr(StrLen(mTermRuleNode^.Nfa^.Keyword));
       Self^.FStream^.VMT^.Read(Self^.FStream, Self^.CurrentToken.Value^,
         StrLen(mTermRuleNode^.Nfa^.Keyword));
-      If mTermRuleNode^.Skipped Then
+
+      mSkip := False;
+      If Not TList_IsEmpty(mTermRuleNode^.CommandList) Then
+      Begin
+        For J := 0 To Pred(mTermRuleNode^.CommandList^.Size) Do
+        Begin
+          mCommand := PCommand(TList_Get(mTermRuleNode^.CommandList, J));
+          Case mCommand^.CommandType Of
+            eSkipCommand:
+            Begin
+              mSkip := True;
+            End;
+            ePushModeCommand:
+            Begin
+              TCodeLexer_PushMode(Self, mCommand^.Arg);
+            End;
+            ePopModeCommand:
+            Begin
+              TCodeLexer_PopMode(Self);
+            End;
+          End;
+        End;
+      End;
+
+      If mSkip Then
       Begin
         Goto S;
       End
@@ -141,7 +171,30 @@ Begin
         FreeStr(TTermRule(Self^.CurrentToken.Kind));
         TTermRule(Self^.CurrentToken.Kind) := strnew(mTermRuleNode^.Name);
 
-        If mTermRuleNode^.Skipped Then
+        mSkip := False;
+        If Not TList_IsEmpty(mTermRuleNode^.CommandList) Then
+        Begin
+          For J := 0 To Pred(mTermRuleNode^.CommandList^.Size) Do
+          Begin
+            mCommand := PCommand(TList_Get(mTermRuleNode^.CommandList, J));
+            Case mCommand^.CommandType Of
+              eSkipCommand:
+              Begin
+                mSkip := True;
+              End;
+              ePushModeCommand:
+              Begin
+                TCodeLexer_PushMode(Self, mCommand^.Arg);
+              End;
+              ePopModeCommand:
+              Begin
+                TCodeLexer_PopMode(Self);
+              End;
+            End;
+          End;
+        End;
+
+        If mSkip Then
         Begin
           Goto S;
         End
@@ -179,15 +232,17 @@ End;
 
 Procedure TCodeLexer_PopMode(Var Self: PLexer);
 Var
-  mMode: PChar;
+  mMode: PPChar;
 Begin
-  mMode := PPChar(TStack_Pop(PCodeLexer(Self)^.Mode))^;
-  FreeStr(mMode);
+  mMode := PPChar(TStack_Pop(PCodeLexer(Self)^.Mode));
+  FreeStr(mMode^);
+  FreeMem(mMode);
 End;
 
 Procedure ModeStackElementDestructor(Const Element: Pointer);
 Begin
   FreeStr(PPChar(Element)^);
+  FreeMem(PPChar(Element));
 End;
 
 Initialization
