@@ -24,6 +24,7 @@ Function TCodeLexer_IsToken(Var Self: PLexer; Const TokenKind: Pointer): Boolean
 Function TCodeLexer_GetNextToken(Var Self: PLexer): Boolean;
 Procedure TCodeLexer_PushMode(Var Self: PLexer; Mode: PChar);
 Procedure TCodeLexer_PopMode(Var Self: PLexer);
+Procedure TCodeLexer_ProcessToken(Var Self: PCodeLexer);
 
 Procedure ModeStackElementDestructor(Const Element: Pointer);
 
@@ -34,6 +35,7 @@ Uses
 
 Var
   mTCodeLexer_VMT: TLexer_VMT;
+  mHereDocId: PChar;
 
 Procedure TCodeLexer_Create(Var Self: PCodeLexer; Const Source: PStream);
 Var
@@ -147,6 +149,7 @@ Begin
       Else
       Begin
         Result := True;
+        TCodeLexer_ProcessToken(mSelf);
         Exit;
       End;
     End
@@ -200,6 +203,7 @@ Begin
         End
         Else
         Begin
+          TCodeLexer_ProcessToken(mSelf);
           Exit;
         End;
       End;
@@ -237,6 +241,42 @@ Begin
   mMode := PPChar(TStack_Pop(PCodeLexer(Self)^.Mode));
   FreeStr(mMode^);
   FreeMem(mMode);
+End;
+
+Procedure TCodeLexer_ProcessToken(Var Self: PCodeLexer);
+Var
+  mMode: PChar;
+  mTokenValue: PChar;
+  mKind: PChar;
+  mEnding: PChar;
+Begin
+  mMode := PPChar(TStack_Top(Self^.Mode))^;
+  mTokenValue := Self^.Parent.CurrentToken.Value;
+  mKind := TTermRule(Self^.Parent.CurrentToken.Kind);
+
+  If StrComp(mMode, 'hereDoc') <> 0 Then
+    Exit;
+  If StrComp(mKind, 'STARTHEREDOC') = 0 Then
+  Begin
+    mHereDocId := SubStr(mTokenValue, 3, Length(mTokenValue) - 3);
+    Exit;
+  End;
+  If StrComp(mKind, 'HEREDOCTEXT') = 0 Then
+  Begin
+    mEnding := CreateStr(Length(mHereDocId) + 1);
+    StrCat(mEnding, mHereDocId);
+    StrCat(mEnding, ';');
+    { If StrComp(mTokenValue, mEnding) = 0 Then }
+    If TrimRight(StrPas(mTokenValue)) = StrPas(mEnding) Then
+    Begin
+      FreeStr(mKind);
+      TTermRule(Self^.Parent.CurrentToken.Kind) := StrNew('_SEMI_HEREDOC');
+      TCodeLexer_PopMode(PLexer(Self));
+      FreeStr(mHereDocId);
+    End;
+    FreeStr(mEnding);
+    Exit;
+  End;
 End;
 
 Procedure ModeStackElementDestructor(Const Element: Pointer);
