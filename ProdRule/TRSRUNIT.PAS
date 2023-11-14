@@ -14,7 +14,7 @@ Function TermRulesExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  TypeDef, IdNode, GrpNode, TrmRNode, TERUnit, TRRUNIT, GRMRNODE, NFA,
+  TypeDef, IdNode, GrpNode, TrmRNode, TRRUNIT, GRMRNODE,
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
 
 { termRules -> termRule* ( Mode Id Semi termRule* )* }

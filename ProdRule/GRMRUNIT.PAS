@@ -14,7 +14,7 @@ Function GrammarRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  TypeDef, List, GrmrNode, TrmRNode, RuleNode, RRUnit, TRRUnit, OptRUnit,
+  TypeDef, List, GrmrNode, TrmRNode, RuleNode, RRUnit, OptRUnit,
   TRSRUNIT, GLEXER, GPARSER;
 
 { grammar -> ( Options LCurlyBrack option* RCurlyBrack ) ? rule* termRules }
@@ -22,7 +22,6 @@ Function GrammarRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePointS2, mSavePointS3: TSize;
   mRuleNode: PAstNode;
-  mTermRuleNode: PAstNode;
 Label
   S1, S2, S3, S4;
 Begin

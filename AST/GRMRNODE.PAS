@@ -42,7 +42,7 @@ Var
 Implementation
 
 Uses
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, TypeDef, RuleNode;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, TypeDef, RuleNode;
 
 Procedure TermRulesElementDestructor(Const Element: Pointer);
 Var

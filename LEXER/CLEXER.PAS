@@ -266,11 +266,10 @@ Begin
     mEnding := CreateStr(Length(mHereDocId) + 1);
     StrCat(mEnding, mHereDocId);
     StrCat(mEnding, ';');
-    { If StrComp(mTokenValue, mEnding) = 0 Then }
-    If TrimRight(StrPas(mTokenValue)) = StrPas(mEnding) Then
+    If StrPos(mTokenValue, mEnding) = mTokenValue Then
     Begin
       FreeStr(mKind);
-      TTermRule(Self^.Parent.CurrentToken.Kind) := StrNew('_SEMI_HEREDOC');
+      TTermRule(Self^.Parent.CurrentToken.Kind) := StrNew('@HEREDOC_END');
       TCodeLexer_PopMode(PLexer(Self));
       FreeStr(mHereDocId);
     End;

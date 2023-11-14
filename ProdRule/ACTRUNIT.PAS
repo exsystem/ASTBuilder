@@ -14,15 +14,13 @@ Function ActionRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  TypeDef, IdNode, GrpNode, TrmRNode, TERUnit, TRRUNIT, GRMRNODE, NFA,
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, CLEXER, GPARSER;
+  TypeDef, IdNode, GrpNode, TrmRNode, GRMRNODE,
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, GLEXER, CLEXER, GPARSER;
 
 { action -> skip | (PushMode LParen Id RParen) | PopMode }
 Function ActionRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
-Var
-  mSavePointS2, mSavePointS3: TSize;
 Label
-  S1, S2, S3;
+  S1, S2;
 Begin
   S1:
     If TGrammarParser_Term(Parser, eSkip) Then

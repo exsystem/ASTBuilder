@@ -6,7 +6,7 @@ Unit ASRUNIT;
 Interface
 
 Uses
-  Parser, Lexer, ASTNode;
+  Parser, ASTNode;
 
 Function ActionsRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Function ActionsRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
@@ -14,8 +14,8 @@ Function ActionsRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  TypeDef, IdNode, GrpNode, TrmRNode, TERUnit, TRRUNIT, ACTRUNIT, GRMRNODE, NFA,
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
+  TypeDef, IdNode, GrpNode, TrmRNode, ACTRUNIT, GRMRNODE,
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, GLEXER, GPARSER;
 
 { actions -> action (Comma action)* }
 Function ActionsRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
@@ -24,7 +24,7 @@ Var
 Label
   S1, S2;
 Begin
-{ ATTENSION: IT'S NOT actions -> (action Comma)* action }
+  { ATTENSION: IT'S NOT actions -> (action Comma)* action }
   S1:
     If ActionRule(Parser, Ast) Then
     Begin

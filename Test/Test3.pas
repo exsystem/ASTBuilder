@@ -19,7 +19,7 @@ Uses {$IFNDEF FPC}
   SysUtils,
   TestUtil,
   Lexer,
-  GrmrPasr,
+  CPARSER,
   Parser, GrmRUnit, ASTNode, ParseTr,
  {$IFDEF USE_STRINGS}strings,{$ENDIF} STREAM, GLEXER, GPARSER, CLEXER;
 

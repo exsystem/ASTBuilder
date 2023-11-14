@@ -117,9 +117,8 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="Test/TEST2.PAS"/>
+        <Filename Value="Test/Test2.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Test2"/>
       </Unit>
       <Unit>
         <Filename Value="AST/GRMRNODE.PAS"/>
@@ -165,7 +164,7 @@
         <UnitName Value="EofRule"/>
       </Unit>
       <Unit>
-        <Filename Value="LexrRule/Grammar/Idrule.pas"/>
+        <Filename Value="LexrRule/Grammar/IDRULE.PAS"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="IdRule"/>
       </Unit>
@@ -308,7 +307,7 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="PARSER/GPARSER.PAS"/>
+        <Filename Value="PARSER/GPARSER.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
@@ -331,6 +330,7 @@
       <Unit>
         <Filename Value="ProdRule/TRSRUNIT.PAS"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="TRSRUnit"/>
       </Unit>
     </Units>
   </ProjectOptions>

@@ -1,5 +1,5 @@
-{ Unit GrammarParser; }
-Unit GrmrPasr;
+{ Unit CodeParser; }
+Unit CPARSER;
 
 {$I define.inc}
 
@@ -477,7 +477,8 @@ End;
 Function TAstViewer_CompareTokenKind(Const LHS: Pointer;
   Const RHS: Pointer): Boolean;
 Begin
-  Result := (StrComp(TTermRule(LHS), TTermRule(RHS)) = 0);
+
+  Result := (StrComp(TTermRule(LHS), TTermRule(RHS)) = 0) or (StrScan(TTermRule(LHS), '@') = TTermRule(LHS));
 End;
 
 Procedure TAstViewer_PrintParseTree(Self: PAstViewer; ParseTree: PParseTree);
