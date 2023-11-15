@@ -2,7 +2,12 @@ PROGRAM TEST;
 
 VAR
   MFILEPATH: STRING;
+  mText: String;
 BEGIN
+  mText := <<<sql
+select * from t1
+  where a = 10 and b = 20;
+sql;
   WRITELN(PROMPT);
   READLN(MFILEPATH);
   IF MFILEPATH = '' THEN

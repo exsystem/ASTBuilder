@@ -77,6 +77,7 @@ bool_
 
 string
    : STRING_LITERAL
+   | START_HEREDOC HEREDOC_TEXT +
    ;
 
 typeDefinitionPart
@@ -695,6 +696,8 @@ EQUAL
    : '='
    ;
 
+START_HEREDOC
+   : '<<<' [a-zA-Z_][a-zA-Z0-9_]* -> pushMode(hereDoc) ;
 
 NOT_EQUAL
    : '<>'
@@ -838,3 +841,6 @@ NUM_INT
    : ('0' .. '9') +
    ;
 
+
+mode hereDoc;
+HEREDOC_TEXT: (~([\r\n]))* [\r\n];

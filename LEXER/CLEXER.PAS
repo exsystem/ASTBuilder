@@ -248,32 +248,33 @@ Var
   mMode: PChar;
   mTokenValue: PChar;
   mKind: PChar;
-  mEnding: PChar;
 Begin
   mMode := PPChar(TStack_Top(Self^.Mode))^;
   mTokenValue := Self^.Parent.CurrentToken.Value;
   mKind := TTermRule(Self^.Parent.CurrentToken.Kind);
 
   If StrComp(mMode, 'hereDoc') <> 0 Then
+  Begin
     Exit;
-  If StrComp(mKind, 'STARTHEREDOC') = 0 Then
+  End;
+  If StrComp(mKind, 'START_HEREDOC') = 0 Then
   Begin
     mHereDocId := SubStr(mTokenValue, 3, Length(mTokenValue) - 3);
     Exit;
   End;
-  If StrComp(mKind, 'HEREDOCTEXT') = 0 Then
+  If StrComp(mKind, 'HEREDOC_TEXT') = 0 Then
   Begin
-    mEnding := CreateStr(Length(mHereDocId) + 1);
-    StrCat(mEnding, mHereDocId);
-    StrCat(mEnding, ';');
-    If StrPos(mTokenValue, mEnding) = mTokenValue Then
+    If StrPos(mTokenValue, mHereDocId) = mTokenValue Then
     Begin
       FreeStr(mKind);
       TTermRule(Self^.Parent.CurrentToken.Kind) := StrNew('@HEREDOC_END');
+      TLexer_Retract(PLexer(Self), Length(Self^.Parent.CurrentToken.Value) -
+        Length(mHereDocId));
+      FreeStr(Self^.Parent.CurrentToken.Value);
+      Self^.Parent.CurrentToken.Value := StrNew(mHereDocId);
       TCodeLexer_PopMode(PLexer(Self));
       FreeStr(mHereDocId);
     End;
-    FreeStr(mEnding);
     Exit;
   End;
 End;
