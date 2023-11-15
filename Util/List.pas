@@ -71,18 +71,27 @@ End;
 
 Function TList_Get(Self: PList; Const Index: TSize): Pointer;
 Begin
-  Result := @Self^.FList[Index * Self^.FElemSize];
+  Result := Self^.FList;
+  Inc(TSize(Result), Index * Self^.FElemSize);
 End;
 
 Procedure TList_Set(Self: PList; Const Index: TSize; Value: Pointer);
+Var
+  P: Pointer;
 Begin
-  Move(Value^, Self^.FList[Index * Self^.FElemSize], Self^.FElemSize);
+  P := Self^.FList;
+  Inc(TSize(P), Index * Self^.FElemSize);
+  Move(Value^, P^, Self^.FElemSize);
 End;
 
 Procedure TList_PushBack(Self: PList; Element: Pointer);
+Var
+  P: Pointer;
 Begin
   TList_Grow(Self);
-  Move(Element^, Self^.FList[Self^.Size * Self^.FElemSize], Self^.FElemSize);
+  P := Self^.FList;
+  Inc(TSize(P), Self^.Size * Self^.FElemSize);
+  Move(Element^, P^, Self^.FElemSize);
   Inc(Self^.Size);
 End;
 
@@ -94,17 +103,22 @@ End;
 Function TList_EmplaceBack(Self: PList): Pointer;
 Begin
   TList_Grow(Self);
-  Result := @Self^.FList[Self^.Size * Self^.FElemSize];
+  Result := Self^.FList;
+  Inc(TSize(Result), Self^.Size * Self^.FElemSize);
   Inc(Self^.Size);
 End;
 
 Procedure TList_Erase(Self: PList; Index: TSize); { todo: iterator?? }
+Var
+  mSrc, mDst: Pointer;
 Begin
   If Index <> Self^.Size - 1 Then
   Begin
-    Move(Self^.FList[Succ(Index) * Self^.FElemSize],
-      Self^.FList[Index * Self^.FElemSize],
-      (Self^.Size - Succ(Index)) * Self^.FElemSize);
+    mDst := Self^.FList;
+    Inc(TSize(mDst), Index * Self^.FElemSize);
+    mSrc := mDst;
+    Inc(TSize(mSrc), Self^.FElemSize);
+    Move(mSrc^, mDst^, (Self^.Size - Succ(Index)) * Self^.FElemSize);
   End;
   Dec(Self^.Size);
 End;

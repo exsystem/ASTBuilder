@@ -5,14 +5,13 @@ Program MyFormatter;
 {$R *.res}
 
 uses
+  ASTNode in 'AST\ASTNode.pas',
   GrmrNode in 'AST\Grmrnode.pas',
   GrpNode in 'AST\Grpnode.pas',
   IdNode in 'AST\IdNode.pas',
   RuleNode in 'AST\RuleNode.pas',
   TrmNode in 'AST\Trmnode.pas',
   TrmRNode in 'AST\Trmrnode.pas',
-  GrmrPasr in 'ASTVstr\Grmrpasr.pas',
-  GrmrViwr in 'ASTVstr\Grmrviwr.pas',
   NFA in 'Automata\NFA.pas',
   CHSTRULE in 'LexrRule\Grammar\Chstrule.pas',
   CharRule in 'LexrRule\Grammar\Charrule.pas',
@@ -53,19 +52,32 @@ uses
   TestUtil in 'Test\TestUtil.pas',
   ClsUtils in 'Util\Clsutils.pas',
   List in 'Util\List.pas',
-  Stack in 'Util\Stack.pas',
+  Stack in 'Util\STACK.PAS',
   Trie in 'Util\Trie.pas',
   TypeDef in 'Util\TypeDef.pas',
-  ASTNode in 'ASTNode.pas',
-  Lexer in 'lexer.pas',
-  Parser in 'Parser.pas',
   StrUtil in 'Util\Strutil.pas',
   Utility in 'Util\Utility.pas',
   OptRUnit in 'ProdRule\Optrunit.pas',
   EquRule in 'LexrRule\Grammar\Equrule.pas',
   LCBRule in 'LexrRule\Grammar\Lcbrule.pas',
   OptRule in 'LexrRule\Grammar\Optrule.pas',
-  RCBRule in 'LexrRule\Grammar\Rcbrule.pas';
+  RCBRule in 'LexrRule\Grammar\Rcbrule.pas',
+  ComaRule in 'LexrRule\Grammar\Comarule.pas',
+  ModeRule in 'LexrRule\Grammar\Moderule.pas',
+  PPMDRULE in 'LexrRule\Grammar\Ppmdrule.pas',
+  PUMDRULE in 'LexrRule\Grammar\Pumdrule.pas',
+  ArrwRule in 'LexrRule\Grammar\Arrwrule.pas',
+  TRSRUnit in 'ProdRule\Trsrunit.pas',
+  ASRUNIT in 'ProdRule\Asrunit.pas',
+  ACTRUNIT in 'ProdRule\Actrunit.pas',
+  Stream in 'Util\Stream.pas',
+  Lexer in 'LEXER\Lexer.pas',
+  CLexer in 'LEXER\Clexer.pas',
+  GPARSER in 'PARSER\GPARSER.pas',
+  GrmrViwr in 'PARSER\Grmrviwr.pas',
+  GLexer in 'LEXER\Glexer.pas',
+  PARSER in 'PARSER\PARSER.pas',
+  CPARSER in 'PARSER\Cparser.pas';
 
 Begin
   Test3.Test();
