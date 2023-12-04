@@ -28,7 +28,7 @@ Var
 Implementation
 
 Uses
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, CLEXER;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, CLEXER, TypeDef;
 
 Procedure TTermNode_Create(Var Self: PTermNode);
 Begin
@@ -37,14 +37,14 @@ Begin
   Self^.Parent.VMT := @mTTermNode_AST;
   Self^.Token.Error := strnew('');
   Self^.Token.Value := strnew('');
-  TTermRule(Self^.Token.Kind) := strnew('');
+  PTermRule(Self^.Token.Kind) := TTermRule_Make(0); 
 End;
 
 Procedure TTermNode_Destroy(Self: PAstNode);
 Begin
   FreeStr(PTermNode(Self)^.Token.Error);
   FreeStr(PTermNode(Self)^.Token.Value);
-  FreeStr(TTermRule(PTermNode(Self)^.Token.Kind));
+  TTermRule_Destroy(PTermRule(PTermNode(Self)^.Token.Kind));
   TAstNode_Destroy(Self);
 End;
 

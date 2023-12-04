@@ -6,7 +6,7 @@ Unit TrmRNode;
 Interface
 
 Uses
-  ASTNode, NFA, LIST;
+  ASTNode, NFA, LIST, TypeDef;
 
 Type
 
@@ -24,7 +24,7 @@ Type
 
   TTermRuleNode = Record
     Parent: TAstNode;
-    Name: PChar;
+    TermRuleId: TTermRule;
     Nfa: PNfa;
     CommandList: PList; { <TCommand> }
   End;
@@ -46,14 +46,14 @@ Var
 Implementation
 
 Uses
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, TypeDef;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 Procedure TTermRuleNode_Create(Var Self: PTermRuleNode);
 Begin
   New(Self);
   TAstNode_Create(PAstNode(Self));
   Self^.Parent.VMT := @mTTermRuleNode_AST;
-  Self^.Name := strnew('');
+  Self^.TermRuleId := 0; 
   Self^.Nfa := nil;
   Self^.CommandList := TList_Create(SizeOf(TCommand), 1);
 End;
@@ -69,7 +69,6 @@ Begin
   Begin
     TNfa_Destroy(mSelf^.Nfa);
   End;
-  FreeStr(mSelf^.Name);
   If Not TList_IsEmpty(mSelf^.CommandList) Then
   Begin
     For I := 0 To Pred(mSelf^.CommandList^.Size) Do

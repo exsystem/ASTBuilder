@@ -1,5 +1,5 @@
-string: STARTHEREDOC HEREDOCTEXT+;
-STARTHEREDOC: '<<<' [a-zA-Z_][a-zA-Z0-9_]* -> pushMode(hereDoc) ;
+string: START_HEREDOC HEREDOC_TEXT+;
+START_HEREDOC: '<<<' [a-zA-Z_][a-zA-Z0-9_]* -> pushMode(hereDoc) ;
 WS: [ \t\r\n] -> skip;
 mode hereDoc;
-HEREDOCTEXT: (~([\r\n]))* [\r\n];
+HEREDOC_TEXT: (~([\r\n]))* [\r\n];

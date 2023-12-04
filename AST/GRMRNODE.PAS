@@ -6,7 +6,7 @@ Unit GrmrNode;
 Interface
 
 Uses
-  ASTNode, TRMRNODE, List, Trie;
+  ASTNode, TRMRNODE, List, Trie, TypeDef;
 
 Const
   COption_CaseInsensitive = Byte($00);
@@ -27,7 +27,11 @@ Type
     Parent: TAstNode;
     Options: TOptions;
     Rules: PList; { Of PRuleNode }
+    { <mode, rules[]>[] }
     TermRules: PTrie; { Of PList<PTermRuleNode> }
+    TermRuleNames: PList; { Of PChar }
+    TermRuleIds: PTrie; { Of TTermRule }
+    TermRulesCount: TSize;
   End;
 
 Procedure TGrammarNode_Create(Var Self: PGrammarNode);
@@ -35,6 +39,9 @@ Procedure TGrammarNode_Destroy(Self: PAstNode);
 Procedure TGrammarNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Procedure TGrammarNode_AddTermRule(Self: PGrammarNode; Mode: PChar;
   TermRuleNode: PTermRuleNode);
+Function TGrammarNode_GetTermRuleId(Self: PGrammarNode; Const Name: PChar): TTermRule;
+Function TGrammarNode_GetTermRuleName(Self: PGrammarNode; Const Id: TTermRule): PChar;
+Function TGrammarNode_RegisterTermRule(Self: PGrammarNode; Name: PChar): TTermRule;
 
 Var
   mTGrammarNode_VMT: TAstNode_VMT;
@@ -42,7 +49,7 @@ Var
 Implementation
 
 Uses
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, TypeDef, RuleNode;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, RuleNode;
 
 Procedure TermRulesElementDestructor(Const Element: Pointer);
 Var
@@ -64,6 +71,9 @@ Begin
 End;
 
 Procedure TGrammarNode_Create(Var Self: PGrammarNode);
+Var
+  mName: PChar;
+  mId0, mId1: TTermRule;
 Begin
   New(Self);
   TAstNode_Create(PAstNode(Self));
@@ -72,12 +82,23 @@ Begin
   Self^.Options[COption_CaseInsensitive].BooleanValue := False;
   Self^.Rules := TList_Create(SizeOf(PRuleNode), 1);
   Self^.TermRules := TTrie_Create(SizeOf(PList), TermRulesElementDestructor);
+  Self^.TermRuleNames := TList_Create(SizeOf(PChar), 2);
+  Self^.TermRuleIds := TTrie_Create(SizeOf(TTermRule), nil);
+  mName := StrNew('');
+  mId0 := 0;
+  TList_PushBack(Self^.TermRuleNames, @mName);
+  TTrie_Set(Self^.TermRuleIds, mName, @mId0);
+  mName := StrNew('EOF');
+  mId1 := 1;
+  TList_PushBack(Self^.TermRuleNames, @mName);
+  TTrie_Set(Self^.TermRuleIds, mName, @mId1);
 End;
 
 Procedure TGrammarNode_Destroy(Self: PAstNode);
 Var
   I: TSize;
   mElem: PAstNode;
+  mName: PChar;
 Begin
   If PGrammarNode(Self)^.Rules^.Size > 0 Then
   Begin
@@ -88,6 +109,16 @@ Begin
       Dispose(mElem);
     End;
   End;
+  If PGrammarNode(Self)^.TermRuleNames^.Size > 0 Then
+  Begin
+    For I := 0 To PGrammarNode(Self)^.TermRuleNames^.Size - 1 Do
+    Begin
+      mName := PPChar(TList_Get(PGrammarNode(Self)^.TermRuleNames, I))^;
+      FreeStr(mName);
+    End;
+  End;
+  TList_Destroy(PGrammarNode(Self)^.TermRuleNames);
+  TTrie_Destroy(PGrammarNode(Self)^.TermRuleIds);
   TList_Destroy(PGrammarNode(Self)^.Rules);
   TTrie_Destroy(PGrammarNode(Self)^.TermRules);
   TAstNode_Destroy(Self);
@@ -95,6 +126,7 @@ End;
 
 Procedure TGrammarNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Begin
+  PGrammarNode(Self)^.TermRulesCount := PGrammarNode(Self)^.TermRuleNames.Size;
   Visitor^.Methods^.VisitGrammar(Visitor, Self);
 End;
 
@@ -115,6 +147,26 @@ Begin
     mElem := mPElem^;
   End;
   TList_PushBack(mElem, @TermRuleNode);
+End;
+
+Function TGrammarNode_GetTermRuleId(Self: PGrammarNode; Const Name: PChar): TTermRule;
+Begin
+  Result := PTermRule(TTrie_Get(Self^.TermRuleIds, Name))^;
+End;
+
+Function TGrammarNode_GetTermRuleName(Self: PGrammarNode; Const Id: TTermRule): PChar;
+Begin
+  Result := PChar(TList_Get(Self^.TermRuleNames, Id)^);
+End;
+
+Function TGrammarNode_RegisterTermRule(Self: PGrammarNode; Name: PChar): TTermRule;
+Var
+  mName: PChar;
+Begin
+  mName := StrNew(Name);
+  Result := Self^.TermRuleNames^.Size;
+  TList_PushBack(Self^.TermRuleNames, @mName);
+  TTrie_Set(Self^.TermRuleIds, Name, @Result);
 End;
 
 Begin

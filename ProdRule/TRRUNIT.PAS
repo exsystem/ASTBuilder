@@ -14,7 +14,7 @@ Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  IdNode, GrpNode, TrmRNode, TERUnit, ASRUNIT, NFA,
+  IdNode, GrpNode, TrmRNode, GRMRNODE, TERUnit, ASRUNIT, NFA,
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
 
 { termRule -> term Colon termExpr (Arrow actions)? Semi }
@@ -56,8 +56,9 @@ Begin
     Exit;
   End;
   TTermRuleNode_Create(PTermRuleNode(Ast));
-  FreeStr(PTermRuleNode(Ast)^.Name);
-  PTermRuleNode(Ast)^.Name := mName;
+  PTermRuleNode(Ast)^.TermRuleId :=
+    TGrammarNode_RegisterTermRule(PGrammarNode(PGrammarParser(Parser)^.Ast), mName);
+  FreeStr(mName);
   PTermRuleNode(Ast)^.Nfa := mNfa;
   If TGrammarParser_Term(Parser, eArrow) Then
   Begin

@@ -7,7 +7,7 @@ Unit GrmrViwr;
 Interface
 
 Uses
-  ASTNode, TypeDef;
+  ASTNode, GrmrNode, TypeDef;
 
 Type
   PAstViewer = ^TAstViewer;
@@ -15,6 +15,7 @@ Type
   TAstViewer = Record
     As_IAstVisitor: PAstVisitor;
     Level: TSize;
+    GrammarNode: PGrammarNode;
   End;
 
 Procedure TAstViewer_Create(Var Self: PAstViewer);
@@ -43,7 +44,7 @@ Implementation
 
 Uses
   List, Trie, IdNode, TrmNode, GrpNode, RuleNode,
-  TrmRNode, GrmrNode, NFA,
+  TrmRNode,  NFA,
   SysUtils{$IFDEF USE_STRINGS}, strings{$ENDIF}, StrUtil;
 
 Var
@@ -177,10 +178,12 @@ Var
   mStr: String;
   mStrPChar: PChar;
   mCommand: PCommand;
+  mName: PChar;
 Begin
   mNode := PTermRuleNode(Node);
-  mText := CreateStr(strlen(mNode^.Name) + 1);
-  strcat(mText, mNode^.Name);
+  mName := PPChar(TList_Get(PAstViewer(Intf^.Instance)^.GrammarNode^.TermRuleNames, mNode^.TermRuleId))^;
+  mText := CreateStr(strlen(mName) + 1);
+  strcat(mText, mName);
   strcat(mText, ':');
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
@@ -288,6 +291,7 @@ Var
   mMode: PChar;
 Begin
   mNode := PGrammarNode(Node);
+  PAstViewer(Intf^.Instance)^.GrammarNode:=mNode;
 
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Options:');
   TAstViewer_Indent(PAstViewer(Intf^.Instance));

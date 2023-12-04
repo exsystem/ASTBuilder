@@ -16,7 +16,7 @@ Type
   TParser_IsTokenKindUndefined_Proc = function(Const TokenKind: Pointer): Boolean;
   TParser_IsTokenKindEof_Proc = function(Const TokenKind: Pointer): Boolean;
   TParser_CopyTokenKind_Proc = function(Const TokenKind: Pointer): Pointer;
-  TParser_CompareTokenKind_Proc = function(Const LHS: Pointer; Const RHS: Pointer): Boolean;
+  TParser_CompareTokenKind_Proc = function(Self: PParser; Const LHS: Pointer; Const RHS: Pointer): Boolean;
 
   TParser_VMT = record
     Destroy: TParser_Destroy_Proc;
@@ -151,7 +151,7 @@ End;
 
 Function TParser_IsToken(Self: PParser; TokenKind: Pointer): Boolean;
 Begin
-  Result := Self^.VMT^.CompareTokenKind(TParser_GetCurrentToken(Self)^.Kind, TokenKind);
+  Result := Self^.VMT^.CompareTokenKind(Self, TParser_GetCurrentToken(Self)^.Kind, TokenKind);
 End;
 
 Function TParser_GetCurrentToken(Self: PParser): PToken;

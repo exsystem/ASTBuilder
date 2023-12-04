@@ -45,7 +45,7 @@ Function TAstViewer_IsTokenKindEof(Const TokenKind: Pointer): Boolean;
 
 Function TAstViewer_CopyTokenKind(Const TokenKind: Pointer): Pointer;
 
-Function TAstViewer_CompareTokenKind(Const LHS: Pointer;
+Function TAstViewer_CompareTokenKind(Self: PParser; Const LHS: Pointer;
   Const RHS: Pointer): Boolean;
 
 Procedure TAstViewer_PrintParseTree(Self: PAstViewer; ParseTree: PParseTree);
@@ -61,7 +61,7 @@ Function TAstViewer_Term(Parser: PParser; TokenKind: TTermRule): Boolean;
 Implementation
 
 Uses
-  IdNode, TrmNode, GrpNode, RuleNode, 
+  IdNode, TrmNode, GrpNode, RuleNode,
  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 Var
@@ -79,7 +79,7 @@ Begin
 
   { TODO: Merge with PChar Error fields in the parent class. }
   Self^.Error := False;
-  Self^.ErrorMessages := TStack_Create(SizeOf(PChar), Nil);
+  Self^.ErrorMessages := TStack_Create(SizeOf(PChar), nil);
 End;
 
 Procedure TAstViewer_Destroy(Const Self: PParser);
@@ -93,7 +93,7 @@ Begin
   For I := 0 To Self^.FTokenList^.Size - 1 Do
   Begin
     mToken := PToken(TList_Get(Self^.FTokenList, I));
-    FreeStr(PChar(mToken^.Kind));
+    Dispose(PSize(mToken^.Kind));
   End;
   { TODO: Merge with PChar Error fields in the parent class. }
   While Not TStack_Empty(mSelf^.ErrorMessages) Do
@@ -138,14 +138,16 @@ Var
 Begin
   mNode := PTermNode(Node);
   mSelf := PAstViewer(Intf^.Instance);
-  If TAstViewer_Term(PParser(mSelf), mNode^.Token.Value) Then
+  { Maybe check if term rule exists by mNode^.Token.Value first? }
+  If TAstViewer_Term(PParser(mSelf), TGrammarNode_GetTermRuleId(
+    mSelf^.FGrammar, mNode^.Token.Value)) Then
   Begin
     New(mTermNode);
     mTermNode^.RuleName := strnew('');
     mCurrToken := TParser_GetCurrentToken(PParser(mSelf));
     mTermNode^.Token.Error := StrNew(mCurrToken^.Error);
     mTermNode^.Token.Value := StrNew(mCurrToken^.Value);
-    TTermRule(mTermNode^.Token.Kind) := StrNew(TTermRule(mCurrToken^.Kind));
+    PTermRule(mTermNode^.Token.Kind) := TTermRule_Make(PTermRule(mCurrToken^.Kind)^);
     mTermNode^.Children := nil;
     TList_PushBack(mSelf^.FCurrentParseTreeNode^.Children, @mTermNode);
     mSelf^.Error := False;
@@ -154,7 +156,8 @@ Begin
   mSelf^.Error := True;
   If mSelf^.Parent.FCurrentToken = mSelf^.Parent.FTokenList^.Size - 1 Then
   Begin
-    mCurrToken := PToken(TList_Get(mSelf^.Parent.FTokenList, mSelf^.Parent.FCurrentToken));
+    mCurrToken := PToken(TList_Get(mSelf^.Parent.FTokenList,
+      mSelf^.Parent.FCurrentToken));
     S1 := 'Expecting term `';
     S2 := '`, but `';
     S3 := '` was found.';
@@ -407,7 +410,7 @@ Begin
   mSelf^.FCurrentParseTreeNode^.RuleName := strnew(mNode^.Name);
   mSelf^.FCurrentParseTreeNode^.Token.Error := strnew('');
   mSelf^.FCurrentParseTreeNode^.Token.Value := strnew('');
-  TTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := strnew('');
+  PTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := TTermRule_Make(0);
   mSelf^.FCurrentParseTreeNode^.Children := TList_Create(SizeOf(PParseTree), 1);
   If mNode^.Expr <> nil Then
   Begin
@@ -447,13 +450,15 @@ Begin
   End;
   mSelf^.FGrammar := mNode;
   PCodeLexer(mSelf^.Parent.FLexer)^.GrammarNode := mNode;
-  mSelf^.Parent.FLexer^.FCaseSensitive := Not mNode^.Options[COption_CaseInsensitive].BooleanValue;
+  TCodeLexer_Init(PCodeLexer(mSelf^.Parent.FLexer));
+  mSelf^.Parent.FLexer^.FCaseSensitive :=
+    Not mNode^.Options[COption_CaseInsensitive].BooleanValue;
   New(mSelf^.FParseTree);
   mSelf^.FCurrentParseTreeNode := mSelf^.FParseTree;
   mSelf^.FCurrentParseTreeNode^.RuleName := strnew('*');
   mSelf^.FCurrentParseTreeNode^.Token.Error := strnew('');
   mSelf^.FCurrentParseTreeNode^.Token.Value := strnew('');
-  TTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := strnew('');
+  PTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := TTermRule_Make(0);
   mSelf^.FCurrentParseTreeNode^.Children := TList_Create(SizeOf(PParseTree), 1);
   mItem := PPAstNode(TList_Get(mNode^.Rules, 0))^;
   mItem^.VMT^.Accept(mItem, Intf);
@@ -461,24 +466,24 @@ End;
 
 Function TAstViewer_IsTokenKindUndefined(Const TokenKind: Pointer): Boolean;
 Begin
-  Result := (StrComp(TTermRule(TokenKind), '') = 0);
+  Result := (PTermRule(TokenKind)^ = 0);
 End;
 
 Function TAstViewer_IsTokenKindEof(Const TokenKind: Pointer): Boolean;
 Begin
-  Result := (StrComp(TTermRule(TokenKind), 'EOF') = 0);
+  Result := (PTermRule(TokenKind)^ = 1);
 End;
 
 Function TAstViewer_CopyTokenKind(Const TokenKind: Pointer): Pointer;
 Begin
-  Result := StrNew(TTermRule(TokenKind));
+  Result := TTermRule_Make(PTermRule(TokenKind)^);
 End;
 
-Function TAstViewer_CompareTokenKind(Const LHS: Pointer;
+Function TAstViewer_CompareTokenKind(Self: PParser; Const LHS: Pointer;
   Const RHS: Pointer): Boolean;
 Begin
-
-  Result := (StrComp(TTermRule(LHS), TTermRule(RHS)) = 0) or (StrScan(TTermRule(LHS), '@') = TTermRule(LHS));
+  Result := (PTermRule(LHS)^ = PTermRule(RHS)^) Or (PTermRule(LHS)^
+    >= PAstViewer(Self)^.FGrammar^.TermRulesCount);
 End;
 
 Procedure TAstViewer_PrintParseTree(Self: PAstViewer; ParseTree: PParseTree);
@@ -488,7 +493,8 @@ Var
 Begin
   If strcomp(ParseTree^.RuleName, '') = 0 Then
   Begin
-    mLine := strnew(TTermRule(ParseTree^.Token.Kind));
+    mLine := strnew(TGrammarNode_GetTermRuleName(Self^.FGrammar,
+      PTermRule(ParseTree^.Token.Kind)^));
     mLine := ReallocStr(mLine, StrLen(mLine) + StrLen(': ') +
       StrLen(ParseTree^.Token.Value));
     strcat(mLine, ': ');
@@ -537,7 +543,7 @@ End;
 
 Function TAstViewer_Term(Parser: PParser; TokenKind: TTermRule): Boolean;
 Begin
-  Result := TParser_Term(Parser, Pointer(TokenKind));
+  Result := TParser_Term(Parser, @TokenKind);
 End;
 
 Begin

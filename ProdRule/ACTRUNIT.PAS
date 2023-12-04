@@ -14,7 +14,7 @@ Function ActionRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  TypeDef, IdNode, GrpNode, TrmRNode, GRMRNODE,
+  IdNode, GrpNode, TrmRNode, GRMRNODE,
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, GLEXER, CLEXER, GPARSER;
 
 { action -> skip | (PushMode LParen Id RParen) | PopMode }

@@ -8,8 +8,6 @@ Uses
   List, STACK, TypeDef, Stream, GrmrNode, Lexer;
 
 Type
-  TTermRule = PChar;
-
   PCodeLexer = ^TCodeLexer;
 
   TCodeLexer = Record
@@ -24,6 +22,7 @@ Function TCodeLexer_IsToken(Var Self: PLexer; Const TokenKind: Pointer): Boolean
 Function TCodeLexer_GetNextToken(Var Self: PLexer): Boolean;
 Procedure TCodeLexer_PushMode(Var Self: PLexer; Mode: PChar);
 Procedure TCodeLexer_PopMode(Var Self: PLexer);
+Procedure TCodeLexer_Init(Var Self: PCodeLexer);
 Procedure TCodeLexer_ProcessToken(Var Self: PCodeLexer);
 
 Procedure ModeStackElementDestructor(Const Element: Pointer);
@@ -49,19 +48,19 @@ Begin
   Self^.Mode := TStack_Create(SizeOf(PChar), ModeStackElementDestructor);
   mMode := StrNew('');
   TStack_Push(Self^.Mode, @mMode);
-  TTermRule(Self^.Parent.CurrentToken.Kind) := StrNew('');
+  PTermRule(Self^.Parent.CurrentToken.Kind) := TTermRule_Make(0);
 End;
 
 Procedure TCodeLexer_Destroy(Self: PLexer);
 Begin
-  FreeStr(TTermRule(Self^.CurrentToken.Kind));
+  TTermRule_Destroy(PTermRule(Self^.CurrentToken.Kind));
   TStack_Destroy(PCodeLexer(Self)^.Mode);
   TLexer_Destroy(Self);
 End;
 
 Function TCodeLexer_IsToken(Var Self: PLexer; Const TokenKind: Pointer): Boolean;
 Begin
-  Result := (StrComp(TTermRule(Self^.CurrentToken.Kind), TTermRule(TokenKind)) = 0);
+  Result := (PTermRule(Self^.CurrentToken.Kind)^ = PTermRule(TokenKind)^);
 End;
 
 Function TCodeLexer_GetNextToken(Var Self: PLexer): Boolean;
@@ -78,7 +77,7 @@ Var
 Label
   S;
 Begin
-  If StrComp(TTermRule(Self^.CurrentToken.Kind), 'EOF') = 0 Then
+  If PTermRule(Self^.CurrentToken.Kind)^ = 1 Then
   Begin
     Result := False;
     Exit;
@@ -87,8 +86,8 @@ Begin
   S:
     If TLexer_PeekNextChar(Self) = #0 Then
     Begin
-      FreeStr(TTermRule(Self^.CurrentToken.Kind));
-      TTermRule(Self^.CurrentToken.Kind) := strnew('EOF');
+      TTermRule_Destroy(PTermRule(Self^.CurrentToken.Kind));
+      PTermRule(Self^.CurrentToken.Kind) := TTermRule_Make(1);
       Self^.CurrentToken.StartPos := Self^.FStream^.VMT^.GetPosition(Self^.FStream);
       FreeStr(Self^.CurrentToken.Value);
       Self^.CurrentToken.Value := StrNew('');
@@ -111,8 +110,8 @@ Begin
       Begin
         Continue;
       End;
-      FreeStr(TTermRule(Self^.CurrentToken.Kind));
-      TTermRule(Self^.CurrentToken.Kind) := strnew(mTermRuleNode^.Name);
+      TTermRule_Destroy(PTermRule(Self^.CurrentToken.Kind));
+      PTermRule(Self^.CurrentToken.Kind) := TTermRule_Make(mTermRuleNode^.TermRuleId);
       Self^.CurrentToken.StartPos := Self^.FStream^.VMT^.GetPosition(Self^.FStream);
       FreeStr(Self^.CurrentToken.Value);
       Self^.CurrentToken.Value := CreateStr(StrLen(mTermRuleNode^.Nfa^.Keyword));
@@ -171,8 +170,8 @@ Begin
       If Result Then
       Begin
         TLexer_FetchNextToken(Self, mSavePoint - Self^.CurrentToken.StartPos);
-        FreeStr(TTermRule(Self^.CurrentToken.Kind));
-        TTermRule(Self^.CurrentToken.Kind) := strnew(mTermRuleNode^.Name);
+        TTermRule_Destroy(PTermRule(Self^.CurrentToken.Kind));
+        PTermRule(Self^.CurrentToken.Kind) := TTermRule_Make(mTermRuleNode^.TermRuleId);
 
         mSkip := False;
         If Not TList_IsEmpty(mTermRuleNode^.CommandList) Then
@@ -218,8 +217,8 @@ Begin
     Inc(I);
   End;
 
-  FreeStr(TTermRule(Self^.CurrentToken.Kind));
-  TTermRule(Self^.CurrentToken.Kind) := strnew('');
+  TTermRule_Destroy(PTermRule(Self^.CurrentToken.Kind));
+  PTermRule(Self^.CurrentToken.Kind) := TTermRule_Make(0);
   FreeStr(Self^.CurrentToken.Error);
   Self^.CurrentToken.Error := strnew('Illegal token.');
   TLexer_FetchNextToken(Self, I);
@@ -243,6 +242,11 @@ Begin
   FreeMem(mMode);
 End;
 
+Procedure TCodeLexer_Init(Var Self: PCodeLexer);
+Begin
+  TGrammarNode_RegisterTermRule(Self^.GrammarNode, '@HEREDOC_END');
+End;
+
 Procedure TCodeLexer_ProcessToken(Var Self: PCodeLexer);
 Var
   mMode: PChar;
@@ -251,7 +255,8 @@ Var
 Begin
   mMode := PPChar(TStack_Top(Self^.Mode))^;
   mTokenValue := Self^.Parent.CurrentToken.Value;
-  mKind := TTermRule(Self^.Parent.CurrentToken.Kind);
+  mKind := TGrammarNode_GetTermRuleName(Self^.GrammarNode,
+    PTermRule(Self^.Parent.CurrentToken.Kind)^);
 
   If StrComp(mMode, 'hereDoc') <> 0 Then
   Begin
@@ -266,8 +271,8 @@ Begin
   Begin
     If StrPos(mTokenValue, mHereDocId) = mTokenValue Then
     Begin
-      FreeStr(mKind);
-      TTermRule(Self^.Parent.CurrentToken.Kind) := StrNew('@HEREDOC_END');
+      PTermRule(Self^.Parent.CurrentToken.Kind)^ :=
+        TGrammarNode_GetTermRuleId(Self^.GrammarNode, '@HEREDOC_END');
       TLexer_Retract(PLexer(Self), Length(Self^.Parent.CurrentToken.Value) -
         Length(mHereDocId));
       FreeStr(Self^.Parent.CurrentToken.Value);

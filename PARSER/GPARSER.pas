@@ -33,7 +33,7 @@ Function TGrammarParser_IsTokenKindEof(Const TokenKind: Pointer): Boolean;
 
 Function TGrammarParser_CopyTokenKind(Const TokenKind: Pointer): Pointer;
 
-Function TGrammarParser_CompareTokenKind(Const LHS: Pointer;
+Function TGrammarParser_CompareTokenKind(Self: PParser; Const LHS: Pointer;
   Const RHS: Pointer): Boolean;
 
 Function TGrammarParser_Parse(Const Self: PGrammarParser): Boolean;
@@ -42,17 +42,16 @@ Function TGrammarParser_Term(Parser: PParser; TokenKind: TGrammarTokenKind): Boo
 
 Implementation
 
+Uses
   {$IFDEF DCC}
   {$IFDEF CLASSIC}
-  Uses TypInfo, SysUtils, StrUtil;
+  TypInfo, 
   {$ELSE}
-  Uses System.Rtti, SysUtils, StrUtil;
+  System.Rtti,
   {$ENDIF}
-  {$ELSE}
-
-Uses SysUtils;
-
+  StrUtil,
   {$ENDIF}
+  SysUtils, GRMRNODE, Trie;
 
 Var
   mTGrammarParser_VMT: TParser_VMT;
@@ -105,7 +104,7 @@ Begin
   PGrammarTokenKind(Result)^ := PGrammarTokenKind(TokenKind)^;
 End;
 
-Function TGrammarParser_CompareTokenKind(Const LHS: Pointer;
+Function TGrammarParser_CompareTokenKind(Self: PParser; Const LHS: Pointer;
   Const RHS: Pointer): Boolean;
 Begin
   Result := (PGrammarTokenKind(LHS)^ = PGrammarTokenKind(RHS)^);
