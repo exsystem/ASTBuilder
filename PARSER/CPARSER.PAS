@@ -111,20 +111,14 @@ Procedure TAstViewer_VisitId(Intf: PAstVisitor; Node: PAstNode);
 Var
   mSelf: PAstViewer;
   mNode: PIdNode;
-  I: TSize;
+  I: TNonTermRuleId;
   mRule: PRuleNode;
 Begin
   mSelf := PAstViewer(Intf^.Instance);
   mNode := PIdNode(Node);
-  For I := 0 To mSelf^.FGrammar^.Rules^.Size - 1 Do
-  Begin
-    mRule := PPRuleNode(TList_Get(mSelf^.FGrammar^.Rules, I))^;
-    If strcomp(mRule^.Name, mNode^.Value) = 0 Then
-    Begin
-      mRule^.Parent.VMT^.Accept(PAstNode(mRule), Intf);
-      Exit;
-    End;
-  End;
+  I := TGrammarNode_GetNonTermRuleId(mSelf^.FGrammar, mNode^.Value);
+  mRule := PPRuleNode(TList_Get(mSelf^.FGrammar^.Rules, I - 2))^;
+  mRule^.Parent.VMT^.Accept(PAstNode(mRule), Intf);
 End;
 
 Procedure TAstViewer_VisitTerm(Intf: PAstVisitor; Node: PAstNode);
@@ -143,11 +137,11 @@ Begin
     mSelf^.FGrammar, mNode^.Token.Value)) Then
   Begin
     New(mTermNode);
-    mTermNode^.RuleName := strnew('');
+    mTermNode^.RuleId := 0;
     mCurrToken := TParser_GetCurrentToken(PParser(mSelf));
     mTermNode^.Token.Error := StrNew(mCurrToken^.Error);
     mTermNode^.Token.Value := StrNew(mCurrToken^.Value);
-    PTermRule(mTermNode^.Token.Kind) := TTermRule_Make(PTermRule(mCurrToken^.Kind)^);
+    PTermRule(mTermNode^.Token.Kind) := TSize_Make(PTermRule(mCurrToken^.Kind)^);
     mTermNode^.Children := nil;
     TList_PushBack(mSelf^.FCurrentParseTreeNode^.Children, @mTermNode);
     mSelf^.Error := False;
@@ -407,10 +401,10 @@ Begin
   New(mCurr);
   TList_PushBack(mOrig^.Children, @mCurr);
   mSelf^.FCurrentParseTreeNode := mCurr;
-  mSelf^.FCurrentParseTreeNode^.RuleName := strnew(mNode^.Name);
+  mSelf^.FCurrentParseTreeNode^.RuleId := mNode^.Id;
   mSelf^.FCurrentParseTreeNode^.Token.Error := strnew('');
   mSelf^.FCurrentParseTreeNode^.Token.Value := strnew('');
-  PTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := TTermRule_Make(0);
+  PTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := TSize_Make(0);
   mSelf^.FCurrentParseTreeNode^.Children := TList_Create(SizeOf(PParseTree), 1);
   If mNode^.Expr <> nil Then
   Begin
@@ -455,10 +449,10 @@ Begin
     Not mNode^.Options[COption_CaseInsensitive].BooleanValue;
   New(mSelf^.FParseTree);
   mSelf^.FCurrentParseTreeNode := mSelf^.FParseTree;
-  mSelf^.FCurrentParseTreeNode^.RuleName := strnew('*');
+  mSelf^.FCurrentParseTreeNode^.RuleId := 1; //*
   mSelf^.FCurrentParseTreeNode^.Token.Error := strnew('');
   mSelf^.FCurrentParseTreeNode^.Token.Value := strnew('');
-  PTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := TTermRule_Make(0);
+  PTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := TSize_Make(0);
   mSelf^.FCurrentParseTreeNode^.Children := TList_Create(SizeOf(PParseTree), 1);
   mItem := PPAstNode(TList_Get(mNode^.Rules, 0))^;
   mItem^.VMT^.Accept(mItem, Intf);
@@ -476,7 +470,7 @@ End;
 
 Function TAstViewer_CopyTokenKind(Const TokenKind: Pointer): Pointer;
 Begin
-  Result := TTermRule_Make(PTermRule(TokenKind)^);
+  Result := TSize_Make(PTermRule(TokenKind)^);
 End;
 
 Function TAstViewer_CompareTokenKind(Self: PParser; Const LHS: Pointer;
@@ -491,7 +485,7 @@ Var
   I: TSize;
   mLine: PChar;
 Begin
-  If strcomp(ParseTree^.RuleName, '') = 0 Then
+  If ParseTree^.RuleId = 0 Then
   Begin
     mLine := strnew(TGrammarNode_GetTermRuleName(Self^.FGrammar,
       PTermRule(ParseTree^.Token.Kind)^));
@@ -504,7 +498,8 @@ Begin
   End
   Else
   Begin
-    TAstViewer_WriteLn(Self, ParseTree^.RuleName);
+    TAstViewer_WriteLn(Self, TGrammarNode_GetNonTermRuleName(Self^.FGrammar,
+      ParseTree^.RuleId));
     TAstViewer_Indent(Self);
     If ParseTree^.Children^.Size > 0 Then
     Begin

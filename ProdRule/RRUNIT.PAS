@@ -14,8 +14,9 @@ Function RuleRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  IdNode, GrpNode, RuleNode, ExpRUnit,
+  IdNode, GrpNode, RuleNode, GrmrNode, ExpRUnit,
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
+
 { rule -> Id Colon expr Semi }
 Function RuleRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
@@ -57,9 +58,10 @@ Begin
   If TGrammarParser_Term(Parser, eSemi) Then
   Begin
     TRuleNode_Create(PRuleNode(Ast));
-    FreeStr(PRuleNode(Ast)^.Name);
-    PRuleNode(Ast)^.Name := mName;
+    PRuleNode(Ast)^.Id := TGrammarNode_RegisterNonTermRule(
+      PGrammarNode(PGrammarParser(Parser)^.Ast), mName);
     PRuleNode(Ast)^.Expr := PGroupNode(mGroupNode);
+    FreeStr(mName);
   End
   Else
   Begin

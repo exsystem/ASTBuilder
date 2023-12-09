@@ -22,23 +22,28 @@ Type
   { TODO Allocator? }
   TElementDestructor = Procedure(Const Element: Pointer);
 
+  { 0: invalid, aka '' }
+  { 1: root node, aka '*' }
+  TNonTermRuleId = TSize;
+  PNonTermRuleId = ^TNonTermRuleId;
+
   { 0: undefined, aka '' }
   { 1: EOF }
   TTermRule = TSize;
   PTermRule = ^TTermRule;
 
-Function TTermRule_Make(Const Id: TSize): PTermRule;
-Procedure TTermRule_Destroy(Var Self: PTermRule);
+Function TSize_Make(Const Id: TSize): PSize;
+Procedure TSize_Destroy(Var Self: PSize);
 
 Implementation
 
-Function TTermRule_Make(Const Id: TSize): PTermRule;
+Function TSize_Make(Const Id: TSize): PSize;
 Begin
   New(Result);
   Result^ := Id;
 End;
 
-Procedure TTermRule_Destroy(Var Self: PTermRule);
+Procedure TSize_Destroy(Var Self: PSize);
 Begin
   Dispose(Self);
   Self := nil;

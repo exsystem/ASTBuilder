@@ -48,12 +48,12 @@ Begin
   Self^.Mode := TStack_Create(SizeOf(PChar), ModeStackElementDestructor);
   mMode := StrNew('');
   TStack_Push(Self^.Mode, @mMode);
-  PTermRule(Self^.Parent.CurrentToken.Kind) := TTermRule_Make(0);
+  PTermRule(Self^.Parent.CurrentToken.Kind) := TSize_Make(0);
 End;
 
 Procedure TCodeLexer_Destroy(Self: PLexer);
 Begin
-  TTermRule_Destroy(PTermRule(Self^.CurrentToken.Kind));
+  TSize_Destroy(PTermRule(Self^.CurrentToken.Kind));
   TStack_Destroy(PCodeLexer(Self)^.Mode);
   TLexer_Destroy(Self);
 End;
@@ -86,8 +86,8 @@ Begin
   S:
     If TLexer_PeekNextChar(Self) = #0 Then
     Begin
-      TTermRule_Destroy(PTermRule(Self^.CurrentToken.Kind));
-      PTermRule(Self^.CurrentToken.Kind) := TTermRule_Make(1);
+      TSize_Destroy(PTermRule(Self^.CurrentToken.Kind));
+      PTermRule(Self^.CurrentToken.Kind) := TSize_Make(1);
       Self^.CurrentToken.StartPos := Self^.FStream^.VMT^.GetPosition(Self^.FStream);
       FreeStr(Self^.CurrentToken.Value);
       Self^.CurrentToken.Value := StrNew('');
@@ -110,8 +110,8 @@ Begin
       Begin
         Continue;
       End;
-      TTermRule_Destroy(PTermRule(Self^.CurrentToken.Kind));
-      PTermRule(Self^.CurrentToken.Kind) := TTermRule_Make(mTermRuleNode^.TermRuleId);
+      TSize_Destroy(PTermRule(Self^.CurrentToken.Kind));
+      PTermRule(Self^.CurrentToken.Kind) := TSize_Make(mTermRuleNode^.TermRuleId);
       Self^.CurrentToken.StartPos := Self^.FStream^.VMT^.GetPosition(Self^.FStream);
       FreeStr(Self^.CurrentToken.Value);
       Self^.CurrentToken.Value := CreateStr(StrLen(mTermRuleNode^.Nfa^.Keyword));
@@ -170,8 +170,8 @@ Begin
       If Result Then
       Begin
         TLexer_FetchNextToken(Self, mSavePoint - Self^.CurrentToken.StartPos);
-        TTermRule_Destroy(PTermRule(Self^.CurrentToken.Kind));
-        PTermRule(Self^.CurrentToken.Kind) := TTermRule_Make(mTermRuleNode^.TermRuleId);
+        TSize_Destroy(PTermRule(Self^.CurrentToken.Kind));
+        PTermRule(Self^.CurrentToken.Kind) := TSize_Make(mTermRuleNode^.TermRuleId);
 
         mSkip := False;
         If Not TList_IsEmpty(mTermRuleNode^.CommandList) Then
@@ -217,8 +217,8 @@ Begin
     Inc(I);
   End;
 
-  TTermRule_Destroy(PTermRule(Self^.CurrentToken.Kind));
-  PTermRule(Self^.CurrentToken.Kind) := TTermRule_Make(0);
+  TSize_Destroy(PTermRule(Self^.CurrentToken.Kind));
+  PTermRule(Self^.CurrentToken.Kind) := TSize_Make(0);
   FreeStr(Self^.CurrentToken.Error);
   Self^.CurrentToken.Error := strnew('Illegal token.');
   TLexer_FetchNextToken(Self, I);

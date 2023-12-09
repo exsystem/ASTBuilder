@@ -37,14 +37,14 @@ Begin
   Self^.Parent.VMT := @mTTermNode_AST;
   Self^.Token.Error := strnew('');
   Self^.Token.Value := strnew('');
-  PTermRule(Self^.Token.Kind) := TTermRule_Make(0); 
+  PTermRule(Self^.Token.Kind) := TSize_Make(0);
 End;
 
 Procedure TTermNode_Destroy(Self: PAstNode);
 Begin
   FreeStr(PTermNode(Self)^.Token.Error);
   FreeStr(PTermNode(Self)^.Token.Value);
-  TTermRule_Destroy(PTermRule(PTermNode(Self)^.Token.Kind));
+  TSize_Destroy(PTermRule(PTermNode(Self)^.Token.Kind));
   TAstNode_Destroy(Self);
 End;
 

@@ -43,8 +43,7 @@ Procedure TAstViewer_Deindent(Self: PAstViewer);
 Implementation
 
 Uses
-  List, Trie, IdNode, TrmNode, GrpNode, RuleNode,
-  TrmRNode,  NFA,
+  List, Trie, IdNode, TrmNode, GrpNode, RuleNode, TrmRNode, NFA,
   SysUtils{$IFDEF USE_STRINGS}, strings{$ENDIF}, StrUtil;
 
 Var
@@ -150,8 +149,9 @@ Var
   mText: PChar;
 Begin
   mNode := PRuleNode(Node);
-  mText := strnew(mNode^.Name);
-  mText := ReallocStr(mText, strlen(mNode^.Name) + strlen(':'));
+  mText := PPChar(TList_Get(PAstViewer(Intf^.Instance)^.GrammarNode^.NonTermRuleNames,
+    mNode^.Id))^;
+  mText := ReallocStr(mText, strlen(mText) + strlen(':'));
   strcat(mText, ':');
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
@@ -181,7 +181,8 @@ Var
   mName: PChar;
 Begin
   mNode := PTermRuleNode(Node);
-  mName := PPChar(TList_Get(PAstViewer(Intf^.Instance)^.GrammarNode^.TermRuleNames, mNode^.TermRuleId))^;
+  mName := PPChar(TList_Get(PAstViewer(Intf^.Instance)^.GrammarNode^.TermRuleNames,
+    mNode^.TermRuleId))^;
   mText := CreateStr(strlen(mName) + 1);
   strcat(mText, mName);
   strcat(mText, ':');
@@ -291,7 +292,7 @@ Var
   mMode: PChar;
 Begin
   mNode := PGrammarNode(Node);
-  PAstViewer(Intf^.Instance)^.GrammarNode:=mNode;
+  PAstViewer(Intf^.Instance)^.GrammarNode := mNode;
 
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), 'Options:');
   TAstViewer_Indent(PAstViewer(Intf^.Instance));

@@ -6,7 +6,7 @@ Unit ParseTr;
 Interface
 
 Uses
-  Lexer, List;
+  Lexer, List, TypeDef;
 
 Type
   PPParseTree = ^PParseTree;
@@ -14,7 +14,7 @@ Type
   PParseTree = ^TParseTree;
 
   TParseTree = Record
-    RuleName: PChar;
+    RuleId: TNonTermRuleId;
     Token: TToken;
     Children: PList; { of PParseTree }
   End;
@@ -24,11 +24,10 @@ Procedure TParseTree_Destroy(Self: PParseTree);
 Implementation
 
 Uses
- {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, CLEXER, TypeDef;
+ {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, CLEXER;
 
 Procedure TParseTree_Destroy(Self: PParseTree);
 Begin
-  FreeStr(Self^.RuleName);
   FreeStr(Self^.Token.Error);
   FreeStr(Self^.Token.Value);
   Dispose(PTermRule(Self^.Token.Kind));

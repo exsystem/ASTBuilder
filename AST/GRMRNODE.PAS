@@ -6,7 +6,7 @@ Unit GrmrNode;
 Interface
 
 Uses
-  ASTNode, TRMRNODE, List, Trie, TypeDef;
+  ASTNode, TRMRNODE, List, Trie, TypeDef, RuleNode;
 
 Const
   COption_CaseInsensitive = Byte($00);
@@ -27,6 +27,8 @@ Type
     Parent: TAstNode;
     Options: TOptions;
     Rules: PList; { Of PRuleNode }
+    NonTermRuleNames: PList; { Of PChar }
+    NonTermRuleIds: PTrie; { Of TNonTermRule }
     { <mode, rules[]>[] }
     TermRules: PTrie; { Of PList<PTermRuleNode> }
     TermRuleNames: PList; { Of PChar }
@@ -37,6 +39,12 @@ Type
 Procedure TGrammarNode_Create(Var Self: PGrammarNode);
 Procedure TGrammarNode_Destroy(Self: PAstNode);
 Procedure TGrammarNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
+Function TGrammarNode_GetNonTermRuleId(Self: PGrammarNode;
+  Const Name: PChar): TNonTermRuleId;
+Function TGrammarNode_GetNonTermRuleName(Self: PGrammarNode;
+  Const Id: TNonTermRuleId): PChar;
+Function TGrammarNode_RegisterNonTermRule(Self: PGrammarNode;
+  Name: PChar): TNonTermRuleId;
 Procedure TGrammarNode_AddTermRule(Self: PGrammarNode; Mode: PChar;
   TermRuleNode: PTermRuleNode);
 Function TGrammarNode_GetTermRuleId(Self: PGrammarNode; Const Name: PChar): TTermRule;
@@ -49,7 +57,7 @@ Var
 Implementation
 
 Uses
-  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, RuleNode;
+  {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 Procedure TermRulesElementDestructor(Const Element: Pointer);
 Var
@@ -80,7 +88,19 @@ Begin
   Self^.Parent.VMT := @mTGrammarNode_VMT;
 
   Self^.Options[COption_CaseInsensitive].BooleanValue := False;
+
   Self^.Rules := TList_Create(SizeOf(PRuleNode), 1);
+  Self^.NonTermRuleNames := TList_Create(SizeOf(PChar), 2);
+  Self^.NonTermRuleIds := TTrie_Create(SizeOf(PNonTermRuleId), nil);
+  mName := StrNew('');
+  mId0 := 0;
+  TList_PushBack(Self^.NonTermRuleNames, @mName);
+  TTrie_Set(Self^.NonTermRuleIds, mName, @mId0);
+  mName := StrNew('*');
+  mId1 := 1;
+  TList_PushBack(Self^.NonTermRuleNames, @mName);
+  TTrie_Set(Self^.NonTermRuleIds, mName, @mId1);
+
   Self^.TermRules := TTrie_Create(SizeOf(PList), TermRulesElementDestructor);
   Self^.TermRuleNames := TList_Create(SizeOf(PChar), 2);
   Self^.TermRuleIds := TTrie_Create(SizeOf(TTermRule), nil);
@@ -100,6 +120,16 @@ Var
   mElem: PAstNode;
   mName: PChar;
 Begin
+  If PGrammarNode(Self)^.NonTermRuleNames^.Size > 0 Then
+  Begin
+    For I := 0 To PGrammarNode(Self)^.NonTermRuleNames^.Size - 1 Do
+    Begin
+      mName := PPChar(TList_Get(PGrammarNode(Self)^.NonTermRuleNames, I))^;
+      FreeStr(mName);
+    End;
+  End;
+  TList_Destroy(PGrammarNode(Self)^.NonTermRuleNames);
+  TTrie_Destroy(PGrammarNode(Self)^.NonTermRuleIds);
   If PGrammarNode(Self)^.Rules^.Size > 0 Then
   Begin
     For I := 0 To PGrammarNode(Self)^.Rules^.Size - 1 Do
@@ -109,6 +139,8 @@ Begin
       Dispose(mElem);
     End;
   End;
+  TList_Destroy(PGrammarNode(Self)^.Rules);
+
   If PGrammarNode(Self)^.TermRuleNames^.Size > 0 Then
   Begin
     For I := 0 To PGrammarNode(Self)^.TermRuleNames^.Size - 1 Do
@@ -119,8 +151,8 @@ Begin
   End;
   TList_Destroy(PGrammarNode(Self)^.TermRuleNames);
   TTrie_Destroy(PGrammarNode(Self)^.TermRuleIds);
-  TList_Destroy(PGrammarNode(Self)^.Rules);
   TTrie_Destroy(PGrammarNode(Self)^.TermRules);
+
   TAstNode_Destroy(Self);
 End;
 
@@ -128,6 +160,29 @@ Procedure TGrammarNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Begin
   PGrammarNode(Self)^.TermRulesCount := PGrammarNode(Self)^.TermRuleNames.Size;
   Visitor^.Methods^.VisitGrammar(Visitor, Self);
+End;
+
+Function TGrammarNode_GetNonTermRuleId(Self: PGrammarNode;
+  Const Name: PChar): TNonTermRuleId;
+Begin
+  Result := PNonTermRuleId(TTrie_Get(Self^.NonTermRuleIds, Name))^;
+End;
+
+Function TGrammarNode_GetNonTermRuleName(Self: PGrammarNode;
+  Const Id: TNonTermRuleId): PChar;
+Begin
+  Result := PChar(TList_Get(Self^.NonTermRuleNames, Id)^);
+End;
+
+Function TGrammarNode_RegisterNonTermRule(Self: PGrammarNode;
+  Name: PChar): TNonTermRuleId;
+Var
+  mName: PChar;
+Begin
+  mName := StrNew(Name);
+  Result := Self^.NonTermRuleNames^.Size;
+  TList_PushBack(Self^.NonTermRuleNames, @mName);
+  TTrie_Set(Self^.NonTermRuleIds, Name, @Result);
 End;
 
 Procedure TGrammarNode_AddTermRule(Self: PGrammarNode; Mode: PChar;

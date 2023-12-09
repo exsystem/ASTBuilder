@@ -90,12 +90,12 @@ Begin
       TTermNode_Create(PTermNode(mTermNode));
       FreeStr(PTermNode(mTermNode)^.Token.Error);
       FreeStr(PTermNode(mTermNode)^.Token.Value);
-      TTermRule_Destroy(PTermRule(PTermNode(mTermNode)^.Token.Kind));
+      TSize_Destroy(PTermRule(PTermNode(mTermNode)^.Token.Kind));
       PTermNode(mTermNode)^.Token := TParser_GetCurrentToken(Parser)^;
       PTermNode(mTermNode)^.Token.Error := StrNew(PTermNode(mTermNode)^.Token.Error);
       PTermNode(mTermNode)^.Token.Value := StrNew(PTermNode(mTermNode)^.Token.Value);
       PTermRule(PTermNode(mTermNode)^.Token.Kind) :=
-        TTermRule_Make(PTermRule(PTermNode(mTermNode)^.Token.Kind)^);
+        TSize_Make(PTermRule(PTermNode(mTermNode)^.Token.Kind)^);
     End
     Else
     Begin
