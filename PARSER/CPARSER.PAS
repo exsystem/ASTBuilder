@@ -141,7 +141,7 @@ Begin
     mCurrToken := TParser_GetCurrentToken(PParser(mSelf));
     mTermNode^.Token.Error := StrNew(mCurrToken^.Error);
     mTermNode^.Token.Value := StrNew(mCurrToken^.Value);
-    PTermRule(mTermNode^.Token.Kind) := TSize_Make(PTermRule(mCurrToken^.Kind)^);
+    PTermRule(mTermNode^.Token.Kind) := TTermRule_Make(PTermRule(mCurrToken^.Kind)^);
     mTermNode^.Children := nil;
     TList_PushBack(mSelf^.FCurrentParseTreeNode^.Children, @mTermNode);
     mSelf^.Error := False;
@@ -404,7 +404,7 @@ Begin
   mSelf^.FCurrentParseTreeNode^.RuleId := mNode^.Id;
   mSelf^.FCurrentParseTreeNode^.Token.Error := strnew('');
   mSelf^.FCurrentParseTreeNode^.Token.Value := strnew('');
-  PTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := TSize_Make(0);
+  PTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := TTermRule_Make(0);
   mSelf^.FCurrentParseTreeNode^.Children := TList_Create(SizeOf(PParseTree), 1);
   If mNode^.Expr <> nil Then
   Begin
@@ -449,10 +449,10 @@ Begin
     Not mNode^.Options[COption_CaseInsensitive].BooleanValue;
   New(mSelf^.FParseTree);
   mSelf^.FCurrentParseTreeNode := mSelf^.FParseTree;
-  mSelf^.FCurrentParseTreeNode^.RuleId := 1; //*
+  mSelf^.FCurrentParseTreeNode^.RuleId := 1; {***}
   mSelf^.FCurrentParseTreeNode^.Token.Error := strnew('');
   mSelf^.FCurrentParseTreeNode^.Token.Value := strnew('');
-  PTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := TSize_Make(0);
+  PTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := TTermRule_Make(0);
   mSelf^.FCurrentParseTreeNode^.Children := TList_Create(SizeOf(PParseTree), 1);
   mItem := PPAstNode(TList_Get(mNode^.Rules, 0))^;
   mItem^.VMT^.Accept(mItem, Intf);

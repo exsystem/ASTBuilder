@@ -60,6 +60,7 @@ Uses
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 Procedure TermRulesElementDestructor(Const Element: Pointer);
+{$IFDEF VINTAGE} Far; {$ENDIF}
 Var
   I: TSize;
   mElem: PAstNode;
@@ -158,7 +159,7 @@ End;
 
 Procedure TGrammarNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 Begin
-  PGrammarNode(Self)^.TermRulesCount := PGrammarNode(Self)^.TermRuleNames.Size;
+  PGrammarNode(Self)^.TermRulesCount := PGrammarNode(Self)^.TermRuleNames^.Size;
   Visitor^.Methods^.VisitGrammar(Visitor, Self);
 End;
 

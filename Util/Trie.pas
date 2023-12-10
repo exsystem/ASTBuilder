@@ -61,17 +61,22 @@ Procedure TTrieIterator_Destroy(Const Self: PTrieIterator);
 Procedure TTrieIterator_Next(Const Self: PTrieIterator);
 Function TTrieIterator_Current(Const Self: PTrieIterator): TSuffixNodePair;
 
+{$IFDEF VINTAGE}
+Var
+  CTrieIterator_End: TTrieIterator;
+{$ENDIF}
+
 Implementation
 
 Uses
-{$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF};
+{$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
 Function TTrie_Create(Const ElementSize: TSize;
   Const ElementDestructor: TElementDestructor): PTrie;
 Begin
   New(Result);
   Result^.FElemSize := ElementSize;
-  Result^.Root := TTrie_CreateNode();
+  Result^.Root := TTrie_CreateNode;
   Result^.Root^.Leaf := False;
   Result^.ElementDestructor := ElementDestructor;
 End;
@@ -137,7 +142,7 @@ Begin
     If mNode^.Next[mKey^] = nil Then
     Begin
       mNode^.Next[mKey^] := TTrie_CreateNode;
-      mNode^.Next[mKey^].Leaf := False;
+      mNode^.Next[mKey^]^.Leaf := False;
     End;
     mNode := mNode^.Next[mKey^];
     Inc(mKey, SizeOf(Byte));
@@ -249,6 +254,7 @@ Begin
 End;
 
 Function TTrie_End(Self: PTrie): PTrieIterator;
+{$IFNDEF VINTAGE}
 Const
   CEnd: TTrieIterator = (
     FTrie: nil;
@@ -259,8 +265,9 @@ Const
     Node: nil;
     );
     );
+{$ENDIF}
 Begin
-  Result := @CEnd;
+  Result := @{$IFDEF VINTAGE} CTrieIterator_End {$ELSE} CEnd {$ENDIF};
 End;
 
 Procedure TTrie_DoClear(Const Self: PTrie; Root: PNode);
@@ -288,7 +295,7 @@ End;
 
 Procedure NodeStackElementDestructor(Const Element: Pointer);
 Begin
-  FreeMem(TSuffixNodePair(Element^).Suffix);
+  FreeStr(TSuffixNodePair(Element^).Suffix);
   Dispose(PSuffixNodePair(Element));
 End;
 
@@ -303,7 +310,7 @@ Procedure TTrieIterator_Destroy(Const Self: PTrieIterator);
 Begin
   If Self^.FCurrent.Suffix <> nil Then
   Begin
-    FreeMem(Self^.FCurrent.Suffix);
+    FreeStr(Self^.FCurrent.Suffix);
   End;
   TStack_Destroy(Self^.FNodeStack);
 End;
@@ -322,7 +329,7 @@ Begin
   Begin
     For I := High(Byte) Downto Low(Byte) Do
     Begin
-      If Self^.FCurrent.Node.Next[I] <> nil Then
+      If Self^.FCurrent.Node^.Next[I] <> nil Then
       Begin
         mPair := TStack_Emplace(Self^.FNodeStack);
         If Self^.FCurrent.Suffix = nil Then
@@ -345,7 +352,7 @@ Begin
       End;
     End;
 
-    FreeMem(Self^.FCurrent.Suffix);
+    FreeStr(Self^.FCurrent.Suffix);
     If TStack_Empty(Self^.FNodeStack) Then
     Begin
       Self^.FCurrent.Suffix := nil;
@@ -357,7 +364,7 @@ Begin
     Begin
       mPair := PSuffixNodePair(TStack_Pop(Self^.FNodeStack));
       Self^.FCurrent := mPair^;
-      FreeMem(mPair);
+      Dispose(mPair);
       If Self^.FCurrent.Node^.Leaf Then
       Begin
         Exit;
@@ -370,5 +377,14 @@ Function TTrieIterator_Current(Const Self: PTrieIterator): TSuffixNodePair;
 Begin
   Result := Self^.FCurrent;
 End;
+
+{$IFDEF VINTAGE}
+Initialization
+  CTrieIterator_End.FTrie := nil;
+  CTrieIterator_End.FNodeStack := nil;
+  CTrieIterator_End.FCurrent.Suffix := nil;  
+  CTrieIterator_End.FCurrent.SuffixSize := 0;
+  CTrieIterator_End.FCurrent.Node := nil;
+{$ENDIF}
 
 End.

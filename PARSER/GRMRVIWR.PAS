@@ -44,7 +44,7 @@ Implementation
 
 Uses
   List, Trie, IdNode, TrmNode, GrpNode, RuleNode, TrmRNode, NFA,
-  SysUtils{$IFDEF USE_STRINGS}, strings{$ENDIF}, StrUtil;
+  SysUtils{$IFDEF USE_STRINGS}, strings{$ENDIF}, {$IFDEF VINTAGE} Utility,{$ENDIF} StrUtil;
 
 Var
   mTAstViewer_Methods: TAstVisitor_Methods;
@@ -327,7 +327,7 @@ Begin
     Move(mIterator^.FCurrent.Suffix^, mMode^, mIterator^.FCurrent.SuffixSize);
     mMode[mIterator^.FCurrent.SuffixSize] := #0;
     mStr := StrPas(mMode);
-    FreeMem(mMode);
+    FreeMem(mMode, mIterator^.FCurrent.SuffixSize + SizeOf(Char));
     mStr := 'Mode [' + mStr + ']';
     mText := @mStr[1];
     TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);

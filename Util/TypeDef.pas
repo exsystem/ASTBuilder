@@ -35,6 +35,11 @@ Type
 Function TSize_Make(Const Id: TSize): PSize;
 Procedure TSize_Destroy(Var Self: PSize);
 
+Function TNonTermRuleId_Make(Const Id: TNonTermRuleId): PNonTermRuleId;
+Procedure TNonTermRuleId_Destroy(Var Self: PNonTermRuleId);
+Function TTermRule_Make(Const Id: TTermRule): PTermRule;
+Procedure TTermRule_Destroy(Var Self: PTermRule);
+
 Implementation
 
 Function TSize_Make(Const Id: TSize): PSize;
@@ -47,6 +52,26 @@ Procedure TSize_Destroy(Var Self: PSize);
 Begin
   Dispose(Self);
   Self := nil;
+End;
+
+Function TNonTermRuleId_Make(Const Id: TNonTermRuleId): PNonTermRuleId;
+Begin
+  Result := PNonTermRuleId(TSize_Make(TSize(Id)));
+End;
+
+Procedure TNonTermRuleId_Destroy(Var Self: PNonTermRuleId);
+Begin
+  TSize_Destroy(PSize(Self));
+End;
+
+Function TTermRule_Make(Const Id: TTermRule): PTermRule;
+Begin
+  Result := PTermRule(TSize_Make(TSize(Id)));
+End;
+
+Procedure TTermRule_Destroy(Var Self: PTermRule);
+Begin
+  TSize_Destroy(PSize(Self));
 End;
 
 End.
