@@ -5,7 +5,7 @@
         <FrameworkType>None</FrameworkType>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
-        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <TargetedPlatforms>3</TargetedPlatforms>
         <AppType>Console</AppType>
         <MainSource>MyFormatter.dpr</MainSource>
@@ -196,7 +196,7 @@
         <DCCReference Include="Util\STRUTILS.pas"/>
         <DCCReference Include="Test\TEST1.PAS"/>
         <DCCReference Include="Test\TEST2.PAS"/>
-        <DCCReference Include="Test\TEST3.PAS"/>
+        <DCCReference Include="Test\Test3.pas"/>
         <DCCReference Include="Test\TESTUTIL.PAS"/>
         <DCCReference Include="LEXER\CLEXER.PAS"/>
         <DCCReference Include="LEXER\GLEXER.PAS"/>
@@ -306,7 +306,6 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Win32\Debug\MyFormatter.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployFile LocalName="Win32\Debug\MyFormatter.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployFile LocalName="Win64\Debug\MyFormatter.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">

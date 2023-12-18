@@ -111,11 +111,20 @@ End;
 
 Function TFileStream_Read(Const Self: PStream; Var Data;
   Const Length: TSize): TSize;
+{$IFDEF WIN64}
+Var
+  mResult: Integer;
+{$ENDIF}
 Begin
   {$IFDEF FPC}
   BlockRead(PFileStream(Self)^.FFile, Data, Int64(Length), Int64(Result));
   {$ELSE}
+  {$IFDEF WIN64}
+  BlockRead(PFileStream(Self)^.FFile, Data, Integer(Length), mResult);
+  Result := mResult;
+  {$ELSE}
   BlockRead(PFileStream(Self)^.FFile, Data, Length, Result);
+  {$ENDIF}
   {$ENDIF}
 End;
 
