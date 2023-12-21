@@ -130,6 +130,7 @@ Begin
       mToken^.Error := StrNew(Self^.FLexer^.CurrentToken.Error);
       mToken^.Value := StrNew(Self^.FLexer^.CurrentToken.Value);
       mToken^.Kind := Self^.VMT^.CopyTokenKind(Self^.FLexer^.CurrentToken.Kind);
+      mToken^.StartPos := Self^.FLexer^.CurrentToken.StartPos;
       (*
       {$IFDEF DEBUG}
       {$IFDEF FPC}

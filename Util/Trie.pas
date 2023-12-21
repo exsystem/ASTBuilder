@@ -267,7 +267,11 @@ Const
     );
 {$ENDIF}
 Begin
-  Result := @{$IFDEF VINTAGE} CTrieIterator_End {$ELSE} CEnd {$ENDIF};
+  Result := @
+{$IFDEF VINTAGE} CTrieIterator_End {$ELSE}
+    CEnd
+{$ENDIF}
+  ;
 End;
 
 Procedure TTrie_DoClear(Const Self: PTrie; Root: PNode);

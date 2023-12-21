@@ -6,7 +6,7 @@ Unit CPARSER;
 Interface
 
 Uses
-  TypeDef, List, Stack, Lexer, ParseTr, ASTNode, GrmrNode, PARSER, CLEXER;
+  TypeDef, List, Stack, Lexer, ParseTr, ASTNode, GrmrNode, PARSER, CLEXER, STREAM;
 
 Type
 
@@ -21,6 +21,12 @@ Type
     Error: Boolean;
     ErrorMessages: PStack; { Of PChar }
     Level: TSize;
+
+    FTreeOffset: TSize;
+    FTreeFile: PStream;
+    FStrOffset: TSize;
+    FStrFile: PStream;
+
   End;
 
 Procedure TAstViewer_Create(Var Self: PAstViewer; Lexer: PLexer);
@@ -49,6 +55,10 @@ Function TAstViewer_CompareTokenKind(Self: PParser; Const LHS: Pointer;
   Const RHS: Pointer): Boolean;
 
 Procedure TAstViewer_PrintParseTree(Self: PAstViewer; ParseTree: PParseTree);
+
+Procedure TAstViewer_OutputParseTree(Self: PAstViewer; Path: String);
+
+Procedure TAstViewer_DoOuputNode(Self: PAstViewer; ParseTree: PParseTree; Parent: TSize);
 
 Procedure TAstViewer_WriteLn(Self: PAstViewer; Content: PChar);
 
@@ -142,6 +152,7 @@ Begin
     mTermNode^.Token.Error := StrNew(mCurrToken^.Error);
     mTermNode^.Token.Value := StrNew(mCurrToken^.Value);
     PTermRule(mTermNode^.Token.Kind) := TTermRule_Make(PTermRule(mCurrToken^.Kind)^);
+    mTermNode^.Token.StartPos := mCurrToken^.StartPos;
     mTermNode^.Children := nil;
     TList_PushBack(mSelf^.FCurrentParseTreeNode^.Children, @mTermNode);
     mSelf^.Error := False;
@@ -509,6 +520,80 @@ Begin
       End;
     End;
     TAstViewer_Deindent(Self);
+  End;
+End;
+
+Procedure TAstViewer_OutputParseTree(Self: PAstViewer; Path: String);
+Var
+  mFile: PStream;
+  I: TSize;
+  mName: PChar;
+Begin
+  TBinaryFileStream_Create(PBinaryFileStream(Self^.FTreeFile), Path + 'ast.xt');
+  TBinaryFileStream_Create(PBinaryFileStream(Self^.FStrFile), Path + 'ast.xs');
+
+  TBinaryFileStream_Create(PBinaryFileStream(mFile), Path + 'ast.xnr');
+  For I := 0 To Pred(Self^.FGrammar^.NonTermRuleNames.Size) Do
+  Begin
+    mName := PChar(TList_Get(Self^.FGrammar^.NonTermRuleNames, I)^);
+    TBinaryFileStream_Write(mFile, mName^, Succ(StrLen(mName)) * SizeOf(Char));
+  End;
+  mFile^.VMT^.Destroy(mFile);
+  Dispose(mFile);
+
+  TBinaryFileStream_Create(PBinaryFileStream(mFile), Path + 'ast.xtr');
+  For I := 0 To Pred(Self^.FGrammar^.TermRuleNames.Size) Do
+  Begin
+    mName := PChar(TList_Get(Self^.FGrammar^.TermRuleNames, I)^);
+    TBinaryFileStream_Write(mFile, mName^, Succ(StrLen(mName)) * SizeOf(Char));
+  End;
+  mFile^.VMT^.Destroy(mFile);
+  Dispose(mFile);
+
+  Self^.FTreeOffset := 0;
+  Self^.FStrOffset := 0;
+
+  TAstViewer_DoOuputNode(Self, Self^.FParseTree, SizeOf(TSize));
+
+  Self^.FTreeFile^.VMT^.Destroy(Self^.FTreeFile);
+  Self^.FStrFile^.VMT^.Destroy(Self^.FStrFile);
+  Dispose(Self^.FTreeFile);
+  Dispose(Self^.FStrFile);
+End;
+
+Procedure TAstViewer_DoOuputNode(Self: PAstViewer; ParseTree: PParseTree; Parent: TSize);
+Var
+  mStrLength: TSize;
+  mStrSize: TSize;
+  I: TSize;
+Begin
+  TBinaryFileStream_Write(Self^.FTreeFile, Parent, SizeOf(TSize));
+  TBinaryFileStream_Write(Self^.FTreeFile, ParseTree^.RuleId, SizeOf(TNonTermRuleId));
+  TBinaryFileStream_Write(Self^.FTreeFile, PTermRule(ParseTree^.Token.Kind)^,
+    SizeOf(TTermRule));
+  TBinaryFileStream_Write(Self^.FTreeFile, ParseTree^.Token.StartPos, SizeOf(TSize));
+  TBinaryFileStream_Write(Self^.FTreeFile, Self^.FStrOffset, SizeOf(TSize));
+{
+  Writeln('Parent=', Parent, ', ParseTree^.RuleId=', ParseTree^.RuleId,
+    ', PTermRule(ParseTree^.Token.Kind)^=', PTermRule(ParseTree^.Token.Kind)^,
+    ', ParseTree^.Token.StartPos=', ParseTree^.Token.StartPos,
+    ', Self^.FStrOffset=', Self^.FStrOffset);
+}
+  mStrLength := StrLen(ParseTree^.Token.Value);
+  mStrSize := SizeOf(Char) * mStrLength;
+  TBinaryFileStream_Write(Self^.FStrFile, ParseTree^.Token.Value^, mStrSize);
+  Inc(Self^.FStrOffset, mStrLength);
+
+  Parent := Self^.FTreeOffset;
+  Inc(Self^.FTreeOffset);
+
+  If (ParseTree^.Children <> nil) And (ParseTree^.Children^.Size > 0) Then
+  Begin
+    For I := 0 To ParseTree^.Children^.Size - 1 Do
+    Begin
+      TAstViewer_DoOuputNode(Self, PParseTree(TList_Get(ParseTree^.Children, I)^),
+        Parent);
+    End;
   End;
 End;
 

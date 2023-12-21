@@ -68,6 +68,7 @@ Begin
     End;
   End;
   TAstViewer_PrintParseTree(mViewer, mViewer^.FParseTree);
+  TAstViewer_OutputParseTree(mViewer, '_');
   TParseTree_Destroy(mViewer^.FParseTree);
   TAstViewer_Destroy(PParser(mViewer));
   Dispose(mViewer);
