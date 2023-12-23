@@ -533,7 +533,7 @@ Begin
   TBinaryFileStream_Create(PBinaryFileStream(Self^.FStrFile), Path + 'ast.xs');
 
   TBinaryFileStream_Create(PBinaryFileStream(mFile), Path + 'ast.xnr');
-  For I := 0 To Pred(Self^.FGrammar^.NonTermRuleNames.Size) Do
+  For I := 0 To Pred(Self^.FGrammar^.NonTermRuleNames^.Size) Do
   Begin
     mName := PChar(TList_Get(Self^.FGrammar^.NonTermRuleNames, I)^);
     TBinaryFileStream_Write(mFile, mName^, Succ(StrLen(mName)) * SizeOf(Char));
@@ -542,7 +542,7 @@ Begin
   Dispose(mFile);
 
   TBinaryFileStream_Create(PBinaryFileStream(mFile), Path + 'ast.xtr');
-  For I := 0 To Pred(Self^.FGrammar^.TermRuleNames.Size) Do
+  For I := 0 To Pred(Self^.FGrammar^.TermRuleNames^.Size) Do
   Begin
     mName := PChar(TList_Get(Self^.FGrammar^.TermRuleNames, I)^);
     TBinaryFileStream_Write(mFile, mName^, Succ(StrLen(mName)) * SizeOf(Char));

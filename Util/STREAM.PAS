@@ -21,7 +21,7 @@ Type
   TStream_IsEof_Proc = Function(Const Self: PStream): Boolean;
   TStream_Read_Proc = Function(Const Self: PStream; Var Data;
     Const Length: TSize): TSize;
-  TStream_Write_Proc = Function(Const Self: PStream; Const Data;
+  TStream_Write_Proc = Function(Const Self: PStream; Var Data;
     Const Length: TSize): TSize;
 
   TStream_VMT = Record
@@ -63,7 +63,7 @@ Function TFileStream_Forward(Const Self: PStream; Offset: TSize): Boolean;
 Function TFileStream_Rewind(Const Self: PStream; Offset: TSize): Boolean;
 Function TFileStream_IsEof(Const Self: PStream): Boolean;
 Function TFileStream_Read(Const Self: PStream; Var Data; Const Length: TSize): TSize;
-Function TFileStream_Write(Const Self: PStream; Const Data; Const Length: TSize): TSize;
+Function TFileStream_Write(Const Self: PStream; Var Data; Const Length: TSize): TSize;
 
 Procedure TBinaryFileStream_Create(Var Self: PBinaryFileStream; Filename: String);
 Procedure TBinaryFileStream_Destroy(Const Self: PStream);
@@ -74,7 +74,7 @@ Function TBinaryFileStream_Forward(Const Self: PStream; Offset: TSize): Boolean;
 Function TBinaryFileStream_Rewind(Const Self: PStream; Offset: TSize): Boolean;
 Function TBinaryFileStream_IsEof(Const Self: PStream): Boolean;
 Function TBinaryFileStream_Read(Const Self: PStream; Var Data; Const Length: TSize): TSize;
-Function TBinaryFileStream_Write(Const Self: PStream; Const Data; Const Length: TSize): TSize;
+Function TBinaryFileStream_Write(Const Self: PStream; Var Data; Const Length: TSize): TSize;
 
 Implementation
 
@@ -155,7 +155,7 @@ Begin
   {$ENDIF}
 End;
 
-Function TFileStream_Write(Const Self: PStream; Const Data; Const Length: TSize): TSize;
+Function TFileStream_Write(Const Self: PStream; Var Data; Const Length: TSize): TSize;
 {$IFDEF WIN64}
 Var
   mResult: Integer;
@@ -237,7 +237,7 @@ Begin
   {$ENDIF}
 End;
 
-Function TBinaryFileStream_Write(Const Self: PStream; Const Data; Const Length: TSize): TSize;
+Function TBinaryFileStream_Write(Const Self: PStream; Var Data; Const Length: TSize): TSize;
 {$IFDEF WIN64}
 Var
   mResult: Integer;
