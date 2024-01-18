@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LAZBUILD="/Users/ExSystem/DelphiProjects/FPCUPdeluxe/lazarus/lazbuild"
+LAZBUILD="../FPCUPdeluxe/lazarus/lazbuild"
 PROJECT="./MyFormatter.lpi"
 
 # Modify .lpr file in order to avoid nothing-to-do-bug (http://lists.lazarus.freepascal.org/pipermail/lazarus/2016-February/097554.html)
@@ -17,7 +17,8 @@ if [ $1 = "clean" ] || [ $1 == "test" ]; then
     find . -type d -name "__history" | xargs rm -rf      
     find . -type d -name "__recovery" | xargs rm -rf      
     rm -rf "./lib"
-    # rm -rf "./Win32"
+    rm -rf "./Win32"
+    rm -rf "./Win64"
 fi
 
 if $LAZBUILD $PROJECT; then
