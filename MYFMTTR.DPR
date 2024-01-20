@@ -73,11 +73,12 @@ uses
   TRSRUnit in 'PRODRULE\TRSRUNIT.PAS',
   ASRUNIT in 'PRODRULE\ASRUNIT.PAS',
   ACTRUNIT in 'PRODRULE\ACTRUNIT.PAS',
-  CPARSER in 'PARSER\CPARSER.PAS';
+  CPARSER in 'PARSER\CPARSER.PAS',
+  Main in 'MAIN.PAS';
 
 {$R *.RES}
 
 begin
-  Test3.Test;
+  Main.Run;
   ReadLn;
 end.

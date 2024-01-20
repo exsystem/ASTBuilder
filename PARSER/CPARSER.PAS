@@ -455,7 +455,10 @@ Begin
   End;
   mSelf^.FGrammar := mNode;
   PCodeLexer(mSelf^.Parent.FLexer)^.GrammarNode := mNode;
-  TCodeLexer_Init(PCodeLexer(mSelf^.Parent.FLexer));
+  If Assigned(PCodeLexer(mSelf^.Parent.FLexer)^.OnInit) Then
+  Begin
+    PCodeLexer(mSelf^.Parent.FLexer)^.OnInit(PCodeLexer(mSelf^.Parent.FLexer));
+  End;
   mSelf^.Parent.FLexer^.FCaseSensitive :=
     Not mNode^.Options[COption_CaseInsensitive].BooleanValue;
   New(mSelf^.FParseTree);

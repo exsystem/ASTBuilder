@@ -10,10 +10,15 @@ Uses
 Type
   PCodeLexer = ^TCodeLexer;
 
+  TCodeLexer_Init = Procedure(Var Self: PCodeLexer);
+  TCodeLexer_ProcessToken = Procedure(Var Self: PCodeLexer);
+
   TCodeLexer = Record
     Parent: TLexer;
     GrammarNode: PGrammarNode;
     Mode: PStack; { Of PChar }
+    OnInit: TCodeLexer_Init;
+    OnProcessToken: TCodeLexer_ProcessToken;
   End;
 
 Procedure TCodeLexer_Create(Var Self: PCodeLexer; Const Source: PStream);
@@ -22,8 +27,6 @@ Function TCodeLexer_IsToken(Var Self: PLexer; Const TokenKind: Pointer): Boolean
 Function TCodeLexer_GetNextToken(Var Self: PLexer): Boolean;
 Procedure TCodeLexer_PushMode(Var Self: PLexer; Mode: PChar);
 Procedure TCodeLexer_PopMode(Var Self: PLexer);
-Procedure TCodeLexer_Init(Var Self: PCodeLexer);
-Procedure TCodeLexer_ProcessToken(Var Self: PCodeLexer);
 
 Procedure ModeStackElementDestructor(Const Element: Pointer);
 
@@ -34,7 +37,6 @@ Uses
 
 Var
   mTCodeLexer_VMT: TLexer_VMT;
-  mHereDocId: PChar;
 
 Procedure TCodeLexer_Create(Var Self: PCodeLexer; Const Source: PStream);
 Var
@@ -46,6 +48,8 @@ Begin
 
   Self^.GrammarNode := nil;
   Self^.Mode := TStack_Create(SizeOf(PChar), ModeStackElementDestructor);
+  Self^.OnInit := nil;
+  Self^.OnProcessToken := nil;
   mMode := StrNew('');
   TStack_Push(Self^.Mode, @mMode);
   PTermRule(Self^.Parent.CurrentToken.Kind) := TTermRule_Make(0);
@@ -148,7 +152,10 @@ Begin
       Else
       Begin
         Result := True;
-        TCodeLexer_ProcessToken(mSelf);
+        If Assigned(mSelf^.OnProcessToken) Then
+        Begin
+          mSelf^.OnProcessToken(mSelf);
+        End;
         Exit;
       End;
     End
@@ -202,7 +209,10 @@ Begin
         End
         Else
         Begin
-          TCodeLexer_ProcessToken(mSelf);
+          If Assigned(mSelf^.OnProcessToken) Then
+          Begin
+            mSelf^.OnProcessToken(mSelf);
+          End;
           Exit;
         End;
       End;
@@ -240,48 +250,6 @@ Begin
   mMode := PPChar(TStack_Pop(PCodeLexer(Self)^.Mode));
   FreeStr(mMode^);
   Dispose(mMode);
-End;
-
-Procedure TCodeLexer_Init(Var Self: PCodeLexer);
-Begin
-  TGrammarNode_RegisterTermRule(Self^.GrammarNode, '@HEREDOC_END');
-End;
-
-Procedure TCodeLexer_ProcessToken(Var Self: PCodeLexer);
-Var
-  mMode: PChar;
-  mTokenValue: PChar;
-  mKind: PChar;
-Begin
-  mMode := PPChar(TStack_Top(Self^.Mode))^;
-  mTokenValue := Self^.Parent.CurrentToken.Value;
-  mKind := TGrammarNode_GetTermRuleName(Self^.GrammarNode,
-    PTermRule(Self^.Parent.CurrentToken.Kind)^);
-
-  If StrComp(mMode, 'hereDoc') <> 0 Then
-  Begin
-    Exit;
-  End;
-  If StrComp(mKind, 'START_HEREDOC') = 0 Then
-  Begin
-    mHereDocId := SubStr(mTokenValue, 3, StrLen(mTokenValue) - 3);
-    Exit;
-  End;
-  If StrComp(mKind, 'HEREDOC_TEXT') = 0 Then
-  Begin
-    If StrPos(mTokenValue, mHereDocId) = mTokenValue Then
-    Begin
-      PTermRule(Self^.Parent.CurrentToken.Kind)^ :=
-        TGrammarNode_GetTermRuleId(Self^.GrammarNode, '@HEREDOC_END');
-      TLexer_Retract(PLexer(Self), StrLen(Self^.Parent.CurrentToken.Value) -
-        StrLen(mHereDocId));
-      FreeStr(Self^.Parent.CurrentToken.Value);
-      Self^.Parent.CurrentToken.Value := StrNew(mHereDocId);
-      TCodeLexer_PopMode(PLexer(Self));
-      FreeStr(mHereDocId);
-    End;
-    Exit;
-  End;
 End;
 
 Procedure ModeStackElementDestructor(Const Element: Pointer);
