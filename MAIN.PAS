@@ -19,7 +19,7 @@ Type
     GetMode: TGetMode;
     GetTokenKind: TGetTokenKind;
     GetTokenValue: TGetTokenValue;
-    InsertTokenValue: TInsertToken;
+    InsertToken: TInsertToken;
     PopMode: TPopMode;
   End;
 
@@ -60,7 +60,11 @@ Uses {$IFNDEF FPC}
  {$IFDEF USE_STRINGS}strings,{$ENDIF} STREAM, GLEXER, GPARSER, CLEXER, GRMRNODE, TYPEDEF, StrUtil;
 
 Var
+  {$IFDEF FPC}
+  mHandle: TLibHandle;
+  {$ELSE}
   mHandle: THandle;
+  {$ENDIF}
   mContext: TContext;
   mLexer: PCodeLexer;
 
@@ -92,7 +96,7 @@ Begin
   {$IFDEF VINTAGE}
   p := GetProcAddress(mHandle, 'ProcessToken');
   mProcessToken := TProcessToken(p);
-  {$ELSE} 
+  {$ELSE}
   mProcessToken := TProcessToken(GetProcAddress(mHandle, 'ProcessToken'));
   {$ENDIF}
   mProcessToken(@mContext);
@@ -161,12 +165,12 @@ Var
   mErrorNode: PNode;
 Begin
   mPlugInPath := '';
-  If (ParamCount = 4) Or (ParamCount = 5) Then
+  If (ParamCount = 3) Or (ParamCount = 4) Then
   Begin
     TFileStream_Create(PFileStream(mGrammar), ParamStr(1));
     TFileStream_Create(PFileStream(mCode), ParamStr(2));
     mAstPathPrefix := ParamStr(3);
-    If ParamCount = 5 Then
+    If ParamCount = 4 Then
     Begin
       mPlugInPath := ParamStr(4);
     End;
@@ -204,6 +208,12 @@ Begin
     {$ELSE}
     mHandle := LoadLibrary(mPlugInPath);
     {$ENDIF}
+    mContext.RegisterTermRule := RegisterTermRule;
+    mContext.GetMode := GetMode;
+    mContext.GetTokenKind := GetTokenKind;
+    mContext.GetTokenValue := GetTokenValue;
+    mContext.InsertToken := InsertToken;
+    mContext.PopMode := PopMode;
     mLexer^.OnInit := TCodeLexer_Init;
     mLexer^.OnProcessToken := TCodeLexer_ProcessToken;
   End;
