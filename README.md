@@ -1,9 +1,8 @@
-# MyFormatter
-MyFormatter, ready to be a code formatter.
-
+# ASTBuilder
+This is an AST generator tool written in pure Pascal. You can write your own language grammar to generate the AST of your code.
 
 # LICENSE INFO
-MyFormatter is free software. It is released under the terms of the GPL License.
+ASTBuilder is free software. It is released under the terms of the GPL License.
 
 Copyright © 2022 by ExSystem (exsystemchina*gmail.com, replace the * to @) All rights reserved.
 
