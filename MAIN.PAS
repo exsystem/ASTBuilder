@@ -46,10 +46,13 @@ Uses {$IFNDEF FPC}
   , {$ENDIF}
   {$IFDEF FPC}
   dynlibs,
-  {$ENDIF}
+  {$ELSE}
   {$IFDEF VINTAGE}
   WINPROCS,
   WINTYPES,
+  {$ELSE}
+  Windows,
+  {$ENDIF}
   {$ENDIF}
   Stack,
   SysUtils,
@@ -200,13 +203,17 @@ Begin
   TCodeLexer_Create(mLexer, mCode);
   If mPlugInPath <> '' Then
   Begin
+    {$IFDEF FPC}
+    mHandle := LoadLibrary(mPlugInPath);
+    {$ELSE}
     {$IFDEF VINTAGE}
     GetMem(p, Length(mPlugInPath) + 1);
     StrPCopy(p, mPlugInPath);
     mHandle := LoadLibrary(p);
     FreeMem(p, Length(mPlugInPath) + 1);
     {$ELSE}
-    mHandle := LoadLibrary(mPlugInPath);
+    mHandle := LoadLibrary(PChar(mPlugInPath));
+    {$ENDIF}
     {$ENDIF}
     mContext.RegisterTermRule := RegisterTermRule;
     mContext.GetMode := GetMode;

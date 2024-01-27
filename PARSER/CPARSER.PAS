@@ -503,7 +503,7 @@ Begin
   Begin
     mLine := strnew(TGrammarNode_GetTermRuleName(Self^.FGrammar,
       PTermRule(ParseTree^.Token.Kind)^));
-    mLine := ReallocStr(mLine, StrLen(mLine) + StrLen(': ') +
+    mLine := ReallocStr(mLine, StrLen(mLine) + StrLen(PChar(': ')) +
       StrLen(ParseTree^.Token.Value));
     strcat(mLine, ': ');
     strcat(mLine, ParseTree^.Token.Value);

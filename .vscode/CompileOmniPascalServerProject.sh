@@ -1,10 +1,10 @@
 #!/bin/bash
 
 LAZBUILD="../FPCUPdeluxe/lazarus/lazbuild"
-PROJECT="./MyFormatter.lpi"
+PROJECT="./ASTBuilder.lpi"
 
 # Modify .lpr file in order to avoid nothing-to-do-bug (http://lists.lazarus.freepascal.org/pipermail/lazarus/2016-February/097554.html)
-# echo. >> "./MyFormatter.lpr"
+# echo. >> "./ASTBuilder.lpr"
 
 if [ $1 = "clean" ] || [ $1 == "test" ]; then
     find . -type f -name "*.pas" -exec ../jcf/JCF -config=./.vscode/jcfsettings.cfg -y -inplace -F {} \;
@@ -23,6 +23,6 @@ fi
 
 if $LAZBUILD $PROJECT; then
   if [ $1 = "test" ]; then
-    ./MyFormatter 
+    ./ASTBuilder
   fi
 fi

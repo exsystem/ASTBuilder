@@ -142,7 +142,8 @@ modules/
 *.delphilsp.json
 
 *.dSYM
-MyFormatter
-MyFormatter-*
+ASTBuilder
+ASTBuilder-*
 
-MYFMTTR.OPT
+ppaslink.sh
+ASTBDR.OPT

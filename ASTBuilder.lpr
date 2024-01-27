@@ -1,4 +1,4 @@
-Program MyFormatter;
+Program ASTBuilder;
 
 {$MODE DELPHI}
 
@@ -7,8 +7,6 @@ Uses
   Test2 In 'Test/Test2.pas',
   Test3 In 'Test/Test3.pas',
   MAIN In 'MAIN.PAS';
-
-// {$R *.res}
 
 Begin
   MAIN.Run;

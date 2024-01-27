@@ -121,9 +121,9 @@ Begin
 
   mText := strnew(mGroupType);
   mText := ReallocStr(mText, strlen(mGroupType) + strlen(mTermsRelationship) +
-    strlen(':'));
+    strlen(PChar(':')));
   strcat(mText, mTermsRelationship);
-  strcat(mText, ':');
+  strcat(mText, PChar(':'));
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
 
@@ -151,8 +151,8 @@ Begin
   mNode := PRuleNode(Node);
   mText := PPChar(TList_Get(PAstViewer(Intf^.Instance)^.GrammarNode^.NonTermRuleNames,
     mNode^.Id))^;
-  mText := ReallocStr(mText, strlen(mText) + strlen(':'));
-  strcat(mText, ':');
+  mText := ReallocStr(mText, strlen(mText) + strlen(PChar(':')));
+  strcat(mText, PChar(':'));
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
   TAstViewer_Indent(PAstViewer(Intf^.Instance));
@@ -220,12 +220,12 @@ Begin
     mStr := IntToStr(mNode^.Nfa^.StartState);
     mStrPChar := CreateStr(Length(mStr));
     StrPCopy(mStrPChar, mStr);
-    mText := CreateStr(strlen('Keyword: ') + strlen(mNode^.Nfa^.Keyword));
+    mText := CreateStr(strlen(PChar('Keyword: ')) + strlen(mNode^.Nfa^.Keyword));
     strcat(mText, 'Keyword: ');
     strcat(mText, mNode^.Nfa^.Keyword);
     TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
     FreeStr(mText);
-    mText := CreateStr(strlen('Start state: ') + StrLen(mStrPChar));
+    mText := CreateStr(strlen(PChar('Start state: ')) + StrLen(mStrPChar));
     strcat(mText, 'Start state: ');
     strcat(mText, mStrPChar);
     FreeStr(mStrPChar);

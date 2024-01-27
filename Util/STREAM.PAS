@@ -143,7 +143,7 @@ Var
   mResult: Integer;
 {$ENDIF}
 Begin
-  {$IFDEF FPC}
+  {$IFDEF CPU64}
   BlockRead(PFileStream(Self)^.FFile, Data, Int64(Length), Int64(Result));
   {$ELSE}
   {$IFDEF WIN64}
@@ -161,7 +161,7 @@ Var
   mResult: Integer;
 {$ENDIF}
 Begin
-  {$IFDEF FPC}
+  {$IFDEF CPU64}
   BlockWrite(PFileStream(Self)^.FFile, Data, Int64(Length), Int64(Result));
   {$ELSE}
   {$IFDEF WIN64}
@@ -225,7 +225,7 @@ Var
   mResult: Integer;
 {$ENDIF}
 Begin
-  {$IFDEF FPC}
+  {$IFDEF CPU64}
   BlockRead(PBinaryFileStream(Self)^.FFile, Data, Int64(Length), Int64(Result));
   {$ELSE}
   {$IFDEF WIN64}
@@ -244,7 +244,11 @@ Var
 {$ENDIF}
 Begin
   {$IFDEF FPC}
+  {$IFDEF CPU64}
   BlockWrite(PBinaryFileStream(Self)^.FFile, Data, Int64(Length), Int64(Result));
+  {$ELSE}
+  BlockWrite(PBinaryFileStream(Self)^.FFile, Data, Length, Result);
+  {$ENDIF}
   {$ELSE}
   {$IFDEF WIN64}
   BlockWrite(PBinaryFileStream(Self)^.FFile, Data, Integer(Length), mResult);

@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="9"/>
+    <General>
+      <SessionStorage Value="InProjectDir"/>
+      <MainUnit Value="0"/>
+      <Title Value="MyFormatter"/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+    </General>
+    <i18n>
+      <EnableI18N LFM="False"/>
+    </i18n>
+    <VersionInfo>
+      <StringTable ProductVersion=""/>
+    </VersionInfo>
+    <BuildModes Count="3">
+      <Item1 Name="Default" Default="True"/>
+      <Item2 Name="Debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="MyFormatter"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value=".;AST;LexerRule;ProductionRule;Test;ASTVisitor;Automata;LexerRule/Grammar;LexerRule/Template;ParseTree;Util"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <SyntaxMode Value="Delphi"/>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsStabs"/>
+              <UseHeaptrc Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <MsgFileName Value=""/>
+            </CompilerMessages>
+            <CompilerPath Value="$(CompPath)"/>
+          </Other>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="Release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="MyFormatter"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value=".;AST;LexerRule;ProductionRule;Test;ASTVisitor;Automata;LexerRule/Grammar;LexerRule/Template;ParseTree;Util"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <SyntaxMode Value="Delphi"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <MsgFileName Value=""/>
+            </CompilerMessages>
+            <CompilerPath Value="$(CompPath)"/>
+          </Other>
+        </CompilerOptions>
+      </Item3>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="LCL"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="45">
+      <Unit0>
+        <Filename Value="MyFormatter.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MyFormatter"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="Parser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Parser"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="lexer.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Lexer"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="ASTNode.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ASTNode"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="ProductionRule/FactorRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FactorRuleUnit"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="ProductionRule/ExprRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ExprRuleUnit"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="AST/GrammarNode.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="GrammarNode"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="AST/GroupNode.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="GroupNode"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="AST/IdNode.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IdNode"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="AST/RuleNode.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RuleNode"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="AST/TermNode.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TermNode"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="AST/TermRuleNode.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TermRuleNode"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="ASTVisitor/GrammarParser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="GrammarParser"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="ASTVisitor/GrammarViewer.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="GrammarViewer"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="Automata/NFA.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NFA"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="LexerRule/Grammar/AsteriskRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AsteriskRule"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="LexerRule/Grammar/CharRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CharRule"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="LexerRule/Grammar/ColonRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ColonRule"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="LexerRule/Grammar/DoubleDotsRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DoubleDotsRule"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="LexerRule/Grammar/EofRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="EofRule"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="LexerRule/Grammar/IdRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IdRule"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="LexerRule/Grammar/LParenRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="LParenRule"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="LexerRule/Grammar/OrRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OrRule"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="LexerRule/Grammar/QuestionMarkRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="QuestionMarkRule"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="LexerRule/Grammar/RParenRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RParenRule"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="LexerRule/Grammar/SemiRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SemiRule"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="LexerRule/Grammar/StringRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StringRule"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="LexerRule/Grammar/TermRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TermRule"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="LexerRule/Template/KeywordRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="KeywordRule"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="LexerRule/Template/SymbolRule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SymbolRule"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="ParseTree/ParseTree.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ParseTree"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="ProductionRule/GrammarRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="GrammarRuleUnit"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="ProductionRule/RuleRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RuleRuleUnit"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="ProductionRule/StringFactorRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StringFactorRuleUnit"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="ProductionRule/TermExprRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TermExprRuleUnit"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="ProductionRule/TermFactorRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TermFactorRuleUnit"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="ProductionRule/TermRuleRuleUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TermRuleRuleUnit"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="Test/Test1.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Test1"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="Util/ClassUtils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ClassUtils"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="Util/List.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="List"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="Util/StringUtils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StringUtils"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="Util/Trie.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Trie"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="Util/TypeDef.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TypeDef"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="Test/Test2.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Test2"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="LexerRule/Grammar/plusrule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PlusRule"/>
+      </Unit44>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target>
+      <Filename Value="MyFormatter"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value=".;AST;LexerRule;ProductionRule;Test;ASTVisitor;Automata;LexerRule/Grammar;LexerRule/Template;ParseTree;Util"/>
+      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Linking>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+    <Other>
+      <CompilerMessages>
+        <MsgFileName Value=""/>
+      </CompilerMessages>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

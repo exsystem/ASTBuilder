@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="9"/>
+    <General>
+      <Flags>
+        <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
+      </Flags>
+      <SessionStorage Value="InProjectDir"/>
+      <MainUnit Value="0"/>
+      <Title Value="ASTBuilder"/>
+      <UseAppBundle Value="False"/>
+      <ResourceType Value="res"/>
+    </General>
+    <i18n>
+      <EnableI18N LFM="False"/>
+    </i18n>
+    <VersionInfo>
+      <StringTable ProductVersion=""/>
+    </VersionInfo>
+    <BuildModes Count="3">
+      <Item1 Name="Default" Default="True"/>
+      <Item2 Name="Debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="ASTBuilder_126"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="AST;Automata;LEXER;LexrRule/Grammar;LexrRule/Template;PARSER;ParseTr;ProdRule;Test;Util"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <MsgFileName Value=""/>
+            </CompilerMessages>
+            <CompilerPath Value="$(CompPath)"/>
+          </Other>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="Release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="project1"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="AST;Automata;LEXER;LexrRule/Grammar;LexrRule/Template;PARSER;ParseTr;ProdRule;Test;Util"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <MsgFileName Value=""/>
+            </CompilerMessages>
+            <CompilerPath Value="$(CompPath)"/>
+          </Other>
+        </CompilerOptions>
+      </Item3>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+      </local>
+    </RunParams>
+    <Units Count="76">
+      <Unit0>
+        <Filename Value="ASTBuilder_126.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ASTBuilder_126"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="define.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="MAIN.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MAIN"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="AST/RuleNode.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RuleNode"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="AST/TRMNODE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TRMNODE"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="AST/GRPNODE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="GRPNODE"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="AST/IdNode.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IdNode"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="AST/GRMRNODE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="GRMRNODE"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="AST/ASTNode.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ASTNode"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="AST/TRMRNODE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TRMRNODE"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="Automata/NFA.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NFA"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="LEXER/CLEXER.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CLEXER"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="LEXER/LEXER.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="LEXER"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="LEXER/GLEXER.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="GLEXER"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="LexrRule/Grammar/COLNRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="COLNRULE"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="LexrRule/Grammar/CHARRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CHARRULE"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="LexrRule/Grammar/OPTRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OPTRULE"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="LexrRule/Grammar/DOTRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DOTRULE"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="LexrRule/Grammar/SEMIRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SEMIRULE"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="LexrRule/Grammar/PPMDRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PPMDRULE"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="LexrRule/Grammar/MODERULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MODERULE"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="LexrRule/Grammar/DDTSRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DDTSRULE"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="LexrRule/Grammar/RPARRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RPARRULE"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="LexrRule/Grammar/LPARRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="LPARRULE"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="LexrRule/Grammar/ASTKRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ASTKRULE"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="LexrRule/Grammar/EQURULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="EQURULE"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="LexrRule/Grammar/ARRWRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ARRWRULE"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="LexrRule/Grammar/RBRKRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RBRKRULE"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="LexrRule/Grammar/LBRKRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="LBRKRULE"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="LexrRule/Grammar/IDRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IDRULE"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="LexrRule/Grammar/TERMRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TERMRULE"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="LexrRule/Grammar/ORRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ORRULE"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="LexrRule/Grammar/PLUSRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PLUSRULE"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="LexrRule/Grammar/COMARULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="COMARULE"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="LexrRule/Grammar/LCBRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="LCBRULE"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="LexrRule/Grammar/PUMDRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PUMDRULE"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="LexrRule/Grammar/EOFRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="EOFRULE"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="LexrRule/Grammar/STRRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="STRRULE"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="LexrRule/Grammar/TILDRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TILDRULE"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="LexrRule/Grammar/CHSTRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CHSTRULE"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="LexrRule/Grammar/SKIPRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SKIPRULE"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="LexrRule/Grammar/RCBRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RCBRULE"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="LexrRule/Grammar/QMRKRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="QMRKRULE"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="LexrRule/Template/KYWDRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="KYWDRULE"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="LexrRule/Template/SYMBRULE.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SYMBRULE"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="PARSER/GPARSER.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="GPARSER"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="PARSER/PARSER.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PARSER"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="PARSER/GRMRVIWR.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="GRMRVIWR"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="PARSER/CPARSER.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CPARSER"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="ParseTr/PARSETR.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PARSETR"/>
+      </Unit49>
+      <Unit50>
+        <Filename Value="ProdRule/TERUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TERUNIT"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="ProdRule/ACTRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ACTRUNIT"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="ProdRule/TRSRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TRSRUNIT"/>
+      </Unit52>
+      <Unit53>
+        <Filename Value="ProdRule/CHFRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CHFRUNIT"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="ProdRule/GRMRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="GRMRUNIT"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="ProdRule/FRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FRUNIT"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="ProdRule/RRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RRUNIT"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="ProdRule/ICFRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ICFRUNIT"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="ProdRule/EXPRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="EXPRUNIT"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="ProdRule/ASRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ASRUNIT"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="ProdRule/TRRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TRRUNIT"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="ProdRule/TFRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TFRUNIT"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="ProdRule/OPTRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OPTRUNIT"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="ProdRule/SFRUNIT.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SFRUNIT"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="Test/TestUtil.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TestUtil"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="Test/TEST3.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TEST3"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="Test/Test2.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Test2"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="Test/Test1.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Test1"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="Util/StrUtil.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StrUtil"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="Util/Trie.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Trie"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="Util/STACK.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="STACK"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="Util/CLSUTILS.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CLSUTILS"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="Util/TYPEDEF.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TYPEDEF"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="Util/Utility.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Utility"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="Util/STREAM.PAS"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="STREAM"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="Util/List.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="List"/>
+      </Unit75>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target>
+      <Filename Value="project1"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="AST;Automata;LEXER;LexrRule/Grammar;LexrRule/Template;PARSER;ParseTr;ProdRule;Test;Util"/>
+      <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Other>
+      <CompilerMessages>
+        <MsgFileName Value=""/>
+      </CompilerMessages>
+      <CompilerPath Value="$(CompPath)"/>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

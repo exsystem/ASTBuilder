@@ -1,4 +1,4 @@
-﻿Program MyFormatter;
+﻿Program ASTBuilder;
 
 {$APPTYPE CONSOLE}
 {$R *.res}
@@ -86,7 +86,8 @@ uses
   CPARSER in 'PARSER\CPARSER.PAS',
   GPARSER in 'PARSER\GPARSER.pas',
   GRMRVIWR in 'PARSER\GRMRVIWR.PAS',
-  PARSER in 'PARSER\PARSER.pas';
+  PARSER in 'PARSER\PARSER.pas',
+  MAIN in 'MAIN.PAS';
 
 Begin
   {$IFDEF USE_FASTMM5}
@@ -104,6 +105,6 @@ Begin
   FastMM_EnterDebugMode;
   {$ENDIF}
   ReportMemoryLeaksOnShutdown := True;
-  Test3.Test();
+  MAIN.Run();
   Readln;
 End.
