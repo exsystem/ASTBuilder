@@ -39,23 +39,23 @@ git clone https://github.com/git-bee/jcf-cli.git
 ```
 
 ## 项目环境配置
-1. 使用Lazarus新建空白项目并且保存，如`MyFormatter/MyFormatter.lpi`。
-2. 用VSCode打开项目所在目录，如`$MyFormatter/`。
+1. 使用Lazarus新建空白项目并且保存，如`ASTBuilder/ASTBuilder.lpi`。
+2. 用VSCode打开项目所在目录，如`$ASTBuilder/`。
 3. Cmd-Shift-P：选择OmniPascal Load Project，然后选择加载对应的lpi项目文件路径。 
 4. 修改或创建`.vscode/CompileOmniPascalServerProject.sh`
 ```bash
 #!/bin/bash
 
 LAZBUILD="/Applications/Lazarus/lazbuild"
-PROJECT="/Users/exsystem/DelphiProject/MyFormatter/MyFormatter.lpi"
+PROJECT="/Users/exsystem/DelphiProject/ASTBuilder/ASTBuilder.lpi"
 
 # Modify .lpr file in order to avoid nothing-to-do-bug (http://lists.lazarus.freepascal.org/pipermail/lazarus/2016-February/097554.html)
-# echo. >> "/Users/exsystem/DelphiProject/MyFormatter/MyFormatter.lpr"
+# echo. >> "/Users/exsystem/DelphiProject/ASTBuilder/ASTBuilder.lpr"
 
 if $LAZBUILD $PROJECT; then
 
   if [ $1 = "test" ]; then
-    "/Users/exsystem/DelphiProject/MyFormatter/MyFormatter" 
+    "/Users/exsystem/DelphiProject/ASTBuilder/ASTBuilder" 
   fi
 fi
 ```
@@ -156,7 +156,7 @@ fi
       "type": "lldb",
       "request": "launch",
       "name": "Debug",
-      "program": "${workspaceFolder}/MyFormatter",
+      "program": "${workspaceFolder}/ASTBuilder",
       "args": [],
       "cwd": "${workspaceFolder}"
     }
