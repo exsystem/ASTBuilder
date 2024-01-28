@@ -77,9 +77,10 @@ uses
   GrmrViwr in 'PARSER\Grmrviwr.pas',
   GLexer in 'LEXER\Glexer.pas',
   PARSER in 'PARSER\PARSER.pas',
-  CPARSER in 'PARSER\Cparser.pas';
+  CPARSER in 'PARSER\Cparser.pas',
+  MAIN in 'MAIN.PAS';
 
 Begin
-  Test3.Test();
+  MAIN.Run;
   ReadLn;
 End.
