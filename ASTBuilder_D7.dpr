@@ -1,4 +1,4 @@
-Program MyFormatter;
+Program ASTBuilder;
 
 {$APPTYPE CONSOLE}
 
