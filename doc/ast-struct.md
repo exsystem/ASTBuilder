@@ -13,18 +13,21 @@ The terminal values file stores the string values of all terminals from the inpu
 ## Non-terminal Rules Files (*.xnr)
 
 This file contains the rule names of all non-terminals defined in your grammar and used in the input code file. Each non-terminal is stored one by one in C-styled string, so you can distinguish each one by the ending `NUL`(`#0`) character. The ID of a non-terminal rule is its order number among this sequence of the rule name strings.
+
 The first two non-terminal rules with ID `0` and `1` are always named as empty and `*`, which are the unused dummy rule and the root grammar rule (named `*`) of your grammar.
+
 ```
 +-----------------------------+----+-----------------------------+----+-----------------------------+----+     +-----------------------------+----+
 | Name of Non-terminal Rule 0 | #0 | Name of Non-terminal Rule 1 | #0 | Name of Non-terminal Rule 2 | #0 | ... | Name of Non-terminal Rule N | #0 |
 +-----------------------------+----+-----------------------------+----+-----------------------------+----+     +-----------------------------+----+
 ```
 
-
 ## Terminal Rules Files (*.xtr)
 
 This file contains the rule names of all terminal rules defined in your grammar and used in the input code file. Each terminal rule is stored one by one in C-styled string, so you can distinguish each one by the ending `NUL`(`#0`) character. The ID of a terminal rule is its order number among this sequence of the rule name strings.
+
 The first two terminal rules with ID `0` and `1` are always named as empty and `EOF`, which are the unused dummy rule and the end symbol EOF of your input code.
+
 ```
 +-------------------------+----+-------------------------+----+-------------------------+----+     +-------------------------+----+
 | Name of Terminal Rule 0 | #0 | Name of Terminal Rule 1 | #0 | Name of Terminal Rule 2 | #0 | ... | Name of Terminal Rule N | #0 |
@@ -41,7 +44,7 @@ The AST files store the abstract syntax tree of the input code file. The files c
 4. Start Position: the start character position in the input code file, indicating the value of the node, if it is a terminal node. This field is ignored if it is a non-terminal node.
 5. Offset: the start character position in the terminal values file of the node, if it is a terminal node. You can retrive the string using this start position and the next nearest `NUL`(`#0`) character. This field is ignored if it is a non-terminal node.
 
-Each field is an unsigned integer. The length of an integer is indicated by the Parent Node ID field of the first node, aka the root node.
+Each field is an unsigned integer. The length of an integer is indicated by the Parent Node ID field of the first node, aka the root node. The EOF node is not included in the AST file.
 
 ```
         +----------------------+----------------------+----------------------+----------------------+----------------------+
