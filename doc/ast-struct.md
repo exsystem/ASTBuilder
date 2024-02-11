@@ -1,6 +1,6 @@
 # AST Structure
 
-## Terminal Values Files (*.xt)
+## Terminal Values Files (*.xs)
 
 The terminal values file stores the string values of all terminals from the input code file, except all the terminals matching by a terminal rule marked as skipped. All the terminal values are followed one by one without any delimiter charcaters. Since each terminal can be indicated by a start position and a length offset, there is no need to put a `NUL`(`#0`) character at the end of the file.
 
