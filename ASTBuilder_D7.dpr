@@ -2,7 +2,7 @@ Program ASTBuilder;
 
 {$APPTYPE CONSOLE}
 
-{$R *.res}
+{$R ASTBuilder_D7.res}
 
 uses
   ASTNode in 'AST\ASTNode.pas',

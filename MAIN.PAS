@@ -4,7 +4,15 @@ Unit Main;
 
 Interface
 
+Uses
+  Lexer, TypeDef;
+
 Type
+  {$IFDEF CLASSIC}
+  TSize = TypeDef.TSize;
+  PSize = TypeDef.PSize;
+  {$ENDIF}
+
   TRegisterTermRule = Procedure(Name: PChar);
   TGetMode = Function: PChar;
   TGetTokenKind = Function: PChar;
@@ -33,6 +41,9 @@ Function GetTokenValue: PChar;
 Procedure InsertToken(Kind: PChar; Value: PChar);
 Procedure PopMode;
 
+Function Parse(GrammarFile: String; SourceCodeFile: String; AstPathPrefix: String;
+  ErrorToken: PToken; ErrorMessages: PString; ErrorMessagesCount: PSize;
+  PlugInPath: String): String;
 Procedure Run;
 
 Implementation
@@ -57,10 +68,9 @@ Uses {$IFNDEF FPC}
   Stack,
   SysUtils,
   TestUtil,
-  Lexer,
   CPARSER,
   Parser, GrmRUnit, ASTNode, ParseTr,
- {$IFDEF USE_STRINGS}strings,{$ENDIF} STREAM, GLEXER, GPARSER, CLEXER, GRMRNODE, TYPEDEF, StrUtil;
+ {$IFDEF USE_STRINGS}strings,{$ENDIF} STREAM, GLEXER, GPARSER, CLEXER, GRMRNODE, StrUtil;
 
 Var
   {$IFDEF FPC}
@@ -141,21 +151,18 @@ Begin
   TCodeLexer_PopMode(PLexer(mLexer));
 End;
 
-Function PropmtForFile(Prompt: PChar): PStream;
-Var
-  mFilePath: String;
+Function Propmt(Prompt: PChar): String;
 Begin
   WriteLn(Prompt);
-  ReadLn(mFilePath);
-  TFileStream_Create(PFileStream(Result), mFilePath);
+  ReadLn(Result);
 End;
 
-Procedure Run;
+Function Parse(GrammarFile: String; SourceCodeFile: String; AstPathPrefix: String;
+  ErrorToken: PToken; ErrorMessages: PString; ErrorMessagesCount: PSize;
+  PlugInPath: String): String;
 Var
   mGrammar: PStream;
   mCode: PStream;
-  mAstPathPrefix: String;
-  mPlugInPath: String;
   {$IFDEF VINTAGE}
   p: PChar;
   {$ENDIF}
@@ -166,45 +173,26 @@ Var
   mParser: PGrammarParser;
   mViewer: PAstViewer;
   mErrorNode: PNode;
+  e: PString;
 Begin
-  mPlugInPath := '';
-  If (ParamCount = 3) Or (ParamCount = 4) Then
-  Begin
-    TFileStream_Create(PFileStream(mGrammar), ParamStr(1));
-    TFileStream_Create(PFileStream(mCode), ParamStr(2));
-    mAstPathPrefix := ParamStr(3);
-    If ParamCount = 4 Then
-    Begin
-      mPlugInPath := ParamStr(4);
-    End;
-  End
-  Else
-  Begin
-    mGrammar := PropmtForFile('Grammar File Path?');
-    mCode := PropmtForFile('Source Code File Path?');
-    WriteLn('AST Output Path Prefix?');
-    ReadLn(mAstPathPrefix);
-    WriteLn('PlugIn Library File Path?');
-    ReadLn(mPlugInPath);
-  End;
+  TFileStream_Create(PFileStream(mGrammar), GrammarFile);
+  TFileStream_Create(PFileStream(mCode), SourceCodeFile);
 
   mGrammarLexer := PLexer(GetGrammarLexer(mGrammar));
   TGrammarParser_Create(mParser, mGrammarLexer, GrammarRule);
-  If TGrammarParser_Parse(mParser) Then
-    WriteLn('ACCEPTED')
-  Else
+  If Not TGrammarParser_Parse(mParser) Then
   Begin
-    WriteLn(Format('ERROR: Parser Message: %s', [mParser^.Parent.Error]));
-    WriteLn(Format('ERROR: Current Token at Pos = %d, Value = [%s], Message: %s',
-      [mGrammarLexer^.CurrentToken.StartPos, mGrammarLexer^.CurrentToken.Value,
-      mGrammarLexer^.CurrentToken.Error]));
+    Result := Format('%s', [mParser^.Parent.Error]);
+    ErrorToken.StartPos := mGrammarLexer^.CurrentToken.StartPos;
+    ErrorToken.Value := strnew(mGrammarLexer^.CurrentToken.Value);
+    ErrorToken.Error := strnew(mGrammarLexer^.CurrentToken.Error);
   End;
 
   TCodeLexer_Create(mLexer, mCode);
-  If mPlugInPath <> '' Then
+  If PlugInPath <> '' Then
   Begin
     {$IFDEF FPC}
-    mHandle := LoadLibrary(mPlugInPath);
+    mHandle := LoadLibrary(PlugInPath);
     {$ELSE}
     {$IFDEF VINTAGE}
     GetMem(p, Length(mPlugInPath) + 1);
@@ -227,6 +215,7 @@ Begin
   TAstViewer_Create(mViewer, PLexer(mLexer));
   mParser^.Ast^.VMT^.Accept(mParser^.Ast, mViewer^.As_IAstVisitor);
   mViewer^.Level := 0;
+  ErrorMessagesCount^ := 0;
   If mViewer^.Error Then
   Begin
     mErrorNode := mViewer^.ErrorMessages^.Top;
@@ -234,13 +223,25 @@ Begin
     Begin
       While mErrorNode^.Next <> nil Do
       Begin
-        WriteLn(PChar(mErrorNode^.Data^));
+        Inc(ErrorMessagesCount);
+        mErrorNode := mErrorNode^.Next;
+      End;
+    End;
+    GetMem(ErrorMessages, ErrorMessagesCount^ * SizeOf(PString));
+    e := ErrorMessages;
+    mErrorNode := mViewer^.ErrorMessages^.Top;
+    If mErrorNode <> nil Then
+    Begin
+      While mErrorNode^.Next <> nil Do
+      Begin
+        e^ := Format('%s', [PChar(mErrorNode^.Data^)]);
+        Inc(e);
         mErrorNode := mErrorNode^.Next;
       End;
     End;
   End;
-  TAstViewer_OutputParseTree(mViewer, mAstPathPrefix);
-  If mPlugInPath <> '' Then
+  TAstViewer_OutputParseTree(mViewer, AstPathPrefix);
+  If PlugInPath <> '' Then
   Begin
     FreeLibrary(mHandle);
   End;
@@ -255,6 +256,61 @@ Begin
   Dispose(mGrammarLexer);
   Dispose(mGrammar);
   Dispose(mCode);
+End;
+
+Procedure Run;
+Var
+  mGrammarFilePath: String;
+  mSourceCodeFilePath: String;
+  mAstPathPrefix: String;
+  mPlugInPath: String;
+  mResult: String;
+  mErrorToken: TToken;
+  mErrorMessagesCount: TSize;
+  mErrorMessages: PString;
+  p: PString;
+Begin
+  mPlugInPath := '';
+  If (ParamCount = 3) Or (ParamCount = 4) Then
+  Begin
+    mGrammarFilePath := ParamStr(1);
+    mSourceCodeFilePath := ParamStr(2);
+    mAstPathPrefix := ParamStr(3);
+    If ParamCount = 4 Then
+    Begin
+      mPlugInPath := ParamStr(4);
+    End;
+  End
+  Else
+  Begin
+    mGrammarFilePath := Propmt('Grammar File Path?');
+    mSourceCodeFilePath := Propmt('Source Code File Path?');
+    mAstPathPrefix := Propmt('AST Output Path Prefix?');
+    mPlugInPath := Propmt('PlugIn Library File Path?');
+  End;
+
+  mResult := Parse(mGrammarFilePath, mSourceCodeFilePath, mAstPathPrefix,
+    @mErrorToken, mErrorMessages, @mErrorMessagesCount, mPlugInPath);
+  If mResult = '' Then
+    WriteLn('ACCEPTED')
+  Else
+  Begin
+    WriteLn(Format('ERROR: Parser Message: %s', [mResult]));
+    WriteLn(Format('ERROR: Current Token at Pos = %d, Value = [%s], Message: %s',
+      [mErrorToken.StartPos, mErrorToken.Value, mErrorToken.Error]));
+  End;
+
+  If mErrorMessagesCount > 0 Then
+  Begin
+    p := mErrorMessages;
+    While mErrorMessagesCount > 0 Do
+    Begin
+      WriteLn(p^);
+      Inc(p);
+      Dec(mErrorMessagesCount);
+    End;
+    FreeMem(mErrorMessages, mErrorMessagesCount * SizeOf(PString));
+  End;
 End;
 
 End.

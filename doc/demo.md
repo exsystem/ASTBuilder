@@ -978,7 +978,7 @@ Then, compile the plugin with those source code files into a dynamic library fil
 
 ## Converter Program for Converting AST to Graphviz DOT File
 
-In this demo, we use C++ to write the converter program for converting the AST to a graphviz DOT file. Please compile this source code into the executable file called `tree-builder` on MacOS/Linux or `tree-builder.exe` on Windows.
+In this demo, we use C++ to write the converter program for converting the AST to a graphviz DOT file. Please compile this source code (under **C++17** standard) into the executable file called `tree-builder` on MacOS/Linux or `tree-builder.exe` on Windows.
 
 ```cpp
 #include <fstream>

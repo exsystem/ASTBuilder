@@ -585,7 +585,7 @@ Begin
   mStrLength := StrLen(ParseTree^.Token.Value);
   mStrSize := SizeOf(Char) * mStrLength;
   TBinaryFileStream_Write(Self^.FStrFile, ParseTree^.Token.Value^, mStrSize);
-  Inc(Self^.FStrOffset, Succ(mStrLength));
+  Inc(Self^.FStrOffset, mStrLength);
 
   Parent := Self^.FTreeOffset;
   Inc(Self^.FTreeOffset);
