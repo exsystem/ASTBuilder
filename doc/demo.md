@@ -962,8 +962,10 @@ void ProcessToken(const struct TContext *Context) {
         return;
     }
     if (strcmp(token_kind, "START_HEREDOC") == 0) {
-        here_doc_id = (char *) malloc(strlen(token_value) - 3);
-        strncpy(here_doc_id, token_value + 3, strlen(token_value) - 3);
+        const size_t here_doc_id_high = strlen(token_value) - 3;
+        here_doc_id = (char *) malloc(here_doc_id_high + 1);
+        strncpy(here_doc_id, token_value + 3, here_doc_id_high);
+        here_doc_id[here_doc_id_high] = '\0';
         return;
     }
     if (strcmp(token_kind, "HEREDOC_TEXT") == 0 && strstr(token_value, here_doc_id) == token_value) {
