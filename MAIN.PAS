@@ -183,9 +183,9 @@ Begin
   If Not TGrammarParser_Parse(mParser) Then
   Begin
     Result := Format('%s', [mParser^.Parent.Error]);
-    ErrorToken.StartPos := mGrammarLexer^.CurrentToken.StartPos;
-    ErrorToken.Value := strnew(mGrammarLexer^.CurrentToken.Value);
-    ErrorToken.Error := strnew(mGrammarLexer^.CurrentToken.Error);
+    ErrorToken^.StartPos := mGrammarLexer^.CurrentToken.StartPos;
+    ErrorToken^.Value := strnew(mGrammarLexer^.CurrentToken.Value);
+    ErrorToken^.Error := strnew(mGrammarLexer^.CurrentToken.Error);
   End;
 
   TCodeLexer_Create(mLexer, mCode);
@@ -195,12 +195,12 @@ Begin
     mHandle := LoadLibrary(PlugInPath);
     {$ELSE}
     {$IFDEF VINTAGE}
-    GetMem(p, Length(mPlugInPath) + 1);
-    StrPCopy(p, mPlugInPath);
+    GetMem(p, Length(PlugInPath) + 1);
+    StrPCopy(p, PlugInPath);
     mHandle := LoadLibrary(p);
-    FreeMem(p, Length(mPlugInPath) + 1);
+    FreeMem(p, Length(PlugInPath) + 1);
     {$ELSE}
-    mHandle := LoadLibrary(PChar(mPlugInPath));
+    mHandle := LoadLibrary(PChar(PlugInPath));
     {$ENDIF}
     {$ENDIF}
     mContext.RegisterTermRule := RegisterTermRule;
