@@ -69,8 +69,14 @@ Uses {$IFNDEF FPC}
   SysUtils,
   TestUtil,
   CPARSER,
-  Parser, GrmRUnit, ASTNode, ParseTr,
+  PARSER, GrmRUnit, ASTNode, ParseTr,
  {$IFDEF USE_STRINGS}strings,{$ENDIF} STREAM, GLEXER, GPARSER, CLEXER, GRMRNODE, StrUtil;
+
+ {$IFNDEF VINTAGE}
+ Type
+  TSize = TypeDef.TSize;
+  PSize = TypeDef.PSize;
+ {$ENDIF}
 
 Var
   {$IFDEF FPC}
