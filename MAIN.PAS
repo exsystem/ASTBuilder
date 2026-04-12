@@ -5,7 +5,7 @@ Unit Main;
 Interface
 
 Uses
-  Lexer, TypeDef;
+  LEXER, TypeDef;
 
 Type
   {$IFDEF CLASSIC}

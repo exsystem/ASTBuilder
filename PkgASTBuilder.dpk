@@ -1,0 +1,106 @@
+﻿package PkgASTBuilder;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS ON}
+{$RANGECHECKS ON}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl;
+
+contains
+  MAIN in 'MAIN.PAS',
+  ASTNode in 'AST\ASTNode.pas',
+  GRMRNODE in 'AST\GRMRNODE.PAS',
+  GRPNODE in 'AST\GRPNODE.PAS',
+  IdNode in 'AST\IdNode.pas',
+  RuleNode in 'AST\RuleNode.pas',
+  TRMNODE in 'AST\TRMNODE.PAS',
+  TRMRNODE in 'AST\TRMRNODE.PAS',
+  NFA in 'Automata\NFA.pas',
+  CLEXER in 'LEXER\CLEXER.PAS',
+  GLEXER in 'LEXER\GLEXER.PAS',
+  LEXER in 'LEXER\LEXER.PAS',
+  ARRWRULE in 'LexrRule\Grammar\ARRWRULE.PAS',
+  ASTKRULE in 'LexrRule\Grammar\ASTKRULE.PAS',
+  CHARRULE in 'LexrRule\Grammar\CHARRULE.PAS',
+  CHSTRULE in 'LexrRule\Grammar\CHSTRULE.PAS',
+  COLNRULE in 'LexrRule\Grammar\COLNRULE.PAS',
+  COMARULE in 'LexrRule\Grammar\COMARULE.PAS',
+  DDTSRULE in 'LexrRule\Grammar\DDTSRULE.PAS',
+  DOTRULE in 'LexrRule\Grammar\DOTRULE.PAS',
+  EOFRULE in 'LexrRule\Grammar\EOFRULE.PAS',
+  EQURULE in 'LexrRule\Grammar\EQURULE.PAS',
+  IDRULE in 'LexrRule\Grammar\IDRULE.PAS',
+  LBRKRULE in 'LexrRule\Grammar\LBRKRULE.PAS',
+  LCBRULE in 'LexrRule\Grammar\LCBRULE.PAS',
+  LPARRULE in 'LexrRule\Grammar\LPARRULE.PAS',
+  MODERULE in 'LexrRule\Grammar\MODERULE.PAS',
+  OPTRULE in 'LexrRule\Grammar\OPTRULE.PAS',
+  ORRULE in 'LexrRule\Grammar\ORRULE.PAS',
+  PLUSRULE in 'LexrRule\Grammar\PLUSRULE.PAS',
+  PPMDRULE in 'LexrRule\Grammar\PPMDRULE.PAS',
+  PUMDRULE in 'LexrRule\Grammar\PUMDRULE.PAS',
+  QMRKRULE in 'LexrRule\Grammar\QMRKRULE.PAS',
+  RBRKRULE in 'LexrRule\Grammar\RBRKRULE.PAS',
+  RCBRULE in 'LexrRule\Grammar\RCBRULE.PAS',
+  RPARRULE in 'LexrRule\Grammar\RPARRULE.PAS',
+  SEMIRULE in 'LexrRule\Grammar\SEMIRULE.PAS',
+  SKIPRULE in 'LexrRule\Grammar\SKIPRULE.PAS',
+  STRRULE in 'LexrRule\Grammar\STRRULE.PAS',
+  TERMRULE in 'LexrRule\Grammar\TERMRULE.PAS',
+  TILDRULE in 'LexrRule\Grammar\TILDRULE.PAS',
+  KYWDRULE in 'LexrRule\Template\KYWDRULE.PAS',
+  SYMBRULE in 'LexrRule\Template\SYMBRULE.PAS',
+  CPARSER in 'PARSER\CPARSER.PAS',
+  GPARSER in 'PARSER\GPARSER.pas',
+  GRMRVIWR in 'PARSER\GRMRVIWR.PAS',
+  PARSER in 'PARSER\PARSER.pas',
+  PARSETR in 'ParseTr\PARSETR.PAS',
+  ACTRUNIT in 'ProdRule\ACTRUNIT.PAS',
+  ASRUNIT in 'ProdRule\ASRUNIT.PAS',
+  CHFRUNIT in 'ProdRule\CHFRUNIT.PAS',
+  EXPRUNIT in 'ProdRule\EXPRUNIT.PAS',
+  FRUNIT in 'ProdRule\FRUNIT.PAS',
+  GRMRUNIT in 'ProdRule\GRMRUNIT.PAS',
+  ICFRUNIT in 'ProdRule\ICFRUNIT.PAS',
+  OPTRUNIT in 'ProdRule\OPTRUNIT.PAS',
+  RRUNIT in 'ProdRule\RRUNIT.PAS',
+  SFRUNIT in 'ProdRule\SFRUNIT.PAS',
+  TERUNIT in 'ProdRule\TERUNIT.PAS',
+  TFRUNIT in 'ProdRule\TFRUNIT.PAS',
+  TRRUNIT in 'ProdRule\TRRUNIT.PAS',
+  TRSRUNIT in 'ProdRule\TRSRUNIT.PAS',
+  TestUtil in 'Test\TestUtil.pas',
+  CLSUTILS in 'Util\CLSUTILS.PAS',
+  List in 'Util\List.pas',
+  STACK in 'Util\STACK.PAS',
+  STREAM in 'Util\STREAM.PAS',
+  StrUtil in 'Util\StrUtil.pas',
+  Trie in 'Util\Trie.pas',
+  TYPEDEF in 'Util\TYPEDEF.PAS',
+  Utility in 'Util\Utility.pas';
+
+end.

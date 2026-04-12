@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="5">
+    <Name Value="ASTBuilder"/>
+    <Type Value="RunAndDesignTime"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <SearchPaths>
+        <IncludeFiles Value="$(ProjOutDir)"/>
+        <OtherUnitFiles Value="Util;AST;Automata;LEXER;LexrRule/Grammar;LexrRule/Template;PARSER;ParseTr;ProdRule;Test"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <Parsing>
+        <SyntaxOptions>
+          <SyntaxMode Value="Delphi"/>
+        </SyntaxOptions>
+      </Parsing>
+    </CompilerOptions>
+    <Files>
+      <Item>
+        <Filename Value="AST/ASTNode.pas"/>
+        <UnitName Value="ASTNode"/>
+      </Item>
+      <Item>
+        <Filename Value="AST/GRMRNODE.PAS"/>
+        <UnitName Value="GrmrNode"/>
+      </Item>
+      <Item>
+        <Filename Value="AST/GRPNODE.PAS"/>
+        <UnitName Value="GrpNode"/>
+      </Item>
+      <Item>
+        <Filename Value="AST/IdNode.pas"/>
+        <UnitName Value="IdNode"/>
+      </Item>
+      <Item>
+        <Filename Value="AST/RuleNode.pas"/>
+        <UnitName Value="RuleNode"/>
+      </Item>
+      <Item>
+        <Filename Value="AST/TRMNODE.PAS"/>
+        <UnitName Value="TrmNode"/>
+      </Item>
+      <Item>
+        <Filename Value="AST/TRMRNODE.PAS"/>
+        <UnitName Value="TrmRNode"/>
+      </Item>
+      <Item>
+        <Filename Value="Automata/NFA.pas"/>
+        <UnitName Value="NFA"/>
+      </Item>
+      <Item>
+        <Filename Value="LEXER/CLEXER.PAS"/>
+        <UnitName Value="CLexer"/>
+      </Item>
+      <Item>
+        <Filename Value="LEXER/GLEXER.PAS"/>
+        <UnitName Value="GLexer"/>
+      </Item>
+      <Item>
+        <Filename Value="LEXER/LEXER.PAS"/>
+        <UnitName Value="Lexer"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/ARRWRULE.PAS"/>
+        <UnitName Value="ArrwRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/ASTKRULE.PAS"/>
+        <UnitName Value="AstkRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/CHARRULE.PAS"/>
+        <UnitName Value="CharRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/CHSTRULE.PAS"/>
+        <UnitName Value="ChStRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/COLNRULE.PAS"/>
+        <UnitName Value="ColnRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/COMARULE.PAS"/>
+        <UnitName Value="ComaRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/DDTSRULE.PAS"/>
+        <UnitName Value="DDtsRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/DOTRULE.PAS"/>
+        <UnitName Value="DotRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/EOFRULE.PAS"/>
+        <UnitName Value="EofRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/EQURULE.PAS"/>
+        <UnitName Value="EquRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/IDRULE.PAS"/>
+        <UnitName Value="IdRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/LBRKRULE.PAS"/>
+        <UnitName Value="LBrkRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/LCBRULE.PAS"/>
+        <UnitName Value="LCBRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/LPARRULE.PAS"/>
+        <UnitName Value="LParRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/MODERULE.PAS"/>
+        <UnitName Value="ModeRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/OPTRULE.PAS"/>
+        <UnitName Value="OptRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/ORRULE.PAS"/>
+        <UnitName Value="OrRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/PLUSRULE.PAS"/>
+        <UnitName Value="PlusRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/PPMDRULE.PAS"/>
+        <UnitName Value="PPMDRULE"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/PUMDRULE.PAS"/>
+        <UnitName Value="PUMDRULE"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/QMRKRULE.PAS"/>
+        <UnitName Value="QMrkRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/RBRKRULE.PAS"/>
+        <UnitName Value="RBrkRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/RCBRULE.PAS"/>
+        <UnitName Value="RCBRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/RPARRULE.PAS"/>
+        <UnitName Value="RParRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/SEMIRULE.PAS"/>
+        <UnitName Value="SemiRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/SKIPRULE.PAS"/>
+        <UnitName Value="SkipRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/STRRULE.PAS"/>
+        <UnitName Value="StrRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/TERMRULE.PAS"/>
+        <UnitName Value="TermRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Grammar/TILDRULE.PAS"/>
+        <UnitName Value="TildRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Template/KYWDRULE.PAS"/>
+        <UnitName Value="KywdRule"/>
+      </Item>
+      <Item>
+        <Filename Value="LexrRule/Template/SYMBRULE.PAS"/>
+        <UnitName Value="SymbRule"/>
+      </Item>
+      <Item>
+        <Filename Value="PARSER/CPARSER.PAS"/>
+        <UnitName Value="CPARSER"/>
+      </Item>
+      <Item>
+        <Filename Value="PARSER/GPARSER.pas"/>
+        <UnitName Value="GPARSER"/>
+      </Item>
+      <Item>
+        <Filename Value="PARSER/GRMRVIWR.PAS"/>
+        <UnitName Value="GrmrViwr"/>
+      </Item>
+      <Item>
+        <Filename Value="PARSER/PARSER.pas"/>
+        <UnitName Value="PARSER"/>
+      </Item>
+      <Item>
+        <Filename Value="ParseTr/PARSETR.PAS"/>
+        <UnitName Value="ParseTr"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/ACTRUNIT.PAS"/>
+        <UnitName Value="ACTRUNIT"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/ASRUNIT.PAS"/>
+        <UnitName Value="ASRUNIT"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/CHFRUNIT.PAS"/>
+        <UnitName Value="ChFRUnit"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/EXPRUNIT.PAS"/>
+        <UnitName Value="ExpRUnit"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/FRUNIT.PAS"/>
+        <UnitName Value="FRUnit"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/GRMRUNIT.PAS"/>
+        <UnitName Value="GrmRUnit"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/ICFRUNIT.PAS"/>
+        <UnitName Value="ICFRUnit"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/OPTRUNIT.PAS"/>
+        <UnitName Value="OptRUnit"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/RRUNIT.PAS"/>
+        <UnitName Value="RRUnit"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/SFRUNIT.PAS"/>
+        <UnitName Value="SFRUnit"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/TERUNIT.PAS"/>
+        <UnitName Value="TERUnit"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/TFRUNIT.PAS"/>
+        <UnitName Value="TFRUnit"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/TRRUNIT.PAS"/>
+        <UnitName Value="TRRUnit"/>
+      </Item>
+      <Item>
+        <Filename Value="ProdRule/TRSRUNIT.PAS"/>
+        <UnitName Value="TRSRUnit"/>
+      </Item>
+      <Item>
+        <Filename Value="Test/Test1.pas"/>
+        <UnitName Value="Test1"/>
+      </Item>
+      <Item>
+        <Filename Value="Test/Test2.pas"/>
+        <UnitName Value="Test2"/>
+      </Item>
+      <Item>
+        <Filename Value="Test/TEST3.PAS"/>
+        <UnitName Value="Test3"/>
+      </Item>
+      <Item>
+        <Filename Value="Test/TestUtil.pas"/>
+        <UnitName Value="TestUtil"/>
+      </Item>
+      <Item>
+        <Filename Value="Util/CLSUTILS.PAS"/>
+        <UnitName Value="ClsUtils"/>
+      </Item>
+      <Item>
+        <Filename Value="Util/LIST.BAK"/>
+        <Type Value="Text"/>
+      </Item>
+      <Item>
+        <Filename Value="Util/List.pas"/>
+        <UnitName Value="List"/>
+      </Item>
+      <Item>
+        <Filename Value="Util/STACK.PAS"/>
+        <UnitName Value="Stack"/>
+      </Item>
+      <Item>
+        <Filename Value="Util/STREAM.PAS"/>
+        <UnitName Value="Stream"/>
+      </Item>
+      <Item>
+        <Filename Value="Util/StrUtil.pas"/>
+        <UnitName Value="StrUtil"/>
+      </Item>
+      <Item>
+        <Filename Value="Util/Trie.pas"/>
+        <UnitName Value="Trie"/>
+      </Item>
+      <Item>
+        <Filename Value="Util/TYPEDEF.PAS"/>
+        <UnitName Value="TypeDef"/>
+      </Item>
+      <Item>
+        <Filename Value="Util/Utility.pas"/>
+        <UnitName Value="Utility"/>
+      </Item>
+    </Files>
+    <RequiredPkgs>
+      <Item>
+        <PackageName Value="FCL"/>
+      </Item>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
