@@ -66,7 +66,7 @@ Uses
   TRSRUNIT,
   Test1,
   Test2,
-  TEST3,
+  Test3,
   TestUtil,
   ClsUtils,
   List,

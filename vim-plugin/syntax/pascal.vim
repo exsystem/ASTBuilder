@@ -1,46 +1,48 @@
 " =========================================================
 " Pascal AST Syntax Highlighter (FIXED - Positional parsing)
 " =========================================================
-
 " if exists("b:current_syntax")
 "   finish
 " endif
 
 syntax case ignore
 
-" =========================
-" CONFIG
-" =========================
-function! s:GetASTPrefix() abort
-  " Try to find AST files in multiple locations:
-  " 1. Same directory as the current buffer
-  " 2. /tmp/pascal_ast_1/ (legacy location)
-  " 3. Hardcoded ASTBuilder directory
-  
-  let l:buf_dir = expand('%:p:h')
-  if !empty(l:buf_dir)
-    let l:candidate = l:buf_dir . '/pascal_ast'
-    if filereadable(l:candidate . '.xt')
-      return l:candidate
-    endif
-  endif
-  
-  " Try /tmp/pascal_ast_1/
-  if filereadable('/tmp/pascal_ast_1/pascal_ast.xt')
-    return '/tmp/pascal_ast_1/pascal_ast'
-  endif
-  
-  " Try ASTBuilder directory
-  let l:ast_dir = '/Users/exsystem/DelphiProjects/XDE/ASTBuilder'
-  if filereadable(l:ast_dir . '/pascal_ast.xt')
-    return l:ast_dir . '/pascal_ast'
-  endif
-  
-  " Default fallback
-  return '/tmp/pascal_ast_1/pascal_ast'
-endfunction
+" Set global variables only if they don't already exist
+if !exists('g:ast_builder')
+    let g:ast_builder = expand('~/.vim/astbuilder/ASTBuilder')
+endif
 
-let s:prefix = s:GetASTPrefix()
+if !exists('g:grammar')
+    let g:grammar = expand('~/.vim/astbuilder/pascal.xg')
+endif
+
+if !exists('g:ast_prefix')
+    let g:ast_prefix = '/tmp/pascal_ast_1/pascal_'
+endif
+
+if !exists('g:plugin')
+  " 1. Detect the platform
+  let s:is_windows = has('win32') || has('win64')
+  let s:is_mac = has('macunix')
+
+  " 2. Set the correct extension
+  if s:is_windows
+    let s:ext = '.dll'
+  elseif s:is_mac
+    let s:ext = '.dylib'
+  else
+    let s:ext = '.so'
+  endif
+
+  " 3. Build the path using expand() to handle '~'
+  " Note: Vim's expand() handles forward slashes internally on Windows
+  let s:path = expand('~/.vim/astbuilder/libpascal' . s:ext)
+
+  " 4. Final normalization for Windows paths if needed
+  let g:plugin = simplify(s:path)
+endif
+
+let s:prefix = g:ast_prefix
 let s:debug_log = []
 
 " =========================
@@ -152,14 +154,11 @@ function! s:BuildAST(...) abort
   " If a path is passed as argument, use it as prefix
   if a:0 > 0
     let s:prefix = a:1
-  else
-    " Otherwise, try to find AST files in multiple locations:
-    let s:prefix = s:GetASTPrefix()
   endif
   
   let s:debug_log = ["START s:BuildAST() at " . strftime("%H:%M:%S")]
-  let term_rules = s:ReadCStringFile(s:prefix . ".xtr")
-  let xs_code = s:ReadCodeString(s:prefix . ".xs")
+  let term_rules = s:ReadCStringFile(s:prefix . "ast.xtr")
+  let xs_code = s:ReadCodeString(s:prefix . "ast.xs")
   
   " Get original buffer content (preserving line endings)
   let l:buf_path = expand('%:p')
@@ -182,7 +181,7 @@ function! s:BuildAST(...) abort
     call add(s:debug_log, "Buffer chars 50-100: " . buffer_code[50:99])
   endif
   
-  let nodes = s:ReadNodes(s:prefix . ".xt")
+  let nodes = s:ReadNodes(s:prefix . "ast.xt")
 
   call add(s:debug_log, "term_rules length: " . len(term_rules))
   call add(s:debug_log, "nodes length: " . len(nodes))
@@ -190,7 +189,7 @@ function! s:BuildAST(...) abort
   call add(s:debug_log, "AST prefix: " . s:prefix)
 
   if len(nodes) == 0 || len(term_rules) == 0
-    call writefile(s:debug_log, "/tmp/pascal_debug.txt")
+    call writefile(s:debug_log, "/tmp/ast_syntax_highlighter_debug.log")
     return
   endif
 
@@ -387,7 +386,9 @@ function! s:BuildAST(...) abort
   hi! link pascalNumber Number
   hi! link pascalFloat Float
   hi! link pascalString String
-  hi! link pascalHeredoc String
+  "hi! link pascalHeredoc String
+  " Example for a dark background setup:
+  highlight pascalHeredoc ctermbg=242 guibg=#444444 ctermfg=117 guifg=#add8e6
   hi! link pascalDirective PreProc
   hi! link pascalComment Comment
 
@@ -395,7 +396,8 @@ function! s:BuildAST(...) abort
   call writefile(s:debug_log, "/tmp/pascal_debug.txt")
 endfunction
 
-function! BuildAST_Public() abort
+function! s:PascalSyntaxHighlight() abort
+  call s:GenerateAST()
   call s:BuildAST()
 endfunction
 
@@ -403,31 +405,18 @@ augroup PascalAST
   autocmd!
   " Run BuildAST when the buffer is read/post or filetype is set
   " Use BufReadPost to ensure file content is loaded first
-  autocmd BufReadPost,BufNewFile *.pas call s:BuildAST()
+  autocmd BufReadPost,BufNewFile *.pas call s:PascalSyntaxHighlight()
   " Also try FileType as fallback
-  autocmd FileType pascal call s:BuildAST()
+  autocmd FileType pascal call s:PascalSyntaxHighlight()
 augroup END
 
 " Command to manually trigger AST building
 command! -nargs=? BuildAST call s:BuildAST(<f-args>)
 
-" Helper command to copy AST files from the ASTBuilder directory
-command! CopyASTFiles call s:CopyASTFiles()
-
-function! s:CopyASTFiles() abort
-  let l:src = '/Users/exsystem/DelphiProjects/XDE/ASTBuilder/pascal_ast.*'
-  let l:dst = '/tmp/pascal_ast_1/'
-  echo "Copying AST files from " . l:src . " to " . l:dst
-  if !isdirectory(l:dst)
-    mkdir -p l:dst
-  endif
-  " Use system() to copy files
-  call system('cp ' . l:src . ' ' . l:dst)
-  echo "Done!"
-endfunction
-
 " Helper command to generate AST files for current buffer
 command! GenerateAST call s:GenerateAST()
+
+command! PascalSyntaxHighlight call s:PascalSyntaxHighlight()
 
 function! s:GenerateAST() abort
   let l:buf_name = expand('%:p')
@@ -435,16 +424,11 @@ function! s:GenerateAST() abort
     echo "No buffer loaded"
     return
   endif
-  let l:grammar = '/Users/exsystem/DelphiProjects/XDE/ASTBuilder/Grammar/pascal/pascal.xg'
-  let l:ast_prefix = '/tmp/pascal_ast_1/pascal_ast'
-  let l:plugin = '/Users/exsystem/DelphiProjects/XDE/ASTBuilder/Grammar/pascal/pascal/libpascal.dylib'
   echo "Generating AST for: " . l:buf_name
-  let l:cmd = 'cd /Users/exsystem/DelphiProjects/XDE/ASTBuilder && echo -e "' . l:grammar . '\n' . l:buf_name . '\n' . l:ast_prefix . '\n' . l:plugin . '" | ./ASTBuilder'
+  let l:cmd = g:ast_builder . ' ' . g:grammar . ' ' . l:buf_name . ' ' . g:ast_prefix . ' ' . g:plugin
   echo "Running: " . l:cmd
   let l:result = system(l:cmd)
   echo l:result
-  " Also copy to /tmp
-  call s:CopyASTFiles()
 endfunction
 
 let b:current_syntax = "pascal"
