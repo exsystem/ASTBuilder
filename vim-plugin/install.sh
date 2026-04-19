@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cp syntax/pascal.vim ~/.vim/syntax/
-#cp syntax/pascal_v7_compat.vim ~/.vim/syntax/pascal.vim
+#cp syntax/pascal-v7.vim ~/.vim/syntax/pascal.vim
 cp ../ASTBuilder ~/.vim/astbuilder/
 cp ../../Grammar/pascal/pascal.xg ~/.vim/astbuilder/
 cp ../../Grammar/pascal/pascal/libpascal.dylib ~/.vim/astbuilder/

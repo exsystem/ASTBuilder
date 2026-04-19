@@ -7,9 +7,34 @@
     {
       "type": "lldb",
       "request": "launch",
+      "name": "Debug-TestUTF8FS",
+      "program": "${workspaceFolder}/Test/Out/TestStreamReader",
+      "cwd": "${workspaceFolder}/Test"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
       "name": "Debug",
       "program": "${workspaceFolder}/ASTBuilder",
-      "args": [],
+      "args": [
+        "../Grammar/pascal/pascal.xg",
+        "Test/vim.pas",
+        "pascal_",
+        "../Grammar/pascal/pascal/libpascal.dylib"
+      ],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug-CLib",
+      "program": "${workspaceFolder}/ASTBuilder",
+      "args": [
+        "../Grammar/pascal/pascal.xg",
+        "Test/TestCase/test.pp",
+        "pascal_c_",
+        "/Users/exsystem/CLionProjects/pascal/cmake-build-debug/libpascal.dylib"
+      ],
       "cwd": "${workspaceFolder}"
     }
   ]

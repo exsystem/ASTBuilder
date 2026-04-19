@@ -21,7 +21,7 @@ if [ $1 = "clean" ] || [ $1 == "test" ]; then
     rm -rf "./Win64"
 fi
 
-if $LAZBUILD $PROJECT; then
+if $LAZBUILD --build-mode=Debug $PROJECT; then
   if [ $1 = "test" ]; then
     ./ASTBuilder
   fi

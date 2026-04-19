@@ -44,12 +44,15 @@
           </CodeGeneration>
           <Linking>
             <Debugging>
-              <DebugInfoType Value="dsDwarf3"/>
+              <DebugInfoType Value="dsDwarf2"/>
               <UseHeaptrc Value="True"/>
               <TrashVariables Value="True"/>
               <UseExternalDbgSyms Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-WM11.0"/>
+          </Other>
         </CompilerOptions>
       </Item>
       <Item Name="Release">
@@ -81,6 +84,9 @@
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
+          <Other>
+            <CustomOptions Value="-WM11.0"/>
+          </Other>
         </CompilerOptions>
       </Item>
     </BuildModes>
@@ -91,7 +97,6 @@
     <RunParams>
       <FormatVersion Value="2"/>
     </RunParams>
-    <!-- Removed RequiredPackages - units are included directly in project -->
     <Units>
       <Unit>
         <Filename Value="ASTBuilder.lpr"/>
@@ -114,7 +119,6 @@
       <Unit>
         <Filename Value="Util/List.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="List"/>
       </Unit>
       <Unit>
         <Filename Value="Util/STACK.PAS"/>
@@ -124,17 +128,14 @@
       <Unit>
         <Filename Value="Util/StrUtil.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="StrUtil"/>
       </Unit>
       <Unit>
         <Filename Value="Util/Trie.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Trie"/>
       </Unit>
       <Unit>
         <Filename Value="Util/Utility.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Utility"/>
       </Unit>
       <Unit>
         <Filename Value="Util/CLSUTILS.PAS"/>
@@ -144,7 +145,6 @@
       <Unit>
         <Filename Value="AST/ASTNode.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="ASTNode"/>
       </Unit>
       <Unit>
         <Filename Value="AST/GRMRNODE.PAS"/>
@@ -159,12 +159,10 @@
       <Unit>
         <Filename Value="AST/IdNode.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="IdNode"/>
       </Unit>
       <Unit>
         <Filename Value="AST/RuleNode.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="RuleNode"/>
       </Unit>
       <Unit>
         <Filename Value="AST/TRMNODE.PAS"/>
@@ -179,7 +177,6 @@
       <Unit>
         <Filename Value="Automata/NFA.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="NFA"/>
       </Unit>
       <Unit>
         <Filename Value="LEXER/LEXER.PAS"/>
@@ -199,17 +196,14 @@
       <Unit>
         <Filename Value="PARSER/PARSER.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="PARSER"/>
       </Unit>
       <Unit>
         <Filename Value="PARSER/CPARSER.PAS"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="CPARSER"/>
       </Unit>
       <Unit>
         <Filename Value="PARSER/GPARSER.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="GPARSER"/>
       </Unit>
       <Unit>
         <Filename Value="PARSER/GRMRVIWR.PAS"/>
@@ -224,12 +218,10 @@
       <Unit>
         <Filename Value="ProdRule/ACTRUNIT.PAS"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="ACTRUNIT"/>
       </Unit>
       <Unit>
         <Filename Value="ProdRule/ASRUNIT.PAS"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="ASRUNIT"/>
       </Unit>
       <Unit>
         <Filename Value="ProdRule/CHFRUNIT.PAS"/>
@@ -384,12 +376,10 @@
       <Unit>
         <Filename Value="LexrRule/Grammar/PPMDRULE.PAS"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="PPMDRULE"/>
       </Unit>
       <Unit>
         <Filename Value="LexrRule/Grammar/PUMDRULE.PAS"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="PUMDRULE"/>
       </Unit>
       <Unit>
         <Filename Value="LexrRule/Grammar/QMRKRULE.PAS"/>
@@ -449,12 +439,10 @@
       <Unit>
         <Filename Value="Test/Test1.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Test1"/>
       </Unit>
       <Unit>
         <Filename Value="Test/Test2.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Test2"/>
       </Unit>
       <Unit>
         <Filename Value="Test/TEST3.PAS"/>
@@ -464,7 +452,6 @@
       <Unit>
         <Filename Value="Test/TestUtil.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="TestUtil"/>
       </Unit>
       <Unit>
         <Filename Value="MAIN.PAS"/>
@@ -491,10 +478,13 @@
     </Parsing>
     <Linking>
       <Debugging>
-        <DebugInfoType Value="dsDwarf2Set"/>
+        <DebugInfoType Value="dsDwarf2"/>
         <UseExternalDbgSyms Value="True"/>
       </Debugging>
     </Linking>
+    <Other>
+      <CustomOptions Value="-WM11.0"/>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions>

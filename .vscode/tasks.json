@@ -3,7 +3,7 @@
     "runner": "terminal",
     "tasks": [
         {
-            "command": "${workspaceFolder}/../jcf/JCF",
+            "command": "${workspaceFolder}/../../jcf/JCF",
             "args": [
                 "-config=./.vscode/jcfsettings.inc.cfg",
                 "-inplace",
@@ -15,7 +15,7 @@
             "label": "format inc code"
         },
         {
-            "command": "${workspaceFolder}/../jcf/JCF",
+            "command": "${workspaceFolder}/../../jcf/JCF",
             "args": [
                 "-config=./.vscode/jcfsettings.cfg",
                 "-inplace",

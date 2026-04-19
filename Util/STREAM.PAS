@@ -20,9 +20,9 @@ Type
   TStream_Rewind_Proc = Function(Const Self: PStream; Offset: TSize): Boolean;
   TStream_IsEof_Proc = Function(Const Self: PStream): Boolean;
   TStream_Read_Proc = Function(Const Self: PStream; Var Data;
-    Const Length: TSize): TSize;
+    Const Length: TSize; Var Size: TSize): TSize;
   TStream_Write_Proc = Function(Const Self: PStream; Var Data;
-    Const Length: TSize): TSize;
+    Const Length: TSize; Var Size: TSize): TSize;
 
   TStream_VMT = Record
     Destroy: TStream_Destroy_Proc;
@@ -62,8 +62,8 @@ Procedure TFileStream_SetPosition(Const Self: PStream; Value: TSize);
 Function TFileStream_Forward(Const Self: PStream; Offset: TSize): Boolean;
 Function TFileStream_Rewind(Const Self: PStream; Offset: TSize): Boolean;
 Function TFileStream_IsEof(Const Self: PStream): Boolean;
-Function TFileStream_Read(Const Self: PStream; Var Data; Const Length: TSize): TSize;
-Function TFileStream_Write(Const Self: PStream; Var Data; Const Length: TSize): TSize;
+Function TFileStream_Read(Const Self: PStream; Var Data; Const Length: TSize; Var Size: TSize):TSize;
+Function TFileStream_Write(Const Self: PStream; Var Data; Const Length: TSize; Var Size: TSize): TSize;
 
 Procedure TBinaryFileStream_Create(Var Self: PBinaryFileStream; Filename: String);
 Procedure TBinaryFileStream_Destroy(Const Self: PStream);
@@ -73,8 +73,8 @@ Procedure TBinaryFileStream_SetPosition(Const Self: PStream; Value: TSize);
 Function TBinaryFileStream_Forward(Const Self: PStream; Offset: TSize): Boolean;
 Function TBinaryFileStream_Rewind(Const Self: PStream; Offset: TSize): Boolean;
 Function TBinaryFileStream_IsEof(Const Self: PStream): Boolean;
-Function TBinaryFileStream_Read(Const Self: PStream; Var Data; Const Length: TSize): TSize;
-Function TBinaryFileStream_Write(Const Self: PStream; Var Data; Const Length: TSize): TSize;
+Function TBinaryFileStream_Read(Const Self: PStream; Var Data; Const Length: TSize; Var Size: TSize): TSize;
+Function TBinaryFileStream_Write(Const Self: PStream; Var Data; Const Length: TSize; Var Size: TSize): TSize;
 
 Implementation
 
@@ -137,7 +137,7 @@ Begin
   Result := EOF(PFileStream(Self)^.FFile);
 End;
 
-Function TFileStream_Read(Const Self: PStream; Var Data; Const Length: TSize): TSize;
+Function TFileStream_Read(Const Self: PStream; Var Data; Const Length: TSize; Var Size: TSize): TSize;
 {$IFDEF WIN64}
 Var
   mResult: Integer;
@@ -153,9 +153,10 @@ Begin
   BlockRead(PFileStream(Self)^.FFile, Data, Length, Result);
   {$ENDIF}
   {$ENDIF}
+  Size := Result;
 End;
 
-Function TFileStream_Write(Const Self: PStream; Var Data; Const Length: TSize): TSize;
+Function TFileStream_Write(Const Self: PStream; Var Data; Const Length: TSize; Var Size: TSize): TSize;
 {$IFDEF WIN64}
 Var
   mResult: Integer;
@@ -171,6 +172,7 @@ Begin
   BlockWrite(PFileStream(Self)^.FFile, Data, Length, Result);
   {$ENDIF}
   {$ENDIF}
+  Size := Result;
 End;
 
 Procedure TBinaryFileStream_Create(Var Self: PBinaryFileStream; Filename: String);
@@ -219,7 +221,7 @@ Begin
   Result := EOF(PBinaryFileStream(Self)^.FFile);
 End;
 
-Function TBinaryFileStream_Read(Const Self: PStream; Var Data; Const Length: TSize): TSize;
+Function TBinaryFileStream_Read(Const Self: PStream; Var Data; Const Length: TSize; Var Size: TSize): TSize;
 {$IFDEF WIN64}
 Var
   mResult: Integer;
@@ -235,9 +237,10 @@ Begin
   BlockRead(PBinaryFileStream(Self)^.FFile, Data, Length, Result);
   {$ENDIF}
   {$ENDIF}
+  Size := Result;
 End;
 
-Function TBinaryFileStream_Write(Const Self: PStream; Var Data; Const Length: TSize): TSize;
+Function TBinaryFileStream_Write(Const Self: PStream; Var Data; Const Length: TSize; Var Size: TSize): TSize;
 {$IFDEF WIN64}
 Var
   mResult: Integer;
@@ -257,6 +260,7 @@ Begin
   BlockWrite(PBinaryFileStream(Self)^.FFile, Data, Length, Result);
   {$ENDIF}
   {$ENDIF}
+  Size := Result;
 End;
 
 Begin
