@@ -262,6 +262,8 @@ Begin
   Dispose(mGrammarLexer);
   Dispose(mGrammar);
   Dispose(mCode);
+
+  Result := '';
 End;
 
 Procedure Run;
