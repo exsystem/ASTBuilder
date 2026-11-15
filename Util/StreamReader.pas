@@ -28,6 +28,9 @@ Type
     FEncoding: TEncodingKind;       { Current encoding }
     FEof: Boolean;
     FPosition: TSize; { Position in characters }
+    FByteStart: TSize;
+    FCharBytePositions: Array Of TSize;
+    FCharBytePositionCount: TSize;
   End;
 
   { Encoding detection result }
@@ -35,6 +38,9 @@ Type
     Kind: TEncodingKind;
     BOMSize: TSize;  { Size of Byte Order Mark }
   End;
+
+Function TStreamReader_GetUTF16CharSize(FirstByte, SecondByte: Byte;
+  Encoding: TEncodingKind): TSize;
 
 { ============================================================
   TStreamReader API functions
@@ -70,6 +76,21 @@ Implementation
 
 Var
   mTStreamReader_VMT: TStream_VMT;
+
+Function TStreamReader_GetUTF16CharSize(FirstByte, SecondByte: Byte;
+  Encoding: TEncodingKind): TSize;
+Var
+  mCodeUnit: Word;
+Begin
+  If Encoding = ekUTF16LE Then
+    mCodeUnit := FirstByte Or (SecondByte Shl 8)
+  Else
+    mCodeUnit := (FirstByte Shl 8) Or SecondByte;
+  If (mCodeUnit >= $D800) And (mCodeUnit <= $DBFF) Then
+    Result := 4
+  Else
+    Result := 2;
+End;
 
 { ============================================================
   Internal helper functions
@@ -155,7 +176,8 @@ Begin
       End;
 
       { UTF-8 BOM: EF BB BF }
-      If (mBytes[0] = $EF) And (mBytes[1] = $BB) And (mBytes[2] = $BF) Then
+      If (mNumRead >= 3) And (mBytes[0] = $EF) And (mBytes[1] = $BB) And
+        (mBytes[2] = $BF) Then
       Begin
         Info.Kind := ekUTF8;
         Info.BOMSize := 3;
@@ -244,28 +266,29 @@ End;
 Procedure TStreamReader_Destroy(Const Self: PStream);
 Begin
   CloseFile(PStreamReader(Self)^.FFile);
+  SetLength(PStreamReader(Self)^.FCharBytePositions, 0);
 End;
 
 Function TStreamReader_ReadChar(Const Self: PStreamReader; Const Ch: PByte;
   MaxSize: TSize): Integer;
 Var
   mByteBuf: Array[0..3] Of Byte;
-  mBytesRead, I, mCharSize: Integer;
+  mBytesRead, I, mCharSize, mByteCount: Integer;
 Begin
   Result := 0;
 
   If Self.FEof Then
     Exit;
 
-  { Read first byte }
+  mByteCount := 0;
   BlockRead(Self.FFile, mByteBuf[0], 1, mBytesRead);
   If mBytesRead = 0 Then
   Begin
     Self.FEof := True;
     Exit;
   End;
+  mByteCount := 1;
 
-  { Determine character size based on encoding }
   Case Self.FEncoding Of
     ekASCII:
       mCharSize := 1;
@@ -274,31 +297,57 @@ Begin
     ekGBK:
       mCharSize := TStreamReader_GetGBKCharSize(mByteBuf[0]);
     ekUTF16LE, ekUTF16BE:
-      mCharSize := 2;  { UTF-16 uses 2 bytes minimum }
+    Begin
+      BlockRead(Self.FFile, mByteBuf[1], 1, mBytesRead);
+      If mBytesRead = 0 Then
+      Begin
+        Self.FEof := True;
+        mCharSize := 1;
+      End
+      Else
+      Begin
+        mByteCount := 2;
+        mCharSize := TStreamReader_GetUTF16CharSize(mByteBuf[0],
+          mByteBuf[1], Self.FEncoding);
+      End;
+    End;
     Else
       mCharSize := 1;
   End;
 
-  { Read remaining bytes if needed }
-  For I := 1 To mCharSize - 1 Do
+  For I := mByteCount To mCharSize - 1 Do
   Begin
     BlockRead(Self.FFile, mByteBuf[I], 1, mBytesRead);
     If mBytesRead = 0 Then
     Begin
       Self.FEof := True;
-      Exit;
+      Break;
     End;
+    Inc(mByteCount);
   End;
 
-  { Return bytes as raw character data (raw byte array) }
-  If mCharSize <= MaxSize Then
+  If mByteCount <= MaxSize Then
   Begin
-    Move(mByteBuf[0], Ch^, mCharSize);
-    Result := mCharSize;
+    Move(mByteBuf[0], Ch^, mByteCount);
+    Result := mByteCount;
+    Inc(Self.FPosition);
+    If Self.FPosition = Self.FCharBytePositionCount Then
+    Begin
+      If Self.FCharBytePositionCount = Length(Self.FCharBytePositions) Then
+      Begin
+        If Length(Self.FCharBytePositions) = 0 Then
+          SetLength(Self.FCharBytePositions, 1)
+        Else
+          SetLength(Self.FCharBytePositions,
+            Length(Self.FCharBytePositions) * 2);
+      End;
+      Self.FCharBytePositions[Self.FCharBytePositionCount] :=
+        FilePos(Self.FFile);
+      Inc(Self.FCharBytePositionCount);
+    End;
   End
   Else
   Begin
-    { Buffer too small }
     Result := -1;
   End;
 End;
@@ -308,213 +357,139 @@ Function TStreamReader_ReadCharToString(Const Self: PStreamReader;
   Out Ch: String): Boolean;
 Var
   mBuf: Array[0..3] Of Byte;
-  mBytesRead, I, mCharSize: Integer;
+  mBytesRead: Integer;
 Begin
-  Result := False;
-
-  If Self.FEof Then
-    Exit;
-
-  BlockRead(Self.FFile, mBuf[0], 1, mBytesRead);
-  If mBytesRead = 0 Then
+  mBytesRead := TStreamReader_ReadChar(Self, @mBuf[0], SizeOf(mBuf));
+  Result := mBytesRead > 0;
+  If Result Then
   Begin
-    Self.FEof := True;
-    Exit;
-  End;
-
-  Case Self.FEncoding Of
-    ekASCII: mCharSize := 1;
-    ekUTF8: mCharSize := TStreamReader_GetUTF8CharSize(mBuf[0]);
-    ekGBK: mCharSize := TStreamReader_GetGBKCharSize(mBuf[0]);
-    ekUTF16LE, ekUTF16BE: mCharSize := 2;
-    Else
-      mCharSize := 1;
-  End;
-
-  For I := 1 To mCharSize - 1 Do
-  Begin
-    BlockRead(Self.FFile, mBuf[I], 1, mBytesRead);
-    If mBytesRead = 0 Then
-    Begin
-      Self.FEof := True;
-      Exit;
-    End;
-  End;
-
-  SetLength(Ch, mCharSize);
-  Move(mBuf[0], Ch[1], mCharSize);
-  Result := True;
+    SetLength(Ch, mBytesRead);
+    Move(mBuf[0], Ch[1], mBytesRead);
+  End
+  Else
+    Ch := '';
 End;
 
 Function TStreamReader_ReadLine(Const Self: PStreamReader; Out Line: String): Boolean;
 Var
-  mBytes: Array Of Byte;  { Dynamic byte array }
+  mBytes: Array Of Byte;
   mByteCount, mByteCap: TSize;
-  mBytesRead: Integer;
+  mBytesRead, mNextPosition: TSize;
   mByteData: Array[0..3] Of Byte;
-  mLineEndFound: Boolean;
+  mLineEndFound, mReadAny, mIsCR, mIsLF: Boolean;
 Begin
   Result := False;
   Line := '';
-
-  If Self.FEof Then
-    Exit;
-
   mByteCap := 256;
   SetLength(mBytes, mByteCap);
   mByteCount := 0;
-
   mLineEndFound := False;
+  mReadAny := False;
 
   While Not mLineEndFound Do
   Begin
-    { Read first byte }
-    BlockRead(Self.FFile, mByteData[0], 1, mBytesRead);
-    If mBytesRead = 0 Then
+    mBytesRead := TStreamReader_ReadChar(Self, @mByteData[0], SizeOf(mByteData));
+    If mBytesRead <= 0 Then
       Break;
+    mReadAny := True;
 
-    { Determine character size based on encoding }
-    Case Self.FEncoding Of
-      ekASCII: mBytesRead := 1;
-      ekGBK: mBytesRead := TStreamReader_GetGBKCharSize(mByteData[0]);
-      ekUTF16LE, ekUTF16BE: mBytesRead := 2;
-      ekUTF8: mBytesRead := TStreamReader_GetUTF8CharSize(mByteData[0]);
-      Else
-        mBytesRead := 1;
-    End;
-
-    { Read remaining bytes if needed }
-    If mBytesRead > 1 Then
-      BlockRead(Self.FFile, mByteData[1], Pred(mBytesRead), mBytesRead);
-
-    Inc(mBytesRead);
-
-    { Check for line endings (LF = 0x0A, CR = 0x0D) }
-    If (mByteData[0] = $0A) Or (mByteData[0] = $0D) Then
+    If Self.FEncoding In [ekUTF16LE, ekUTF16BE] Then
     Begin
-      mLineEndFound := True;
-      { Skip LF if it comes after CR (CRLF handling) }
-      If (mByteData[0] = $0D) And (mBytesRead = 1) Then
+      If Self.FEncoding = ekUTF16LE Then
       Begin
-        { Peek at next byte without consuming }
-        If Not EOF(Self.FFile) Then
-        Begin
-          BlockRead(Self.FFile, mByteData[0], 1, mBytesRead);
-          If (mBytesRead = 1) And (mByteData[0] = $0A) Then
-          Begin
-            { CRLF - skip the LF too }
-          End
-          Else
-          Begin
-            { Not CRLF, put byte back (not possible with TFile, so we just continue) }
-          End;
-        End;
+        mIsCR := (mByteData[0] = $0D) And (mByteData[1] = 0);
+        mIsLF := (mByteData[0] = $0A) And (mByteData[1] = 0);
+      End
+      Else
+      Begin
+        mIsCR := (mByteData[0] = 0) And (mByteData[1] = $0D);
+        mIsLF := (mByteData[0] = 0) And (mByteData[1] = $0A);
       End;
     End
-    Else If mByteData[0] = $0A Then
+    Else
+    Begin
+      mIsCR := mByteData[0] = $0D;
+      mIsLF := mByteData[0] = $0A;
+    End;
+
+    If mIsLF Or mIsCR Then
     Begin
       mLineEndFound := True;
+      If mIsCR Then
+      Begin
+        mNextPosition := Self.FPosition;
+        mBytesRead := TStreamReader_ReadChar(Self, @mByteData[0], SizeOf(mByteData));
+        If Self.FEncoding = ekUTF16LE Then
+          mIsLF := (mBytesRead = 2) And (mByteData[0] = $0A) And
+            (mByteData[1] = 0)
+        Else If Self.FEncoding = ekUTF16BE Then
+          mIsLF := (mBytesRead = 2) And (mByteData[0] = 0) And
+            (mByteData[1] = $0A)
+        Else
+          mIsLF := (mBytesRead = 1) And (mByteData[0] = $0A);
+        If Not mIsLF Then
+        Begin
+          TStreamReader_SetPosition(PStream(Self), mNextPosition);
+        End;
+      End;
     End;
 
     If Not mLineEndFound Then
     Begin
-      { Buffer grow if needed }
       If mByteCount + mBytesRead > mByteCap Then
       Begin
-        Inc(mByteCap, 256);
+        mByteCap := mByteCount + mBytesRead + 256;
         SetLength(mBytes, mByteCap);
       End;
-
-      { Copy raw bytes to buffer }
       Move(mByteData[0], mBytes[mByteCount], mBytesRead);
       Inc(mByteCount, mBytesRead);
     End;
   End;
 
-  { Assign raw bytes to string (AnsiString with $H+) }
   If mByteCount > 0 Then
   Begin
     SetLength(Line, mByteCount);
     Move(mBytes[0], Line[1], mByteCount);
-    Result := True;
   End;
+  Result := mReadAny;
 End;
 
 Function TStreamReader_ReadAllText(Const Self: PStreamReader; Out Text: String): TSize;
 Var
-  mBytes: Array Of Byte;  { Dynamic byte array }
+  mBytes: Array Of Byte;
   mByteCount, mByteCap: TSize;
   mBytesRead: Integer;
   mByteData: Array[0..3] Of Byte;
 Begin
   Result := 0;
   Text := '';
-
-  If Self.FEof Then
-    Exit;
-
   mByteCap := 4096;
   SetLength(mBytes, mByteCap);
   mByteCount := 0;
 
-  While True Do
+  Repeat
   Begin
-    { Read first byte }
-    BlockRead(Self.FFile, mByteData[0], 1, mBytesRead);
-    If mBytesRead = 0 Then
+    mBytesRead := TStreamReader_ReadChar(Self, @mByteData[0], SizeOf(mByteData));
+    If mBytesRead <= 0 Then
       Break;
 
-    { Determine character size based on encoding }
-    Case Self.FEncoding Of
-      ekASCII: mBytesRead := 1;
-      ekGBK: mBytesRead := TStreamReader_GetGBKCharSize(mByteData[0]);
-      ekUTF16LE, ekUTF16BE: mBytesRead := 2;
-      ekUTF8: mBytesRead := TStreamReader_GetUTF8CharSize(mByteData[0]);
-      Else
-        mBytesRead := 1;
-    End;
-
-    { Read remaining bytes if needed }
-    If mBytesRead > 1 Then
-      BlockRead(Self.FFile, mByteData[1], Pred(mBytesRead), mBytesRead);
-
-    { Decode to Char based on encoding }
-    {
-    Var Ch: Char;
-    Case Self.FEncoding Of
-      ekUTF16LE:
-        If mBytesRead >= 2 Then
-          Ch := Char(mByteData[0] Or (mByteData[1] Shl 8));
-      ekUTF16BE:
-        If mBytesRead >= 2 Then
-          Ch := Char(mByteData[1] Or (mByteData[0] Shl 8));
-      Else
-        Ch := Chr(mByteData[0]);
-    End;
-    }
-
-    Inc(mBytesRead);
-    { Buffer grow if needed }
     If mByteCount + mBytesRead > mByteCap Then
     Begin
-      Inc(mByteCap, 4096);
+      mByteCap := mByteCount + mBytesRead + 4096;
       SetLength(mBytes, mByteCap);
     End;
 
-    { Copy raw UTF-8 bytes to buffer }
     Move(mByteData[0], mBytes[mByteCount], mBytesRead);
     Inc(mByteCount, mBytesRead);
     Inc(Result);
-  End;
+  End
+  Until False;
 
   If mByteCount > 0 Then
   Begin
-    { For Free Pascal with $H+, String is AnsiString, so we copy raw bytes }
     Text := '';
     SetLength(Text, mByteCount);
-    { Use PAnsiChar to properly handle the byte copy }
-    If mByteCount > 0 Then
-      System.Move(mBytes[0], Text[1], mByteCount);
+    System.Move(mBytes[0], Text[1], mByteCount);
   End;
 End;
 
@@ -549,139 +524,33 @@ Begin
 End;
 
 Function TStreamReader_GetPosition(Const Self: PStream): TSize;
-Var
-  mSelf: PStreamReader;
-  mBytes: Array[0..4095] Of Byte;
-  mBytePos, I: TSize;
-  mReadCount: Integer;
-  mBytesReadResult: Integer;
 Begin
-  mSelf := PStreamReader(Self);
-  If mSelf = nil Then
-  Begin
-    Result := 0;
-    Exit;
-  End;
-
-  mBytePos := FilePos(mSelf^.FFile);
-
-  { Count characters from start to current byte position }
-  Result := 0;
-
-  If mBytePos > 0 Then
-  Begin
-    Seek(mSelf^.FFile, 0);
-
-    I := 0;
-    While (I < mBytePos) Do
-    Begin
-      mBytesReadResult := 0;
-      If (mBytePos - I) > SizeOf(mBytes) Then
-        mReadCount := SizeOf(mBytes)
-      Else
-        mReadCount := mBytePos - I;
-      BlockRead(mSelf^.FFile, mBytes[0], mReadCount, mBytesReadResult);
-      If mBytesReadResult = 0 Then
-        Break;
-
-      { Count characters in this chunk based on encoding }
-      Case mSelf^.FEncoding Of
-        ekASCII:
-          Result := Result + mBytesReadResult;
-        ekUTF16LE, ekUTF16BE:
-          { UTF-16: 2 bytes per character }
-          Result := Result + (mBytesReadResult Div 2);
-        ekUTF8:
-          Result := Result + CountUTF8Characters(@mBytes[0], mBytesReadResult);
-        ekGBK:
-          Result := Result + CountGBKCharacters(@mBytes[0], mBytesReadResult);
-      End;
-
-      I := I + mBytesReadResult;
-    End;
-  End;
+  Result := PStreamReader(Self)^.FPosition;
 End;
 
 Procedure TStreamReader_SetPosition(Const Self: PStream; Value: TSize);
 Var
   mSelf: PStreamReader;
-  mBytes: Array[0..4095] Of Byte;
-  I, mCharSize, mTargetChar: TSize;
-  mReadCount: Integer;
-  mBytesReadResult: Integer;
+  mBytes: Array[0..3] Of Byte;
 Begin
   mSelf := PStreamReader(Self);
   If mSelf = nil Then
     Exit;
 
-  Seek(mSelf^.FFile, 0); { Start from beginning }
-  mTargetChar := 0;
-
-  While (mTargetChar < Value) Do
+  If Value < mSelf^.FCharBytePositionCount Then
   Begin
-    { Read enough bytes for at least one complete character }
-    Case mSelf^.FEncoding Of
-      ekASCII:
-        mReadCount := SizeOf(mBytes);
-      ekUTF8:
-        mReadCount := SizeOf(mBytes);  { UTF-8 chars are 1-4 bytes }
-      ekUTF16LE, ekUTF16BE:
-        mReadCount := SizeOf(mBytes) And (Not 1);  { UTF-16 needs even bytes }
-      ekGBK:
-        mReadCount := SizeOf(mBytes) And (Not 1);  { GBK uses 2 bytes }
-      Else
-        mReadCount := SizeOf(mBytes);
-    End;
-    
-    { Don't read past end of file }
-    If FilePos(mSelf^.FFile) + mReadCount > FileSize(mSelf^.FFile) Then
-      mReadCount := FileSize(mSelf^.FFile) - FilePos(mSelf^.FFile);
-      
-    If mReadCount = 0 Then
-      Break;
-
-    BlockRead(mSelf^.FFile, mBytes[0], mReadCount, mBytesReadResult);
-    If mBytesReadResult = 0 Then
-      Break;
-
-    I := 0;
-    While (I < mBytesReadResult) And (mTargetChar < Value) Do
-    Begin
-      Case mSelf^.FEncoding Of
-        ekASCII:
-          mCharSize := 1;
-        ekUTF16LE, ekUTF16BE:
-          mCharSize := 2;
-        ekUTF8:
-          mCharSize := TStreamReader_GetUTF8CharSize(mBytes[I]);
-        ekGBK:
-          mCharSize := TStreamReader_GetGBKCharSize(mBytes[I]);
-      End;
-
-      Inc(mTargetChar);
-      If mTargetChar < Value Then
-        Inc(I, mCharSize)
-      Else
-        Break;
-    End;
-
-    If mTargetChar < Value Then
-      Continue { Read more }
-    Else
-    Begin
-      { We have enough characters, seek to correct position }
-      Seek(mSelf^.FFile, FilePos(mSelf^.FFile) - mBytesReadResult + I);
-      Break;
-    End;
+    Seek(mSelf^.FFile, mSelf^.FCharBytePositions[Value]);
+    mSelf^.FPosition := Value;
+    mSelf^.FEof := False;
+    Exit;
   End;
 
-  If mTargetChar < Value Then
+  mSelf^.FEof := False;
+  While mSelf^.FPosition < Value Do
   Begin
-    { Reached EOF before target position }
-    Seek(mSelf^.FFile, FileSize(mSelf^.FFile));
+    If TStreamReader_ReadChar(mSelf, @mBytes[0], SizeOf(mBytes)) <= 0 Then
+      Break;
   End;
-  
-  mSelf^.FPosition := mTargetChar;
 End;
 
 Procedure TStreamReader_Create(Var Self: PStreamReader; Filename: String;
@@ -691,10 +560,12 @@ Var
 Begin
   New(Self);
 
+  mInfo.Kind := ekUTF8;
+  mInfo.BOMSize := 0;
   { Detect encoding if ekUTF8 (default) }
-  If Encoding = ekUTF8 Then
+  If TStreamReader_DetectEncoding(Filename, mInfo) Then
   Begin
-    If TStreamReader_DetectEncoding(Filename, mInfo) Then
+    If Encoding = ekUTF8 Then
       Encoding := mInfo.Kind;
   End;
 
@@ -704,142 +575,76 @@ Begin
   AssignFile(Self^.FFile, Filename);
   Reset(Self^.FFile, SizeOf(Byte));
 
-  { Skip BOM if present }
-  If Encoding <> ekASCII Then
+  { Skip a BOM only when it matches the selected encoding. }
+  Self^.FByteStart := 0;
+  If Encoding = mInfo.Kind Then
   Begin
-    Case Encoding Of
-      ekUTF8:
-        If mInfo.BOMSize = 3 Then
-          Seek(Self^.FFile, 3);
-      ekUTF16LE, ekUTF16BE:
-        If mInfo.BOMSize = 2 Then
-          Seek(Self^.FFile, 2);
-    End;
+    Self^.FByteStart := mInfo.BOMSize;
+    Seek(Self^.FFile, Self^.FByteStart);
   End;
 
   Self^.FPosition := 0;
   Self^.FEof := False;
+  SetLength(Self^.FCharBytePositions, 1);
+  Self^.FCharBytePositions[0] := Self^.FByteStart;
+  Self^.FCharBytePositionCount := 1;
   Self^.Parent.VMT := @mTStreamReader_VMT;
 End;
 
 { Count total characters in file }
-Function CountFileCharacters(Const Self: PStreamReader): TSize;
-Var
-  mBytes: Array[0..4095] Of Byte;
-  mTotalBytes, I: TSize;
-  mReadCount: Integer;
-  mBytesReadResult: Integer;
-Begin
-  Result := 0;
-
-  mTotalBytes := FileSize(Self.FFile);
-
-  If mTotalBytes > 0 Then
-  Begin
-    Seek(Self.FFile, 0);
-
-    I := 0;
-    While (I < mTotalBytes) Do
-    Begin
-      mBytesReadResult := 0;
-      If (mTotalBytes - I) > SizeOf(mBytes) Then
-        mReadCount := SizeOf(mBytes)
-      Else
-        mReadCount := mTotalBytes - I;
-      BlockRead(Self.FFile, mBytes[0], mReadCount, mBytesReadResult);
-      If mBytesReadResult = 0 Then
-        Break;
-
-      { Count characters in this chunk based on encoding }
-      Case Self.FEncoding Of
-        ekASCII:
-          Result := Result + mBytesReadResult;
-        ekUTF16LE, ekUTF16BE:
-          { UTF-16: 2 bytes per character }
-          Result := Result + (mBytesReadResult Div 2);
-        ekUTF8:
-          Result := Result + CountUTF8Characters(@mBytes[0], mBytesReadResult);
-        ekGBK:
-          Result := Result + CountGBKCharacters(@mBytes[0], mBytesReadResult);
-      End;
-
-      I := I + mBytesReadResult;
-    End;
-  End;
-End;
-
 Function TStreamReader_GetLength(Const Self: PStream): TSize;
 Var
-  mReader: PStreamReader;
+  mSelf: PStreamReader;
+  mOriginalBytePosition, mOriginalCharacterPosition: TSize;
+  mOriginalEof: Boolean;
+  mBytes: Array[0..3] Of Byte;
 Begin
-  mReader := PStreamReader(Self);
-  If mReader = nil Then
+  mSelf := PStreamReader(Self);
+  Result := 0;
+  mOriginalBytePosition := FilePos(mSelf^.FFile);
+  mOriginalCharacterPosition := mSelf^.FPosition;
+  mOriginalEof := mSelf^.FEof;
+  Seek(mSelf^.FFile, mSelf^.FByteStart);
+  mSelf^.FPosition := 0;
+  mSelf^.FEof := False;
+  While TStreamReader_ReadChar(mSelf, @mBytes[0], SizeOf(mBytes)) > 0 Do
   Begin
-    Result := 0;
-    Exit;
+    Inc(Result);
   End;
-  Result := CountFileCharacters(mReader);
+  Seek(mSelf^.FFile, mOriginalBytePosition);
+  mSelf^.FPosition := mOriginalCharacterPosition;
+  mSelf^.FEof := mOriginalEof;
 End;
 
 Function TStreamReader_IsEof(Const Self: PStream): Boolean;
 Begin
-  Result := EOF(PStreamReader(Self)^.FFile);
+  Result := PStreamReader(Self)^.FEof Or EOF(PStreamReader(Self)^.FFile);
 End;
 
 Function TStreamReader_Read(Const Self: PStream; Var Data; Const Length: TSize; Var Size: TSize): TSize;
-var
+Var
   mSelf: PStreamReader;
-  mBuffer: Array[0..4095] Of Byte;
-  CharSize: TSize;
-  mBytesReadResult: Integer;
+  mBuffer: Array Of Byte;
+  mBytesRead: Integer;
 Begin
   mSelf := PStreamReader(Self);
   Result := 0;
   Size := 0;
-  
-  If (Length = 0) Or mSelf^.FEof Then
+  If Length = 0 Then
     Exit;
-  
-  While (Result < Length) And Not mSelf^.FEof Do
+
+  SetLength(mBuffer, Length * 4);
+  While Result < Length Do
   Begin
-    { Read first byte }
-    BlockRead(mSelf^.FFile, mBuffer[Size], 1, mBytesReadResult);
-    
-    If mBytesReadResult = 0 Then
-    Begin
-      mSelf^.FEof := True;
+    mBytesRead := TStreamReader_ReadChar(mSelf, @mBuffer[Size], 4);
+    If mBytesRead <= 0 Then
       Break;
-    End;
-    
-    { Determine character size based on encoding }
-    Case mSelf^.FEncoding Of
-      ekASCII:
-        CharSize := 1;
-      ekUTF8:
-        CharSize := TStreamReader_GetUTF8CharSize(mBuffer[Size]);
-      ekUTF16LE, ekUTF16BE:
-        CharSize := 2;
-      ekGBK:
-        CharSize := TStreamReader_GetGBKCharSize(mBuffer[Size]);
-      Else
-        CharSize := 1;
-    End;
-    
-    { Read remaining bytes for this character }
-    If CharSize > 1 Then
-      BlockRead(mSelf^.FFile, mBuffer[Succ(Size)], Pred(CharSize), mBytesReadResult);
-    
-    { Update index for next character }
-    Inc(Size, CharSize);
-    Inc(Result);  { One character read }
+    Inc(Size, mBytesRead);
+    Inc(Result);
   End;
-  
-  { Copy all bytes to output buffer }
+
   If Size > 0 Then
-    Move(mBuffer, Data, Size);
-  
-  { Update position }
-  mSelf^.FPosition := mSelf^.FPosition + Result;
+    Move(mBuffer[0], Data, Size);
 End;
 
 Function TStreamReader_Write(Const Self: PStream; Var Data; Const Length: TSize; Var Size: TSize): TSize;
@@ -869,9 +674,15 @@ Begin
 End;
 
 Function TStreamReader_Rewind(Const Self: PStream; Offset: TSize): Boolean;
+Var
+  mPosition: TSize;
 Begin
   { Move back Offset characters }
-  TStreamReader_SetPosition(Self, TStreamReader_GetPosition(Self) - Offset);
+  mPosition := TStreamReader_GetPosition(Self);
+  If Offset > mPosition Then
+    TStreamReader_SetPosition(Self, 0)
+  Else
+    TStreamReader_SetPosition(Self, mPosition - Offset);
   Result := True;
 End;
 

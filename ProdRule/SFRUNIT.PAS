@@ -31,7 +31,7 @@ Function StringFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mToken: PToken;
   I, J: TSize;
-  mCh: PChar;
+  mCh: PTChar;
   mEscaping: Boolean;
 Label
   S1, S2;
@@ -42,20 +42,20 @@ Begin
       TNfa_Create(Nfa);
       mToken := TParser_GetCurrentToken(Parser);
       mCh := CreateStr(1);
-      mCh[1] := #0;
+      PByte(mCh)[1] := 0;
 
       mEscaping := False;
       I := 1;
       J := 0;
-      While I < strlen(mToken^.Value) - 1 Do
+      While I < TCharStrLen(mToken^.Value) - 1 Do
       Begin
         If mEscaping Then
         Begin
           mEscaping := False;
-          mCh[0] := EscapeChar(mToken^.Value[I]);
+          PByte(mCh)^ := EscapeChar(PByte(mToken^.Value)[I]);
         End
         Else
-        If mToken^.Value[I] = '\' Then
+        If PByte(mToken^.Value)[I] = Ord('\') Then
         Begin
           mEscaping := True;
           Inc(I);
@@ -63,7 +63,7 @@ Begin
         End
         Else
         Begin
-          mCh[0] := mToken^.Value[I];
+          PByte(mCh)^ := PByte(mToken^.Value)[I];
         End;
         TNfa_AddEdge(Nfa, mCh, J, J + 1);
         Inc(J);

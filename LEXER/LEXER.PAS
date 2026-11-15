@@ -12,8 +12,8 @@ Type
   PLexer_VMT = ^TLexer_VMT;
 
   TToken = Record
-    Error: PChar;
-    Value: PChar;
+    Error: PTChar;
+    Value: PTChar;
     StartPos: TSize;
     Kind: Pointer;
   End;
@@ -31,6 +31,9 @@ Type
     VMT: PLexer_VMT;
     FCaseSensitive: Boolean;
     FStream: PStream;
+    CurrentChar: PTChar;
+    CurrentCharSize: TSize;
+    FLastPeekCharCount: TSize;
     CurrentToken: TToken;
   End;
 
@@ -39,9 +42,9 @@ Procedure TLexer_Create(Var Self: PLexer; Const Source: PStream;
 Procedure TLexer_Destroy(Var Self: PLexer);
 Function TLexer_CompareNextToken(Var Self: PLexer; Const TokenKind: Pointer): Boolean;
 Procedure TLexer_Forward(Var Self: PLexer; Const Step: TSize);
-Function TLexer_PeekNextChar(Var Self: PLexer): Char;
-Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: PChar): Boolean;
-Function TLexer_GetNextChar(Var Self: PLexer): Char;
+Function TLexer_PeekNextChar(Var Self: PLexer): PTChar;
+Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: PTChar): Boolean;
+Function TLexer_GetNextChar(Var Self: PLexer): PTChar;
 Procedure TLexer_Retract(Var Self: PLexer; Const Step: TSize);
 Function TLexer_GetNextPos(Var Self: PLexer): TSize;
 Procedure TLexer_FetchNextToken(Var Self: PLexer; Length: TSize);
@@ -57,14 +60,18 @@ Begin
   Self^.FCaseSensitive := CaseSensitive;
   Source^.VMT^.SetPosition(Source, 0);
   Self^.FStream := Source;
-  Self^.CurrentToken.Value := strnew('');
-  Self^.CurrentToken.Error := strnew('');
+  Self^.CurrentChar := nil;
+  Self^.CurrentCharSize := 0;
+  Self^.FLastPeekCharCount := 0;
+  Self^.CurrentToken.Value := TCharStrNew('');
+  Self^.CurrentToken.Error := TCharStrNew('');
 End;
 
 Procedure TLexer_Destroy(Var Self: PLexer);
 Begin
   FreeStr(Self^.CurrentToken.Error);
   FreeStr(Self^.CurrentToken.Value);
+  TChar_Deallocate(Self^.CurrentChar);
   Self^.FStream^.VMT^.Destroy(Self^.FStream);
 End;
 
@@ -73,74 +80,87 @@ Begin
   Self^.FStream^.VMT^.Forward(Self^.FStream, Step);
 End;
 
-Function TLexer_PeekNextChar(Var Self: PLexer): Char;
+Function TLexer_PeekNextChar(Var Self: PLexer): PTChar;
 Begin
-  If Self^.FStream^.VMT^.IsEof(Self^.FStream) Then
-  Begin
-    Result := #0;
-    Exit;
-  End;
-  Self^.FStream^.VMT^.Read(Self^.FStream, Result, 1);
-  Self^.FStream^.VMT^.Rewind(Self^.FStream, 1);
+  Result := TLexer_GetNextChar(Self);
+  If Result^.Bytes[0] <> 0 Then
+    Self^.FStream^.VMT^.Rewind(Self^.FStream, 1);
 End;
 
-Function TLexer_GetNextChar(Var Self: PLexer): Char;
-Begin
-  Self^.FStream^.VMT^.Read(Self^.FStream, Result, 1);
-End;
-
-Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: PChar): Boolean;
+Function TLexer_GetNextChar(Var Self: PLexer): PTChar;
 Var
-  I: TSize;
-  mNextWordLength: TSize;
-  {$IFNDEF CLASSIC}
-  mSourceNextWord: PChar;
-  {$ENDIF}
+  mBytes: Array[0..3] Of Byte;
+  mReadCount, mByteCount: TSize;
 Begin
-  mNextWordLength := StrLen(NextWord);
-  If Self^.FStream^.VMT^.GetPosition(Self^.FStream) + mNextWordLength >
-    Self^.FStream^.VMT^.GetLength(Self^.FStream) Then
+  TChar_Deallocate(Self^.CurrentChar);
+  mReadCount := Self^.FStream^.VMT^.Read(Self^.FStream, mBytes[0], 1,
+    mByteCount);
+  If (mReadCount = 0) Or (mByteCount = 0) Then
   Begin
-    Result := False;
-    Exit;
+    Self^.CurrentChar := TChar_Allocate(1);
+    Self^.CurrentChar^.Bytes[0] := 0;
+    Self^.CurrentCharSize := 0;
+  End
+  Else
+  Begin
+    Self^.CurrentChar := TChar_Allocate(mByteCount);
+    Move(mBytes[0], Self^.CurrentChar^, mByteCount);
+    Self^.CurrentCharSize := mByteCount;
   End;
-  If Not Self^.FCaseSensitive Then
+  Result := Self^.CurrentChar;
+End;
+
+Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: PTChar): Boolean;
+Var
+  I, J: TSize;
+  mNextWordLength, mByteOffset, mCharSize, mCharsRead: TSize;
+  mChar: PTChar;
+Begin
+  mNextWordLength := TCharStrLen(NextWord);
+  mByteOffset := 0;
+  mCharsRead := 0;
+  Result := True;
+  While mByteOffset < mNextWordLength Do
   Begin
-    Result := True;
-    For I := 0 To mNextWordLength - 1 Do
-    Begin
-      If Lower(NextWord[I]) <> Lower(TLexer_GetNextChar(Self)) Then
-      Begin
-        Result := False;
-        Self^.FStream^.VMT^.Rewind(Self^.FStream, Succ(I));
-        Exit;
-      End;
-    End;
-    Self^.FStream^.VMT^.Rewind(Self^.FStream, mNextWordLength);
-    Exit;
-  End;
-  {$IFNDEF CLASSIC}
-  GetMem(mSourceNextWord, mNextWordLength * SizeOf(Char));
-  Self^.FStream^.VMT^.Read(Self^.FStream, mSourceNextWord^, mNextWordLength);
-  Self^.FStream^.VMT^.Rewind(Self^.FStream, mNextWordLength);
-  Result := CompareMem(mSourceNextWord, NextWord, mNextWordLength * SizeOf(Char));
-  FreeMem(mSourceNextWord);
-  If Result Then
-  Begin
-    Exit;
-  End;
-  {$ENDIF}
-  For I := 0 To mNextWordLength - 1 Do
-  Begin
-    If NextWord[I] <> TLexer_GetNextChar(Self) Then
+    mChar := TLexer_GetNextChar(Self);
+    mCharSize := Self^.CurrentCharSize;
+    If mCharSize = 0 Then
     Begin
       Result := False;
-      Self^.FStream^.VMT^.Rewind(Self^.FStream, Succ(I));
-      Exit;
+      Break;
     End;
+    Inc(mCharsRead);
+    If mByteOffset + mCharSize > mNextWordLength Then
+    Begin
+      Result := False;
+      Break;
+    End;
+    For J := 0 To mCharSize - 1 Do
+    Begin
+      I := PByte(NextWord)[mByteOffset + J];
+      If Not Self^.FCaseSensitive Then
+      Begin
+        If Lower(I) <> Lower(PByte(mChar)[J]) Then
+        Begin
+          Result := False;
+          Break;
+        End;
+      End
+      Else If I <> PByte(mChar)[J] Then
+      Begin
+        Result := False;
+        Break;
+      End;
+    End;
+    If Not Result Then
+      Break;
+    Inc(mByteOffset, mCharSize);
   End;
-  Self^.FStream^.VMT^.Rewind(Self^.FStream, mNextWordLength);
-  Result := True;
+  If mCharsRead > 0 Then
+    Self^.FStream^.VMT^.Rewind(Self^.FStream, mCharsRead);
+  Self^.FLastPeekCharCount := 0;
+  If Result Then
+    Self^.FLastPeekCharCount := mCharsRead;
 End;
 
 Function TLexer_CompareNextToken(Var Self: PLexer; Const TokenKind: Pointer): Boolean;
@@ -160,11 +180,14 @@ Begin
 End;
 
 Procedure TLexer_FetchNextToken(Var Self: PLexer; Length: TSize);
+Var
+  mDummy: TSize;
 Begin
   FreeStr(Self^.CurrentToken.Value);
-  Self^.CurrentToken.Value := CreateStr(Length);
+  Self^.CurrentToken.Value := CreateStr(Length * 4);
   Self^.FStream^.VMT^.SetPosition(Self^.FStream, Self^.CurrentToken.StartPos);
-  Self^.FStream^.VMT^.Read(Self^.FStream, Self^.CurrentToken.Value^, Length);
+  Self^.FStream^.VMT^.Read(Self^.FStream, Self^.CurrentToken.Value^, Length, mDummy);
+  PByte(Self^.CurrentToken.Value)[mDummy] := 0;
 End;
 
 End.

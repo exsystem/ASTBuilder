@@ -13,11 +13,11 @@ Type
   PSize = TypeDef.PSize;
   {$ENDIF}
 
-  TRegisterTermRule = Procedure(Name: PChar);
-  TGetMode = Function: PChar;
-  TGetTokenKind = Function: PChar;
-  TGetTokenValue = Function: PChar;
-  TInsertToken = Procedure(Kind: PChar; Value: PChar);
+  TRegisterTermRule = Procedure(Name: PTChar);
+  TGetMode = Function: PTChar;
+  TGetTokenKind = Function: PTChar;
+  TGetTokenValue = Function: PTChar;
+  TInsertToken = Procedure(Kind: PTChar; Value: PTChar);
   TPopMode = Procedure;
 
   PContext = ^TContext;
@@ -34,11 +34,11 @@ Type
   TInit = Procedure(Context: PContext);
   TProcessToken = Procedure(Context: PContext);
 
-Procedure RegisterTermRule(Name: PChar);
-Function GetMode: PChar;
-Function GetTokenKind: PChar;
-Function GetTokenValue: PChar;
-Procedure InsertToken(Kind: PChar; Value: PChar);
+Procedure RegisterTermRule(Name: PTChar);
+Function GetMode: PTChar;
+Function GetTokenKind: PTChar;
+Function GetTokenValue: PTChar;
+Procedure InsertToken(Kind: PTChar; Value: PTChar);
 Procedure PopMode;
 
 Function Parse(GrammarFile: String; SourceCodeFile: String; AstPathPrefix: String;
@@ -70,7 +70,7 @@ Uses {$IFNDEF FPC}
   TestUtil,
   CPARSER,
   PARSER, GrmRUnit, ASTNode, ParseTr,
- {$IFDEF USE_STRINGS}strings,{$ENDIF} STREAM, GLEXER, GPARSER, CLEXER, GRMRNODE, StrUtil;
+ {$IFDEF USE_STRINGS}strings,{$ENDIF} STREAM, StreamReader, GLEXER, GPARSER, CLEXER, GRMRNODE, StrUtil;
 
  {$IFNDEF VINTAGE}
  Type
@@ -121,35 +121,35 @@ Begin
   mProcessToken(@mContext);
 End;
 
-Procedure RegisterTermRule(Name: PChar);
+Procedure RegisterTermRule(Name: PTChar);
 Begin
   TGrammarNode_RegisterTermRule(mLexer^.GrammarNode, Name);
 End;
 
-Function GetMode: PChar;
+Function GetMode: PTChar;
 Begin
-  Result := PPChar(TStack_Top(mLexer^.Mode))^;
+  Result := PPTChar(TStack_Top(mLexer^.Mode))^;
 End;
 
-Function GetTokenKind: PChar;
+Function GetTokenKind: PTChar;
 Begin
   Result := TGrammarNode_GetTermRuleName(mLexer^.GrammarNode,
     PTermRule(mLexer^.Parent.CurrentToken.Kind)^);
 End;
 
-Function GetTokenValue: PChar;
+Function GetTokenValue: PTChar;
 Begin
   Result := mLexer^.Parent.CurrentToken.Value;
 End;
 
-Procedure InsertToken(Kind: PChar; Value: PChar);
+Procedure InsertToken(Kind: PTChar; Value: PTChar);
 Begin
   PTermRule(mLexer^.Parent.CurrentToken.Kind)^ :=
     TGrammarNode_GetTermRuleId(mLexer^.GrammarNode, Kind);
-  TLexer_Retract(PLexer(mLexer), StrLen(mLexer^.Parent.CurrentToken.Value) -
-    StrLen(Value));
+  TLexer_Retract(PLexer(mLexer), TCharStrLen(mLexer^.Parent.CurrentToken.Value) -
+    TCharStrLen(Value));
   FreeStr(mLexer^.Parent.CurrentToken.Value);
-  mLexer^.Parent.CurrentToken.Value := StrNew(Value);
+  mLexer^.Parent.CurrentToken.Value := TCharStrNew(Value);
 End;
 
 Procedure PopMode;
@@ -157,7 +157,7 @@ Begin
   TCodeLexer_PopMode(PLexer(mLexer));
 End;
 
-Function Propmt(Prompt: PChar): String;
+Function Propmt(Const Prompt: AnsiString): String;
 Begin
   WriteLn(Prompt);
   ReadLn(Result);
@@ -170,7 +170,7 @@ Var
   mGrammar: PStream;
   mCode: PStream;
   {$IFDEF VINTAGE}
-  p: PChar;
+  p: PTChar;
   {$ENDIF}
   mGrammarLexer: PLexer;
   {$IFDEF VER150}
@@ -181,8 +181,8 @@ Var
   mErrorNode: PNode;
   e: PString;
 Begin
-  TFileStream_Create(PFileStream(mGrammar), GrammarFile);
-  TFileStream_Create(PFileStream(mCode), SourceCodeFile);
+  TStreamReader_Create(PStreamReader(mGrammar), GrammarFile, ekUTF8);
+  TStreamReader_Create(PStreamReader(mCode), SourceCodeFile, ekUTF8);
 
   mGrammarLexer := PLexer(GetGrammarLexer(mGrammar));
   TGrammarParser_Create(mParser, mGrammarLexer, GrammarRule);
@@ -190,8 +190,8 @@ Begin
   Begin
     Result := Format('%s', [mParser^.Parent.Error]);
     ErrorToken^.StartPos := mGrammarLexer^.CurrentToken.StartPos;
-    ErrorToken^.Value := strnew(mGrammarLexer^.CurrentToken.Value);
-    ErrorToken^.Error := strnew(mGrammarLexer^.CurrentToken.Error);
+    ErrorToken^.Value := TCharStrNew(mGrammarLexer^.CurrentToken.Value);
+    ErrorToken^.Error := TCharStrNew(mGrammarLexer^.CurrentToken.Error);
   End;
 
   TCodeLexer_Create(mLexer, mCode);
@@ -206,7 +206,7 @@ Begin
     mHandle := LoadLibrary(p);
     FreeMem(p, Length(PlugInPath) + 1);
     {$ELSE}
-    mHandle := LoadLibrary(PChar(PlugInPath));
+    mHandle := LoadLibrary(PTChar(PlugInPath));
     {$ENDIF}
     {$ENDIF}
     mContext.RegisterTermRule := RegisterTermRule;
@@ -240,7 +240,7 @@ Begin
     Begin
       While mErrorNode^.Next <> nil Do
       Begin
-        e^ := Format('%s', [PChar(mErrorNode^.Data^)]);
+        e^ := TCharStrToAnsiString(PTChar(mErrorNode^.Data^));
         Inc(e);
         mErrorNode := mErrorNode^.Next;
       End;

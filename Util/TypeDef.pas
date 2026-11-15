@@ -5,6 +5,12 @@ Unit TypeDef;
 Interface
 
 Type
+  TChar = packed Record
+    Bytes: Array[0..0] Of Byte;
+  End;
+  PTChar = ^TChar;
+  PPTChar = ^PTChar;
+
   {$IFDEF TPC}
   Cardinal = Word;
   {$ENDIF}
@@ -13,7 +19,6 @@ Type
   UIntPtr = Cardinal;
   PByte = ^Byte;
   PBoolean = ^Boolean;
-  PPChar = ^PChar;
   {$ENDIF}
 
   PSize = ^TSize;
@@ -32,6 +37,9 @@ Type
   TTermRule = TSize;
   PTermRule = ^TTermRule;
 
+Function TChar_Allocate(Const ByteSize: TSize): PTChar;
+Procedure TChar_Deallocate(Var Self: PTChar);
+
 Function TSize_Make(Const Id: TSize): PSize;
 Procedure TSize_Destroy(Var Self: PSize);
 
@@ -41,6 +49,25 @@ Function TTermRule_Make(Const Id: TTermRule): PTermRule;
 Procedure TTermRule_Destroy(Var Self: PTermRule);
 
 Implementation
+
+Function TChar_Allocate(Const ByteSize: TSize): PTChar;
+Begin
+  If ByteSize = 0 Then
+  Begin
+    Result := nil;
+    Exit;
+  End;
+  GetMem(Result, ByteSize);
+End;
+
+Procedure TChar_Deallocate(Var Self: PTChar);
+Begin
+  If Self <> nil Then
+  Begin
+    FreeMem(Self);
+    Self := nil;
+  End;
+End;
 
 Function TSize_Make(Const Id: TSize): PSize;
 Begin

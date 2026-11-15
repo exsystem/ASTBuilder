@@ -18,13 +18,12 @@ Uses
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := (TLexer_PeekNextChar(Lexer) = #0);
+  Result := (TLexer_PeekNextChar(Lexer)^.Bytes[0] = 0);
   If Result Then
   Begin
     FreeStr(Lexer^.CurrentToken.Value);
-    Lexer^.CurrentToken.Value := StrNew('');
+    Lexer^.CurrentToken.Value := TCharStrNew('');
     Lexer^.CurrentToken.StartPos := TLexer_GetNextPos(Lexer);
-    TLexer_Forward(Lexer, 1);
   End;
 End;
 

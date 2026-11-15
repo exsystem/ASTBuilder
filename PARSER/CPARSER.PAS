@@ -19,7 +19,7 @@ Type
     FParseTree: PParseTree;
     FCurrentParseTreeNode: PParseTree;
     Error: Boolean;
-    ErrorMessages: PStack; { Of PChar }
+    ErrorMessages: PStack; { Of PTChar }
     Level: TSize;
 
     FTreeOffset: TSize;
@@ -60,7 +60,7 @@ Procedure TAstViewer_OutputParseTree(Self: PAstViewer; Path: String);
 
 Procedure TAstViewer_DoOuputNode(Self: PAstViewer; ParseTree: PParseTree; Parent: TSize);
 
-Procedure TAstViewer_WriteLn(Self: PAstViewer; Content: PChar);
+Procedure TAstViewer_WriteLn(Self: PAstViewer; Content: PTChar);
 
 Procedure TAstViewer_Indent(Self: PAstViewer);
 
@@ -87,9 +87,9 @@ Begin
   Self^.As_IAstVisitor^.Instance := Self;
   Self^.As_IAstVisitor^.Methods := @mTAstViewer_Methods;
 
-  { TODO: Merge with PChar Error fields in the parent class. }
+  { TODO: Merge with PTChar Error fields in the parent class. }
   Self^.Error := False;
-  Self^.ErrorMessages := TStack_Create(SizeOf(PChar), nil);
+  Self^.ErrorMessages := TStack_Create(SizeOf(PTChar), nil);
 End;
 
 Procedure TAstViewer_Destroy(Const Self: PParser);
@@ -97,7 +97,7 @@ Var
   mSelf: PAstViewer;
   I: TSize;
   mToken: PToken;
-  mErrMsg: PPChar;
+  mErrMsg: PPTChar;
 Begin
   mSelf := PAstViewer(Self);
   For I := 0 To Self^.FTokenList^.Size - 1 Do
@@ -105,12 +105,12 @@ Begin
     mToken := PToken(TList_Get(Self^.FTokenList, I));
     Dispose(PSize(mToken^.Kind));
   End;
-  { TODO: Merge with PChar Error fields in the parent class. }
+  { TODO: Merge with PTChar Error fields in the parent class. }
   While Not TStack_Empty(mSelf^.ErrorMessages) Do
   Begin
     mErrMsg := TStack_Pop(mSelf^.ErrorMessages);
     FreeStr(mErrMsg^);
-    FreeMem(mErrMsg, SizeOf(PPChar));
+    FreeMem(mErrMsg, SizeOf(PPTChar));
   End;
   TStack_Destroy(mSelf^.ErrorMessages);
   Dispose(mSelf^.As_IAstVisitor);
@@ -137,8 +137,8 @@ Var
   mSelf: PAstViewer;
   mTermNode: PParseTree;
   mCurrToken: PToken;
-  mErrMsg: PChar;
-  S1, S2, S3: PChar;
+  mErrMsg: PTChar;
+  S1, S2, S3: AnsiString;
 Begin
   mNode := PTermNode(Node);
   mSelf := PAstViewer(Intf^.Instance);
@@ -149,8 +149,8 @@ Begin
     New(mTermNode);
     mTermNode^.RuleId := 0;
     mCurrToken := TParser_GetCurrentToken(PParser(mSelf));
-    mTermNode^.Token.Error := StrNew(mCurrToken^.Error);
-    mTermNode^.Token.Value := StrNew(mCurrToken^.Value);
+    mTermNode^.Token.Error := TCharStrNew(mCurrToken^.Error);
+    mTermNode^.Token.Value := TCharStrNew(mCurrToken^.Value);
     PTermRule(mTermNode^.Token.Kind) := TTermRule_Make(PTermRule(mCurrToken^.Kind)^);
     mTermNode^.Token.StartPos := mCurrToken^.StartPos;
     mTermNode^.Children := nil;
@@ -166,13 +166,13 @@ Begin
     S1 := 'Expecting term `';
     S2 := '`, but `';
     S3 := '` was found.';
-    mErrMsg := CreateStr(StrLen(S1) + StrLen(mNode^.Token.Value) +
-      StrLen(S2) + StrLen(mCurrToken^.Value) + StrLen(S3));
-    strcat(mErrMsg, S1);
-    strcat(mErrMsg, mNode^.Token.Value);
-    strcat(mErrMsg, S2);
-    strcat(mErrMsg, mCurrToken^.Value);
-    strcat(mErrMsg, S3);
+    mErrMsg := CreateStr(Length(S1) + TCharStrLen(mNode^.Token.Value) +
+      Length(S2) + TCharStrLen(mCurrToken^.Value) + Length(S3));
+    TCharStrCat(mErrMsg, S1);
+    TCharStrCat(mErrMsg, mNode^.Token.Value);
+    TCharStrCat(mErrMsg, S2);
+    TCharStrCat(mErrMsg, mCurrToken^.Value);
+    TCharStrCat(mErrMsg, S3);
     TStack_Push(mSelf^.ErrorMessages, @mErrMsg);
   End;
 End;
@@ -413,8 +413,8 @@ Begin
   TList_PushBack(mOrig^.Children, @mCurr);
   mSelf^.FCurrentParseTreeNode := mCurr;
   mSelf^.FCurrentParseTreeNode^.RuleId := mNode^.Id;
-  mSelf^.FCurrentParseTreeNode^.Token.Error := strnew('');
-  mSelf^.FCurrentParseTreeNode^.Token.Value := strnew('');
+  mSelf^.FCurrentParseTreeNode^.Token.Error := TCharStrNew('');
+  mSelf^.FCurrentParseTreeNode^.Token.Value := TCharStrNew('');
   PTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := TTermRule_Make(0);
   mSelf^.FCurrentParseTreeNode^.Children := TList_Create(SizeOf(PParseTree), 1);
   If mNode^.Expr <> nil Then
@@ -464,8 +464,8 @@ Begin
   New(mSelf^.FParseTree);
   mSelf^.FCurrentParseTreeNode := mSelf^.FParseTree;
   mSelf^.FCurrentParseTreeNode^.RuleId := 1; {***}
-  mSelf^.FCurrentParseTreeNode^.Token.Error := strnew('');
-  mSelf^.FCurrentParseTreeNode^.Token.Value := strnew('');
+  mSelf^.FCurrentParseTreeNode^.Token.Error := TCharStrNew('');
+  mSelf^.FCurrentParseTreeNode^.Token.Value := TCharStrNew('');
   PTermRule(mSelf^.FCurrentParseTreeNode^.Token.Kind) := TTermRule_Make(0);
   mSelf^.FCurrentParseTreeNode^.Children := TList_Create(SizeOf(PParseTree), 1);
   mItem := PPAstNode(TList_Get(mNode^.Rules, 0))^;
@@ -497,16 +497,16 @@ End;
 Procedure TAstViewer_PrintParseTree(Self: PAstViewer; ParseTree: PParseTree);
 Var
   I: TSize;
-  mLine: PChar;
+  mLine: PTChar;
 Begin
   If ParseTree^.RuleId = 0 Then
   Begin
-    mLine := strnew(TGrammarNode_GetTermRuleName(Self^.FGrammar,
+    mLine := TCharStrNew(TGrammarNode_GetTermRuleName(Self^.FGrammar,
       PTermRule(ParseTree^.Token.Kind)^));
-    mLine := ReallocStr(mLine, StrLen(mLine) + StrLen(PChar(': ')) +
-      StrLen(ParseTree^.Token.Value));
-    strcat(mLine, ': ');
-    strcat(mLine, ParseTree^.Token.Value);
+    mLine := ReallocStr(mLine, TCharStrLen(mLine) + Length(': ') +
+      TCharStrLen(ParseTree^.Token.Value));
+    TCharStrCat(mLine, ': ');
+    TCharStrCat(mLine, ParseTree^.Token.Value);
     TAstViewer_WriteLn(Self, mLine);
     FreeStr(mLine);
   End
@@ -530,7 +530,8 @@ Procedure TAstViewer_OutputParseTree(Self: PAstViewer; Path: String);
 Var
   mFile: PStream;
   I: TSize;
-  mName: PChar;
+  mName: PTChar;
+  mDummy: TSize;
 Begin
   TBinaryFileStream_Create(PBinaryFileStream(Self^.FTreeFile), Path + 'ast.xt');
   TBinaryFileStream_Create(PBinaryFileStream(Self^.FStrFile), Path + 'ast.xs');
@@ -538,8 +539,8 @@ Begin
   TBinaryFileStream_Create(PBinaryFileStream(mFile), Path + 'ast.xnr');
   For I := 0 To Pred(Self^.FGrammar^.NonTermRuleNames^.Size) Do
   Begin
-    mName := PChar(TList_Get(Self^.FGrammar^.NonTermRuleNames, I)^);
-    TBinaryFileStream_Write(mFile, mName^, Succ(StrLen(mName)) * SizeOf(Char));
+    mName := PTChar(TList_Get(Self^.FGrammar^.NonTermRuleNames, I)^);
+    TBinaryFileStream_Write(mFile, mName^.Bytes[0], Succ(TCharStrLen(mName)), mDummy);
   End;
   mFile^.VMT^.Destroy(mFile);
   Dispose(mFile);
@@ -547,8 +548,8 @@ Begin
   TBinaryFileStream_Create(PBinaryFileStream(mFile), Path + 'ast.xtr');
   For I := 0 To Pred(Self^.FGrammar^.TermRuleNames^.Size) Do
   Begin
-    mName := PChar(TList_Get(Self^.FGrammar^.TermRuleNames, I)^);
-    TBinaryFileStream_Write(mFile, mName^, Succ(StrLen(mName)) * SizeOf(Char));
+    mName := PTChar(TList_Get(Self^.FGrammar^.TermRuleNames, I)^);
+    TBinaryFileStream_Write(mFile, mName^.Bytes[0], Succ(TCharStrLen(mName)), mDummy);
   End;
   mFile^.VMT^.Destroy(mFile);
   Dispose(mFile);
@@ -569,22 +570,23 @@ Var
   mStrLength: TSize;
   mStrSize: TSize;
   I: TSize;
+  mDummy: TSize;
 Begin
-  TBinaryFileStream_Write(Self^.FTreeFile, Parent, SizeOf(TSize));
-  TBinaryFileStream_Write(Self^.FTreeFile, ParseTree^.RuleId, SizeOf(TNonTermRuleId));
+  TBinaryFileStream_Write(Self^.FTreeFile, Parent, SizeOf(TSize), mDummy);
+  TBinaryFileStream_Write(Self^.FTreeFile, ParseTree^.RuleId, SizeOf(TNonTermRuleId), mDummy);
   TBinaryFileStream_Write(Self^.FTreeFile, PTermRule(ParseTree^.Token.Kind)^,
-    SizeOf(TTermRule));
-  TBinaryFileStream_Write(Self^.FTreeFile, ParseTree^.Token.StartPos, SizeOf(TSize));
-  TBinaryFileStream_Write(Self^.FTreeFile, Self^.FStrOffset, SizeOf(TSize));
+    SizeOf(TTermRule), mDummy);
+  TBinaryFileStream_Write(Self^.FTreeFile, ParseTree^.Token.StartPos, SizeOf(TSize), mDummy);
+  TBinaryFileStream_Write(Self^.FTreeFile, Self^.FStrOffset, SizeOf(TSize), mDummy);
 {
   Writeln('Parent=', Parent, ', ParseTree^.RuleId=', ParseTree^.RuleId,
     ', PTermRule(ParseTree^.Token.Kind)^=', PTermRule(ParseTree^.Token.Kind)^,
     ', ParseTree^.Token.StartPos=', ParseTree^.Token.StartPos,
     ', Self^.FStrOffset=', Self^.FStrOffset);
 }
-  mStrLength := StrLen(ParseTree^.Token.Value);
-  mStrSize := SizeOf(Char) * mStrLength;
-  TBinaryFileStream_Write(Self^.FStrFile, ParseTree^.Token.Value^, mStrSize);
+  mStrLength := TCharStrLen(ParseTree^.Token.Value);
+  mStrSize := SizeOf(TChar) * mStrLength;
+  TBinaryFileStream_Write(Self^.FStrFile, ParseTree^.Token.Value^.Bytes[0], mStrSize, mDummy);
   Inc(Self^.FStrOffset, mStrLength);
 
   Parent := Self^.FTreeOffset;
@@ -600,7 +602,7 @@ Begin
   End;
 End;
 
-Procedure TAstViewer_WriteLn(Self: PAstViewer; Content: PChar);
+Procedure TAstViewer_WriteLn(Self: PAstViewer; Content: PTChar);
 Var
   I: TSize;
 Begin
@@ -611,7 +613,7 @@ Begin
       Write('  ');
     End;
   End;
-  Writeln(Content);
+  Writeln(PAnsiChar(Content));
 End;
 
 Procedure TAstViewer_Indent(Self: PAstViewer);

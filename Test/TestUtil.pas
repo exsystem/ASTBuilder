@@ -5,9 +5,10 @@ Unit TestUtil;
 Interface
 
 Uses
-  {$IFDEF VINTAGE}WinCrt, {$ENDIF} Lexer, GLexer, Stream;
+  {$IFDEF VINTAGE}WinCrt, {$ENDIF} Lexer, GLexer, Stream, TypeDef;
 
-Function PropmtForFile(Prompt: PChar; DefaultFilePath: PChar): PStream;
+Function PropmtForFile(Prompt: PTChar; DefaultFilePath: PTChar): PStream; Overload;
+Function PropmtForFile(Const Prompt, DefaultFilePath: AnsiString): PStream; Overload;
 Function GetGrammarLexer(Grammar: PStream): PGrammarLexer;
 
 Implementation
@@ -18,17 +19,17 @@ Uses
   QMrkRule, PlusRule, TildRule, RParRule, LBrkRule,
   RBrkRule, LCBRule, RCBRule, CharRule, ChStRule, StrRule, DotRule,
   DDtsRule, EquRule, SemiRule, SkipRule, OptRule, MODERULE, ARRWRULE,
-  PPMDRULE, PUMDRULE, COMARULE, SysUtils;
+  PPMDRULE, PUMDRULE, COMARULE,   SysUtils, StrUtil;
 
-Function PropmtForFile(Prompt: PChar; DefaultFilePath: PChar): PStream;
+Function PropmtForFile(Prompt: PTChar; DefaultFilePath: PTChar): PStream;
 Var
   mFilePath: String;
 Begin
-  WriteLn(Prompt);
+  WriteLn(TCharStrToAnsiString(Prompt));
   ReadLn(mFilePath);
   If mFilePath = '' Then
   Begin
-    mFilePath := StrPas(DefaultFilePath);
+    mFilePath := TCharStrToAnsiString(DefaultFilePath);
   End;
   {$IFDEF DCC}
   {$IFDEF CLASSIC}
@@ -41,6 +42,17 @@ Begin
   mFilePath := 'Test/TestCase/' + mFilePath;
   {$ENDIF}
   TFileStream_Create(PFileStream(Result), mFilePath);
+End;
+
+Function PropmtForFile(Const Prompt, DefaultFilePath: AnsiString): PStream;
+Var
+  mPrompt, mDefaultFilePath: PTChar;
+Begin
+  mPrompt := TCharStrNew(Prompt);
+  mDefaultFilePath := TCharStrNew(DefaultFilePath);
+  Result := PropmtForFile(mPrompt, mDefaultFilePath);
+  FreeStr(mPrompt);
+  FreeStr(mDefaultFilePath);
 End;
 
 Function GetGrammarLexer(Grammar: PStream): PGrammarLexer;

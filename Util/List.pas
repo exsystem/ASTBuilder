@@ -12,7 +12,7 @@ Type
 
   TList = Record
     FElemSize: TSize;
-    FList: {$IFDEF VINTAGE}PChar{$ELSE}PByte{$ENDIF};
+    FList: {$IFDEF VINTAGE}PTChar{$ELSE}PByte{$ENDIF};
     FCapacity: TSize;
     Size: TSize;
   End;

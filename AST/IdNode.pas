@@ -5,17 +5,17 @@ Unit IdNode;
 Interface
 
 Uses
-  ASTNode;
+  ASTNode, TypeDef;
 
 Type
   PIdNode = ^TIdNode;
 
   TIdNode = Record
     Parent: TAstNode;
-    Value: PChar;
+    Value: PTChar;
   End;
 
-Procedure TIdNode_Create(Var Self: PIdNode; Value: PChar);
+Procedure TIdNode_Create(Var Self: PIdNode; Value: PTChar);
 
 Procedure TIdNode_Destroy(Self: PAstNode);
 
@@ -29,13 +29,13 @@ Implementation
 Uses
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil;
 
-Procedure TIdNode_Create(Var Self: PIdNode; Value: PChar);
+Procedure TIdNode_Create(Var Self: PIdNode; Value: PTChar);
 Begin
   New(Self);
   TAstNode_Create(PAstNode(Self));
   Self^.Parent.VMT := @mTIdNode_AST;
 
-  Self^.Value := strnew(Value);
+  Self^.Value := TCharStrNew(Value);
 End;
 
 Procedure TIdNode_Destroy(Self: PAstNode);

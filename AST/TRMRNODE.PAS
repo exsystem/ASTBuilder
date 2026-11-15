@@ -16,7 +16,7 @@ Type
 
   TCommand = Record
     CommandType: TCommandType;
-    Arg: PChar;
+    Arg: PTChar;
   End;
 
   PPTermRuleNode = ^PTermRuleNode;
@@ -37,7 +37,7 @@ Procedure TTermRuleNode_Accept(Self: PAstNode; Visitor: PAstVisitor);
 
 Procedure TTermRuleNode_AddSkipCommand(Self: PTermRuleNode);
 
-Procedure TTermRuleNode_AddPushModeCommand(Self: PTermRuleNode; Mode: PChar);
+Procedure TTermRuleNode_AddPushModeCommand(Self: PTermRuleNode; Mode: PTChar);
 
 Procedure TTermRuleNode_AddPopModeCommand(Self: PTermRuleNode);
 Var
@@ -98,13 +98,13 @@ Begin
   mCommand^.Arg := nil;
 End;
 
-Procedure TTermRuleNode_AddPushModeCommand(Self: PTermRuleNode; Mode: PChar);
+Procedure TTermRuleNode_AddPushModeCommand(Self: PTermRuleNode; Mode: PTChar);
 Var
   mCommand: PCommand;
 Begin
   mCommand := PCommand(TList_EmplaceBack(Self^.CommandList));
   mCommand^.CommandType := ePushModeCommand;
-  mCommand^.Arg := StrNew(Mode);
+  mCommand^.Arg := TCharStrNew(Mode);
 End;
 
 Procedure TTermRuleNode_AddPopModeCommand(Self: PTermRuleNode);

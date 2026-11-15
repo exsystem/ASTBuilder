@@ -24,13 +24,13 @@ Uses
   TypeDef, IdNode, TrmNode, GrpNode,
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
 
-{ individualCharFactor -> Char DoubleDots Char }
+{ individualCharFactor -> TChar DoubleDots TChar }
 Function IndividualCharFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS1: TSize;
-  mFrom, mTo: PChar;
-  mCh: Char;
-  mChStr: PChar;
+  mFrom, mTo: PTChar;
+  mCh: Byte;
+  mChStr: PTChar;
 Label
   S1, S2, S3, S4;
 Begin
@@ -38,7 +38,7 @@ Begin
     mSavePointS1 := Parser^.FCurrentToken;
   If TGrammarParser_Term(Parser, eChar) Then
   Begin
-    mFrom := strnew(TParser_GetCurrentToken(Parser)^.Value);
+    mFrom := TCharStrNew(TParser_GetCurrentToken(Parser)^.Value);
   End
   Else
   Begin
@@ -59,7 +59,7 @@ Begin
   S3:
     If TGrammarParser_Term(Parser, eChar) Then
     Begin
-      mTo := strnew(TParser_GetCurrentToken(Parser)^.Value);
+      mTo := TCharStrNew(TParser_GetCurrentToken(Parser)^.Value);
     End
     Else
     Begin
@@ -69,28 +69,28 @@ Begin
       Exit;
     End;
   S4:
-    If mFrom[1] = '\' Then
+    If PByte(mFrom)[1] = Ord('\') Then
     Begin
-      mFrom[0] := EscapeChar(mFrom[2]);
+      PByte(mFrom)[0] := EscapeChar(PByte(mFrom)[2]);
     End
     Else
     Begin
-      mFrom[0] := mFrom[1];
+      PByte(mFrom)[0] := PByte(mFrom)[1];
     End;
-  If mTo[1] = '\' Then
+  If PByte(mTo)[1] = Ord('\') Then
   Begin
-    mTo[0] := EscapeChar(mTo[2]);
+    PByte(mTo)[0] := EscapeChar(PByte(mTo)[2]);
   End
   Else
   Begin
-    mTo[0] := mTo[1];
+    PByte(mTo)[0] := PByte(mTo)[1];
   End;
   TNfa_Create(Nfa);
   mChStr := CreateStr(1);
-  mChStr[1] := #0;
-  For mCh := mFrom[0] To mTo[0] Do
+  PByte(mChStr)[1] := 0;
+  For mCh := PByte(mFrom)^ To PByte(mTo)^ Do
   Begin
-    mChStr[0] := mCh;
+    PByte(mChStr)^ := mCh;
     TNfa_AddEdge(Nfa, mChStr, 0, 1);
   End;
   FreeStr(mChStr);
@@ -100,13 +100,13 @@ Begin
   Result := True;
 End;
 
-{ individualCharFactor -> Char }
+{ individualCharFactor -> TChar }
 Function IndividualCharFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 Label
   S1, S2;
 Var
-  mCh: PChar;
-  mValue: PChar;
+  mCh: PTChar;
+  mValue: PTChar;
 Begin
   S1:
     If TGrammarParser_Term(Parser, eChar) Then
@@ -122,15 +122,15 @@ Begin
     mValue := TParser_GetCurrentToken(Parser)^.Value;
   TNfa_Create(Nfa);
   mCh := CreateStr(1);
-  If mValue[1] = '\' Then
+  If PByte(mValue)[1] = Ord('\') Then
   Begin
-    mCh[0] := EscapeChar(mValue[2]);
+    PByte(mCh)[0] := EscapeChar(PByte(mValue)[2]);
   End
   Else
   Begin
-    mCh[0] := mValue[1];
+    PByte(mCh)[0] := PByte(mValue)[1];
   End;
-  mCh[1] := #0;
+  PByte(mCh)[1] := 0;
   TNfa_AddEdge(Nfa, mCh, 0, 1);
   FreeStr(mCh);
   TNfa_GetState(Nfa, 1)^.Acceptable := True;
@@ -142,42 +142,42 @@ Function IndividualCharFactorRuleExpression3(Parser: PParser; Var Nfa: PNfa): Bo
 Label
   S1;
 Var
-  mTerm: PChar;
-  mChList: PChar;
-  mSourceStart: PChar;
-  mDestStart: PChar;
+  mTerm: PTChar;
+  mChList: PTChar;
+  mSourceStart: PTChar;
+  mDestStart: PTChar;
   mLength: TSize;
-  mCurr: PChar;
+  mCurr: PTChar;
   mRangeMode: Boolean;
-  mCh: PChar;
+  mCh: PTChar;
 Begin
   S1:
     If TGrammarParser_Term(Parser, eCharSet) Then
     Begin
       mTerm := TParser_GetCurrentToken(Parser)^.Value;
-      mCurr := SubStr(mTerm, 1, StrLen(mTerm) - 2);
-      mChList := CreateStr(StrLen(mCurr));
+      mCurr := SubStr(mTerm, 1, TCharStrLen(mTerm) - 2);
+      mChList := CreateStr(TCharStrLen(mCurr));
       mSourceStart := mCurr;
       mDestStart := mChList;
       mLength := 0;
       mCh := mCurr;
-      While mCh^ <> #0 Do
+      While PByte(mCh)^ <> 0 Do
       Begin
-        If mCh^ = '\' Then
+        If PByte(mCh)^ = Ord('\') Then
         Begin
-          Move(mSourceStart^, mDestStart^, mLength * SizeOf(Char));
+          Move(mSourceStart^, mDestStart^, mLength * SizeOf(TChar));
           Inc(mDestStart, mLength);
           Inc(mCh);
-          mCh^ := EscapeChar(mCh^);
+          PByte(mCh)^ := EscapeChar(PByte(mCh)^);
           mSourceStart := mCh;
           mLength := 0;
         End;
         Inc(mLength);
         Inc(mCh);
       End;
-      Move(mSourceStart^, mDestStart^, mLength * SizeOf(Char));
+      Move(mSourceStart^, mDestStart^, mLength * SizeOf(TChar));
       Inc(mDestStart, mLength);
-      mDestStart^ := #0;
+      PByte(mDestStart)^ := 0;
       FreeStr(mCurr);
 
       mSourceStart := mChList;
@@ -185,9 +185,9 @@ Begin
       mRangeMode := False;
       TNfa_Create(Nfa);
       mCh := CreateStr(1);
-      mCh[1] := #0;
+      PByte(mCh)[1] := 0;
       Repeat
-        If mCurr^ = '-' Then
+        If PByte(mCurr)^ = Ord('-') Then
         Begin
           mRangeMode := True;
         End
@@ -195,19 +195,19 @@ Begin
         Begin
           If mRangeMode Then
           Begin
-            mCh[0] := mSourceStart^;
-            Inc(mCh[0]);
-            While mCh[0] <> mCurr^ Do
+            PByte(mCh)^ := PByte(mSourceStart)^;
+            Inc(PByte(mCh)^);
+            While PByte(mCh)^ <> PByte(mCurr)^ Do
             Begin
               TNfa_AddEdge(Nfa, mCh, 0, 1);
-              Inc(mCh[0]);
+              Inc(PByte(mCh)^);
             End;
             TNfa_AddEdge(Nfa, mCh, 0, 1);
             mRangeMode := False;
           End
           Else
           Begin
-            mCh[0] := mCurr^;
+            PByte(mCh)^ := PByte(mCurr)^;
             TNfa_AddEdge(Nfa, mCh, 0, 1);
             mSourceStart := mCurr;
           End;
@@ -217,7 +217,7 @@ Begin
       Until mCurr = mDestStart;
 
       FreeStr(mCh);
-      mDestStart^ := '.';
+      PByte(mDestStart)^ := Ord('.');
       FreeStr(mChList);
       TNfa_GetState(Nfa, 1)^.Acceptable := True;
       Result := True;

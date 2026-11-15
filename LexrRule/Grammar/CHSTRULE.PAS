@@ -20,12 +20,12 @@ Uses
 Function Parse(Lexer: PLexer): Boolean;
 Var
   mOffset: TSize;
-  mCurr: Char;
+  mCurr: PTChar;
 Label
   S1, S2, S3;
 Begin
   S1:
-    If TLexer_PeekNextChar(Lexer) = '[' Then
+    If TLexer_PeekNextChar(Lexer)^.Bytes[0] = Ord('[') Then
     Begin
       TLexer_Forward(Lexer, 1);
       mOffset := 1;
@@ -37,26 +37,26 @@ Begin
     End;
   S2:
     mCurr := TLexer_PeekNextChar(Lexer);
-  If mCurr = #0 Then
+  If mCurr^.Bytes[0] = 0 Then
   Begin
     TLexer_Retract(Lexer, mOffset);
     Result := False;
     Exit;
   End;
-  If mCurr = '\' Then
+  If mCurr^.Bytes[0] = Ord('\') Then
   Begin
     TLexer_Forward(Lexer, 2);
     Inc(mOffset, 2);
     Goto S2;
   End
   Else
-  If mCurr = '[' Then
+  If mCurr^.Bytes[0] = Ord('[') Then
   Begin
     TLexer_Retract(Lexer, mOffset);
     Result := False;
     Exit;
   End
-  Else If mCurr = ']' Then
+  Else If mCurr^.Bytes[0] = Ord(']') Then
   Begin
     TLexer_Forward(Lexer, 1);
     Inc(mOffset);

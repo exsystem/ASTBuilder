@@ -14,13 +14,13 @@ Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  IdNode, GrpNode, TrmRNode, GRMRNODE, TERUnit, ASRUNIT, NFA,
+  IdNode, GrpNode, TrmRNode, GRMRNODE, TERUnit, ASRUNIT, NFA, TypeDef,
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
 
 { termRule -> term Colon termExpr (Arrow actions)? Semi }
 Function TermRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
-  mName: PChar;
+  mName: PTChar;
   mNfa: PNfa;
 Label
   S1, S2, S3;
@@ -28,7 +28,7 @@ Begin
   S1:
     If TGrammarParser_Term(Parser, eTerm) Then
     Begin
-      mName := strnew(TParser_GetCurrentToken(Parser)^.Value);
+      mName := TCharStrNew(TParser_GetCurrentToken(Parser)^.Value);
     End
     Else
     Begin

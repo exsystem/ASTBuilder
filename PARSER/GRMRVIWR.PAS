@@ -34,7 +34,8 @@ Procedure TAstViewer_VisitTermRule(Intf: PAstVisitor; Node: PAstNode);
 
 Procedure TAstViewer_VisitGrammar(Intf: PAstVisitor; Node: PAstNode);
 
-Procedure TAstViewer_WriteLn(Self: PAstViewer; Content: PChar);
+Procedure TAstViewer_WriteLn(Self: PAstViewer; Content: PTChar); Overload;
+Procedure TAstViewer_WriteLn(Self: PAstViewer; Const Content: AnsiString); Overload;
 
 Procedure TAstViewer_Indent(Self: PAstViewer);
 
@@ -67,12 +68,12 @@ End;
 Procedure TAstViewer_VisitId(Intf: PAstVisitor; Node: PAstNode);
 Var
   mNode: PIdNode;
-  mText: PChar;
+  mText: PTChar;
 Begin
   mNode := PIdNode(Node);
-  mText := strnew('Non-Terminal: ');
-  mText := ReallocStr(mText, strlen(mText) + strlen(mNode^.Value));
-  strcat(mText, mNode^.Value);
+  mText := TCharStrNew('Non-Terminal: ');
+  mText := ReallocStr(mText, TCharStrLen(mText) + TCharStrLen(mNode^.Value));
+  TCharStrCat(mText, mNode^.Value);
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
 End;
@@ -80,12 +81,12 @@ End;
 Procedure TAstViewer_VisitTerm(Intf: PAstVisitor; Node: PAstNode);
 Var
   mNode: PTermNode;
-  mText: PChar;
+  mText: PTChar;
 Begin
   mNode := PTermNode(Node);
-  mText := strnew('Terminal: ');
-  mText := ReallocStr(mText, StrLen(mText) + StrLen(mNode^.Token.Value));
-  strcat(mText, mNode^.Token.Value);
+  mText := TCharStrNew('Terminal: ');
+  mText := ReallocStr(mText, TCharStrLen(mText) + TCharStrLen(mNode^.Token.Value));
+  TCharStrCat(mText, mNode^.Token.Value);
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
 End;
@@ -95,9 +96,9 @@ Var
   mNode: PGroupNode;
   I: TSize;
   mItem: PAstNode;
-  mGroupType: PChar;
-  mTermsRelationship: PChar;
-  mText: PChar;
+  mGroupType: AnsiString;
+  mTermsRelationship: AnsiString;
+  mText: PTChar;
 Begin
   mNode := PGroupNode(Node);
   Case mNode^.GroupType Of
@@ -119,11 +120,11 @@ Begin
     mTermsRelationship := '';
   End;
 
-  mText := strnew(mGroupType);
-  mText := ReallocStr(mText, strlen(mGroupType) + strlen(mTermsRelationship) +
-    strlen(PChar(':')));
-  strcat(mText, mTermsRelationship);
-  strcat(mText, PChar(':'));
+  mText := TCharStrNew(mGroupType);
+  mText := ReallocStr(mText, TCharStrLen(mText) + Length(mTermsRelationship) +
+    Length(':'));
+  TCharStrCat(mText, mTermsRelationship);
+  TCharStrCat(mText, ':');
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
 
@@ -146,13 +147,13 @@ End;
 Procedure TAstViewer_VisitRule(Intf: PAstVisitor; Node: PAstNode);
 Var
   mNode: PRuleNode;
-  mText: PChar;
+  mText: PTChar;
 Begin
   mNode := PRuleNode(Node);
-  mText := PPChar(TList_Get(PAstViewer(Intf^.Instance)^.GrammarNode^.NonTermRuleNames,
+  mText := PPTChar(TList_Get(PAstViewer(Intf^.Instance)^.GrammarNode^.NonTermRuleNames,
     mNode^.Id))^;
-  mText := ReallocStr(mText, strlen(mText) + strlen(PChar(':')));
-  strcat(mText, PChar(':'));
+  mText := ReallocStr(mText, TCharStrLen(mText) + Length(':'));
+  TCharStrCat(mText, ':');
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
   TAstViewer_Indent(PAstViewer(Intf^.Instance));
@@ -173,19 +174,19 @@ Var
   mState: PNfaState;
   mEdge: PNfaEdge;
   I, J: TSize;
-  mFromState: String;
-  mText: PChar;
-  mStr: String;
-  mStrPChar: PChar;
+  mFromState: AnsiString;
+  mText: PTChar;
+  mStr: AnsiString;
+  mStrPChar: PTChar;
   mCommand: PCommand;
-  mName: PChar;
+  mName: PTChar;
 Begin
   mNode := PTermRuleNode(Node);
-  mName := PPChar(TList_Get(PAstViewer(Intf^.Instance)^.GrammarNode^.TermRuleNames,
+  mName := PPTChar(TList_Get(PAstViewer(Intf^.Instance)^.GrammarNode^.TermRuleNames,
     mNode^.TermRuleId))^;
-  mText := CreateStr(strlen(mName) + 1);
-  strcat(mText, mName);
-  strcat(mText, ':');
+  mText := CreateStr(TCharStrLen(mName) + Length(':'));
+  TCharStrCat(mText, mName);
+  TCharStrCat(mText, ':');
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
   TAstViewer_Indent(PAstViewer(Intf^.Instance));
@@ -218,16 +219,15 @@ Begin
       End;
     End;
     mStr := IntToStr(mNode^.Nfa^.StartState);
-    mStrPChar := CreateStr(Length(mStr));
-    StrPCopy(mStrPChar, mStr);
-    mText := CreateStr(strlen(PChar('Keyword: ')) + strlen(mNode^.Nfa^.Keyword));
-    strcat(mText, 'Keyword: ');
-    strcat(mText, mNode^.Nfa^.Keyword);
+    mStrPChar := TCharStrNew(mStr);
+    mText := CreateStr(Length('Keyword: ') + TCharStrLen(mNode^.Nfa^.Keyword));
+    TCharStrCat(mText, 'Keyword: ');
+    TCharStrCat(mText, mNode^.Nfa^.Keyword);
     TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
     FreeStr(mText);
-    mText := CreateStr(strlen(PChar('Start state: ')) + StrLen(mStrPChar));
-    strcat(mText, 'Start state: ');
-    strcat(mText, mStrPChar);
+    mText := CreateStr(Length('Start state: ') + TCharStrLen(mStrPChar));
+    TCharStrCat(mText, 'Start state: ');
+    TCharStrCat(mText, mStrPChar);
     FreeStr(mStrPChar);
     TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
     FreeStr(mText);
@@ -252,25 +252,27 @@ Begin
         For J := 0 To mState^.Edges^.Size - 1 Do
         Begin
           mEdge := PNfaEdge(TList_Get(mState^.Edges, J));
-          mStr := StrPas(mEdge^.Value);
+          mStr := TCharStrToAnsiString(mEdge^.Value);
           If mStr = '' Then
           Begin
             mStr := mFromState + ' -->| |' + IntToStr(mEdge^.ToState) + ';' + #0;
           End
           Else
           Begin
-            mStr := mFromState + ' -->|' + StrPas(mEdge^.Value) +
+            mStr := mFromState + ' -->|' + TCharStrToAnsiString(mEdge^.Value) +
               ' |' + IntToStr(mEdge^.ToState) + ';' + #0;
           End;
-          mText := @mStr[1];
+          mText := TCharStrNew(mStr);
           TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
+          FreeStr(mText);
         End;
       End
       Else
       Begin
         mStr := mFromState + ';' + #0;
-        mText := @mStr[1];
+        mText := TCharStrNew(mStr);
         TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
+        FreeStr(mText);
       End;
       TAstViewer_Deindent(PAstViewer(Intf^.Instance));
     End;
@@ -287,9 +289,9 @@ Var
   mItem: PAstNode;
   mIterator, mEndIterator: PTrieIterator;
   mList: PList;
-  mText: PChar;
-  mStr: String;
-  mMode: PChar;
+  mText: PTChar;
+  mStr: AnsiString;
+  mMode: PTChar;
 Begin
   mNode := PGrammarNode(Node);
   PAstViewer(Intf^.Instance)^.GrammarNode := mNode;
@@ -323,14 +325,15 @@ Begin
   While Not CompareMem(@(mIterator^.FCurrent), @(mEndIterator^.FCurrent),
       SizeOf(TSuffixNodePair)) Do
   Begin
-    GetMem(mMode, mIterator^.FCurrent.SuffixSize + SizeOf(Char));
+    GetMem(mMode, mIterator^.FCurrent.SuffixSize + SizeOf(TChar));
     Move(mIterator^.FCurrent.Suffix^, mMode^, mIterator^.FCurrent.SuffixSize);
-    mMode[mIterator^.FCurrent.SuffixSize] := #0;
-    mStr := StrPas(mMode);
-    FreeMem(mMode, mIterator^.FCurrent.SuffixSize + SizeOf(Char));
+    PByte(mMode)[mIterator^.FCurrent.SuffixSize] := 0;
+    mStr := TCharStrToAnsiString(mMode);
+    FreeMem(mMode, mIterator^.FCurrent.SuffixSize + SizeOf(TChar));
     mStr := 'Mode [' + mStr + ']';
-    mText := @mStr[1];
+    mText := TCharStrNew(mStr);
     TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
+    FreeStr(mText);
     TAstViewer_Indent(PAstViewer(Intf^.Instance));
     mList := PList(mIterator^.FCurrent.Node^.Data^);
     If mList^.Size <> 0 Then
@@ -350,7 +353,7 @@ Begin
   Dispose(mIterator);
 End;
 
-Procedure TAstViewer_WriteLn(Self: PAstViewer; Content: PChar);
+Procedure TAstViewer_WriteLn(Self: PAstViewer; Content: PTChar);
 Var
   I: TSize;
 Begin
@@ -361,7 +364,16 @@ Begin
       Write('  ');
     End;
   End;
-  Writeln(Content);
+  Writeln(TCharStrToAnsiString(Content));
+End;
+
+Procedure TAstViewer_WriteLn(Self: PAstViewer; Const Content: AnsiString);
+Var
+  mText: PTChar;
+Begin
+  mText := TCharStrNew(Content);
+  TAstViewer_WriteLn(Self, mText);
+  FreeStr(mText);
 End;
 
 Procedure TAstViewer_Indent(Self: PAstViewer);

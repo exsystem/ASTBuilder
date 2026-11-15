@@ -5,11 +5,11 @@ When using a grammar file, ASTBuilder may use a corresponding plugin dynamic lib
 ## PlugIn Interface
 
 ```pascal
-  TRegisterTermRule = Procedure(Name: PChar);
-  TGetMode = Function: PChar;
-  TGetTokenKind = Function: PChar;
-  TGetTokenValue = Function: PChar;
-  TInsertToken = Procedure(Kind: PChar; Value: PChar);
+  TRegisterTermRule = Procedure(Name: PTChar);
+  TGetMode = Function: PTChar;
+  TGetTokenKind = Function: PTChar;
+  TGetTokenValue = Function: PTChar;
+  TInsertToken = Procedure(Kind: PTChar; Value: PTChar);
   TPopMode = Procedure;
 
   PContext = ^TContext;

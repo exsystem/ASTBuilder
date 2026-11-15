@@ -35,8 +35,8 @@ Begin
   New(Self);
   TAstNode_Create(PAstNode(Self));
   Self^.Parent.VMT := @mTTermNode_AST;
-  Self^.Token.Error := strnew('');
-  Self^.Token.Value := strnew('');
+  Self^.Token.Error := TCharStrNew('');
+  Self^.Token.Value := TCharStrNew('');
   PTermRule(Self^.Token.Kind) := TTermRule_Make(0);
 End;
 

@@ -81,6 +81,7 @@ Var
   mKeyword: PGrammarTokenKind;
   mSelf: PGrammarLexer;
   mTokenKind: PGrammarTokenKind;
+  mChar: PTChar;
 Begin
   mTokenKind := PGrammarTokenKind(Self^.CurrentToken.Kind);
   If mTokenKind^ = eEof Then
@@ -88,9 +89,11 @@ Begin
     Result := False;
     Exit;
   End;
-  While IsSpace(TLexer_PeekNextChar(Self)) Do
+  mChar := TLexer_PeekNextChar(Self);
+  While IsSpace(mChar^.Bytes[0]) Do
   Begin
     TLexer_Forward(Self, 1);
+    mChar := TLexer_PeekNextChar(Self);
   End;
 
   mSelf := PGrammarLexer(Self);
@@ -99,10 +102,10 @@ Begin
   Begin
     mRule := PLexerRule(TList_Get(mSelf^.RuleList, I));
     FreeStr(Self^.CurrentToken.Error);
-    Self^.CurrentToken.Error := strnew('');
+    Self^.CurrentToken.Error := TCharStrNew('');
     If mRule^.Parser(Self) Then
     Begin
-      Result := (strcomp(Self^.CurrentToken.Error, '') = 0);
+      Result := (TCharStrComp(Self^.CurrentToken.Error, '') = 0);
       If Result Then
       Begin
         mKeyword := PGrammarTokenKind(TTrie_Get(mSelf^.Keywords,
@@ -126,14 +129,16 @@ Begin
 
   Self^.CurrentToken.StartPos := Self^.FStream^.VMT^.GetPosition(Self^.FStream);
   I := 0;
-  While (Not IsSpace(TLexer_PeekNextChar(Self))) And (TLexer_PeekNextChar(Self) <> #0) Do
+  mChar := TLexer_PeekNextChar(Self);
+  While (Not IsSpace(mChar^.Bytes[0])) And (mChar^.Bytes[0] <> 0) Do
   Begin
     TLexer_Forward(Self, 1);
     Inc(I);
+    mChar := TLexer_PeekNextChar(Self);
   End;
   mTokenKind^ := eUndefined;
   FreeStr(Self^.CurrentToken.Error);
-  Self^.CurrentToken.Error := strnew('Illegal token.');
+  Self^.CurrentToken.Error := TCharStrNew('Illegal token.');
   TLexer_FetchNextToken(Self, I);
   Result := False;
 End;

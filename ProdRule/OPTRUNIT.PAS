@@ -14,21 +14,21 @@ Function OptionRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Implementation
 
 Uses
-  IdNode, GRMRNODE, TrmRNode, 
+  IdNode, GRMRNODE, TrmRNode, TypeDef,
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
 
 { optionRule -> Id Equal Id Semi }
 Function OptionRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
-  mKey: PChar;
-  mValue: PChar;
+  mKey: PTChar;
+  mValue: PTChar;
 Label
   S1, S2;
 Begin
   S1:
     If TGrammarParser_Term(Parser, eId) Then
     Begin
-      mKey := strnew(TParser_GetCurrentToken(Parser)^.Value);
+      mKey := TCharStrNew(TParser_GetCurrentToken(Parser)^.Value);
     End
     Else
     Begin
@@ -47,7 +47,7 @@ Begin
   End;
   If TGrammarParser_Term(Parser, eId) Then
   Begin
-    mValue := strnew(TParser_GetCurrentToken(Parser)^.Value);
+    mValue := TCharStrNew(TParser_GetCurrentToken(Parser)^.Value);
   End
   Else
   Begin
@@ -57,10 +57,10 @@ Begin
   End;
   If TGrammarParser_Term(Parser, eSemi) Then
   Begin
-    If StrComp(mKey, 'caseInsensitive') = 0 Then
+    If TCharStrComp(mKey, 'caseInsensitive') = 0 Then
     Begin
       PGrammarNode(Ast)^.Options[COption_CaseInsensitive].BooleanValue :=
-        (StrComp(mValue, 'true') = 0);
+        (TCharStrComp(mValue, 'true') = 0);
     End; { else if .... for other options in the future }
 
     FreeStr(mKey);

@@ -31,7 +31,7 @@ Type
     FLexer: PLexer;
     FTokenList: PList;
     FCurrentToken: TSize;
-    Error: PChar;
+    Error: PTChar;
   End;
 
 procedure TParser_Create(Var Self: PParser; Lexer: PLexer);
@@ -65,7 +65,7 @@ Begin
   Self^.FLexer := Lexer;
   Self^.FTokenList := TList_Create(SizeOf(TToken), 5);
   Self^.FCurrentToken := 0;
-  Self^.Error := strnew('');
+  Self^.Error := TCharStrNew('');
 End;
 
 Procedure TParser_Destroy(Self: PParser);
@@ -127,8 +127,8 @@ Begin
       Inc(Self^.FCurrentToken);
       mToken := TList_EmplaceBack(Self^.FTokenList); { USE EMPLACE }
       mToken^ := Self^.FLexer^.CurrentToken;
-      mToken^.Error := StrNew(Self^.FLexer^.CurrentToken.Error);
-      mToken^.Value := StrNew(Self^.FLexer^.CurrentToken.Value);
+      mToken^.Error := TCharStrNew(Self^.FLexer^.CurrentToken.Error);
+      mToken^.Value := TCharStrNew(Self^.FLexer^.CurrentToken.Value);
       mToken^.Kind := Self^.VMT^.CopyTokenKind(Self^.FLexer^.CurrentToken.Kind);
       mToken^.StartPos := Self^.FLexer^.CurrentToken.StartPos;
       (*

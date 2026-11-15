@@ -44,7 +44,7 @@ Type
 
   TFileStream = Record
     Parent: TStream;
-    FFile: File {Of Char};
+    FFile: File {Of TChar};
   End;
 
   PBinaryFileStream = ^TBinaryFileStream;
@@ -88,7 +88,7 @@ Begin
   Self^.Parent.VMT := @mTFileStream_VMT;
 
   AssignFile(Self^.FFile, Filename);
-  Reset(Self^.FFile, SizeOf(Char));
+  Reset(Self^.FFile, SizeOf(TChar));
   {$IFDEF UTF16_TEXT}
   Seek(Self^.FFile, 1);
   {$ENDIF}

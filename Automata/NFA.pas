@@ -20,7 +20,7 @@ Type
   PNfaEdge = ^TNfaEdge;
 
   TNfaEdge = Record
-    Value: PChar;
+    Value: PTChar;
     EdgeType: TNfaEdgeType;
     ToState: TSize;
   End;
@@ -54,13 +54,13 @@ Type
     FNewStates: PList; { of TNfaStateInstruction }
     FOldStates: PList; { of TNfaStateInstruction }
     FAlreadyOn: PList; { of Boolean }
-    Keyword: PChar;
+    Keyword: PTChar;
   End;
 
 Procedure TNfa_Create(Var Self: PNfa);
 Procedure TNfa_Destroy(Self: PNfa);
 Function TNfa_GetState(Self: PNfa; StateIndex: TSize): PNfaState;
-Procedure TNfa_AddEdge(Self: PNfa; Value: PChar; Source: TSize; Destination: TSize);
+Procedure TNfa_AddEdge(Self: PNfa; Value: PTChar; Source: TSize; Destination: TSize);
 Procedure TNfa_AnyChar(Self: PNfa; Source: TSize; Destination: TSize);
 Procedure TNfa_MergeChars(Self: PNfa; Nfa: PNfa);
 {
@@ -76,17 +76,17 @@ Procedure TNfa_Optional(Var Self: PNfa; Greedy: Boolean);
 Procedure TNfa_OneOrMore(Var Self: PNfa; Greedy: Boolean);
 Procedure TNfa_Not(Var Self: PNfa);
 Procedure TNfa_Reset(Var Self: PNfa);
-Function TNfa_MatchEdge(Edge: PNfaEdge; Ch: Char;
+Function TNfa_MatchEdge(Edge: PNfaEdge; Ch: PTChar;
   Const CaseInsensitive: Boolean): Boolean;
-Function TNfa_Match(Var Self: PNfa; Const Ch: Char; Const State: TSize;
+Function TNfa_Match(Var Self: PNfa; Const Ch: PTChar; Const State: TSize;
   Const CaseInsensitive: Boolean): Boolean;
-Function TNfa_Move(Var Self: PNfa; Const Ch: Char;
+Function TNfa_Move(Var Self: PNfa; Const Ch: PTChar;
   Const CaseInsensitive: Boolean): Boolean;
 Function TNfa_Accepted(Var Self: PNfa): Boolean;
 {
   SEE: <<Compilers: Principles, Techniques, and Tools (2nd Edition)>>: Chapter.3.7.2 / Page.156~158
 }
-Function TNfa_Validate(Var Self: PNfa; Input: PChar;
+Function TNfa_Validate(Var Self: PNfa; Input: PTChar;
   Const CaseInsensitive: Boolean): Boolean;
 {
   TODO: rename to TNfa_AddEpsilonClosureStates?
@@ -113,7 +113,7 @@ Begin
   mState^.Acceptable := False;
   mState^.Greedy := True;
   mState^.Edges := TList_Create(SizeOf(TNfaEdge), 1);
-  Self^.Keyword := strnew('');
+  Self^.Keyword := TCharStrNew('');
   Self^.FAlreadyOn := nil;
   Self^.FOldStates := nil;
   Self^.FNewStates := nil;
@@ -154,7 +154,7 @@ Begin
   Result := PNfaState(TList_Get(Self^.States, StateIndex));
 End;
 
-Procedure TNfa_AddEdge(Self: PNfa; Value: PChar; Source: TSize; Destination: TSize);
+Procedure TNfa_AddEdge(Self: PNfa; Value: PTChar; Source: TSize; Destination: TSize);
 Var
   mState: PNfaState;
   mEdge: PNfaEdge;
@@ -163,16 +163,16 @@ Begin
   If (Source = Self^.States^.Size - 1) And (Destination = Self^.States^.Size) And
     (mState^.Edges^.Size = 0) Then
   Begin
-    Self^.Keyword := ReallocStr(Self^.Keyword, strlen(Self^.Keyword) + strlen(Value));
-    strcat(Self^.Keyword, Value);
+    Self^.Keyword := ReallocStr(Self^.Keyword, TCharStrLen(Self^.Keyword) + TCharStrLen(Value));
+    TCharStrCat(Self^.Keyword, Value);
   End
   Else
   Begin
     FreeStr(Self^.Keyword);
-    Self^.Keyword := strnew('');
+    Self^.Keyword := TCharStrNew('');
   End;
   mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-  mEdge^.Value := strnew(Value);
+  mEdge^.Value := TCharStrNew(Value);
   mEdge^.EdgeType := TNfaEdgeType_Char;
   mEdge^.ToState := Destination;
   If Destination = Self^.States^.Size Then
@@ -190,11 +190,11 @@ Var
   mEdge: PNfaEdge;
 Begin
   FreeStr(Self^.Keyword);
-  Self^.Keyword := strnew('');
+  Self^.Keyword := TCharStrNew('');
 
   mState := PNfaState(TList_Get(Self^.States, Source));
   mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-  mEdge^.Value := strnew('');
+  mEdge^.Value := TCharStrNew('');
   mEdge^.EdgeType := TNfaEdgeType_Any;
   mEdge^.ToState := Destination;
   If Destination = Self^.States^.Size Then
@@ -220,7 +220,7 @@ Begin
     For J := 0 To mState^.Edges^.Size - 1 Do
     Begin
       mEdge := PNfaEdge(TList_Get(mState^.Edges, J));
-      If strcomp(mEdge^.Value, mNfaEdge^.Value) = 0 Then
+      If TCharStrComp(mEdge^.Value, mNfaEdge^.Value) = 0 Then
       Begin
         TNfa_Destroy(Nfa);
         Exit;
@@ -231,7 +231,7 @@ Begin
   Begin
     mNfaEdge := PNfaEdge(TList_Get(mNfaState^.Edges, I));
     mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-    mEdge^.Value := strnew(mNfaEdge^.Value);
+    mEdge^.Value := TCharStrNew(mNfaEdge^.Value);
     mEdge^.EdgeType := TNfaEdgeType_Char;
     mEdge^.ToState := 1;
   End;
@@ -259,16 +259,16 @@ Begin
   Begin
     Exit;
   End;
-  If (strcomp(Self^.Keyword, '') = 0) Or (strcomp(Nfa^.Keyword, '') = 0) Then
+  If (TCharStrComp(Self^.Keyword, '') = 0) Or (TCharStrComp(Nfa^.Keyword, '') = 0) Then
   Begin
     FreeStr(Self^.Keyword);
-    Self^.Keyword := strnew('');
+    Self^.Keyword := TCharStrNew('');
   End
   Else
   Begin
-    Self^.Keyword := ReallocStr(Self^.Keyword, strlen(Self^.Keyword) +
-      strlen(Nfa^.Keyword));
-    strcopy(Self^.Keyword, Nfa^.Keyword);
+    Self^.Keyword := ReallocStr(Self^.Keyword, TCharStrLen(Self^.Keyword) +
+      TCharStrLen(Nfa^.Keyword));
+    TCharStrCopy(Self^.Keyword, Nfa^.Keyword);
   End;
   FreeStr(Nfa^.Keyword);
   For I := 0 To Self^.States^.Size - 1 Do
@@ -277,7 +277,7 @@ Begin
     If mState^.Acceptable Then
     Begin
       mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-      mEdge^.Value := strnew('');
+      mEdge^.Value := TCharStrNew('');
       mEdge^.EdgeType := TNfaEdgeType_Char;
       mEdge^.ToState := Nfa^.StartState + Self^.States^.Size;
       mState^.Acceptable := False;
@@ -313,16 +313,16 @@ Var
   mState: PNfaState;
   mEdge: PNfaEdge;
 Begin
-  If (strcomp(Self^.Keyword, '') = 0) Xor (strcomp(Nfa^.Keyword, '') = 0) Then
+  If (TCharStrComp(Self^.Keyword, '') = 0) Xor (TCharStrComp(Nfa^.Keyword, '') = 0) Then
   Begin
-    Self^.Keyword := ReallocStr(Self^.Keyword, strlen(Self^.Keyword) +
-      strlen(Nfa^.Keyword));
-    strcat(Self^.Keyword, Nfa^.Keyword);
+    Self^.Keyword := ReallocStr(Self^.Keyword, TCharStrLen(Self^.Keyword) +
+      TCharStrLen(Nfa^.Keyword));
+    TCharStrCat(Self^.Keyword, Nfa^.Keyword);
   End
   Else
   Begin
     FreeStr(Self^.Keyword);
-    Self^.Keyword := strnew('');
+    Self^.Keyword := TCharStrNew('');
   End;
   FreeStr(Nfa^.Keyword);
   For I := 0 To Nfa^.States^.Size - 1 Do
@@ -343,11 +343,11 @@ Begin
   mState^.Greedy := True;
   mState^.Edges := TList_Create(SizeOf(TNfaEdge), 2);
   mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-  mEdge^.Value := strnew('');
+  mEdge^.Value := TCharStrNew('');
   mEdge^.EdgeType := TNfaEdgeType_Char;
   mEdge^.ToState := Self^.StartState;
   mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-  mEdge^.Value := strnew('');
+  mEdge^.Value := TCharStrNew('');
   mEdge^.EdgeType := TNfaEdgeType_Char;
   mEdge^.ToState := Nfa^.StartState + (Self^.States^.Size - 1) - Nfa^.States^.Size;
   Self^.StartState := Self^.States^.Size - 1;
@@ -361,7 +361,7 @@ Begin
     If mState^.Acceptable Then
     Begin
       mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-      mEdge^.Value := strnew('');
+      mEdge^.Value := TCharStrNew('');
       mEdge^.EdgeType := TNfaEdgeType_Char;
       mEdge^.ToState := Self^.States^.Size - 1;
       mState^.Acceptable := False;
@@ -372,7 +372,7 @@ Begin
 End;
 
 {
-  A := ~A ; // A only contains one char.
+  A := ~A ; // A only contains one TChar.
 }
 Procedure TNfa_Not(Var Self: PNfa);
 Var
@@ -380,10 +380,10 @@ Var
   mEdge: PNfaEdge;
 Begin
   FreeStr(Self^.Keyword);
-  Self^.Keyword := strnew('');
+  Self^.Keyword := TCharStrNew('');
   mState := PNfaState(TList_Get(Self^.States, 0));
   mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-  mEdge^.Value := strnew('~');
+  mEdge^.Value := TCharStrNew('~');
   mEdge^.EdgeType := TNfaEdgeType_Others;
   mEdge^.ToState := 2;
   mState := PNfaState(TList_Get(Self^.States, 1));
@@ -405,7 +405,7 @@ Var
   mFlag: TSize;
 Begin
   FreeStr(Self^.Keyword);
-  Self^.Keyword := strnew('');
+  Self^.Keyword := TCharStrNew('');
   For I := 0 To Self^.States^.Size - 1 Do
   Begin
     mState := PNfaState(TList_Get(Self^.States, I));
@@ -418,7 +418,7 @@ Begin
         For J := 0 To mState^.Edges^.Size - 1 Do
         Begin
           mEdge := PNfaEdge(TList_Get(mState^.Edges, J));
-          If (mEdge^.ToState = Self^.StartState) And (strcomp(mEdge^.Value, '') = 0) Then
+          If (mEdge^.ToState = Self^.StartState) And (TCharStrComp(mEdge^.Value, '') = 0) Then
           Begin
             mFlag := J;
             Break;
@@ -428,7 +428,7 @@ Begin
       If mFlag = mState^.Edges^.Size Then
       Begin
         mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-        mEdge^.Value := strnew('');
+        mEdge^.Value := TCharStrNew('');
         mEdge^.EdgeType := TNfaEdgeType_Char;
         mEdge^.ToState := Self^.StartState;
       End;
@@ -451,17 +451,17 @@ Var
   mEdge: PNfaEdge;
 Begin
   FreeStr(Self^.Keyword);
-  Self^.Keyword := strnew('');
+  Self^.Keyword := TCharStrNew('');
   mState := PNfaState(TList_EmplaceBack(Self^.States));
   mState^.Acceptable := False;
   mState^.Greedy := Greedy;
   mState^.Edges := TList_Create(SizeOf(TNfaEdge), 2);
   mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-  mEdge^.Value := strnew('');
+  mEdge^.Value := TCharStrNew('');
   mEdge^.EdgeType := TNfaEdgeType_Char;
   mEdge^.ToState := Self^.States^.Size;
   mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-  mEdge^.Value := strnew('');
+  mEdge^.Value := TCharStrNew('');
   mEdge^.EdgeType := TNfaEdgeType_Char;
   mEdge^.ToState := Self^.StartState;
   mState := PNfaState(TList_EmplaceBack(Self^.States));
@@ -474,12 +474,12 @@ Begin
     If mState^.Acceptable Then
     Begin
       mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-      mEdge^.Value := strnew('');
+      mEdge^.Value := TCharStrNew('');
       mEdge^.EdgeType := TNfaEdgeType_Char;
       mEdge^.ToState := Self^.States^.Size - 1;
 
       mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-      mEdge^.Value := strnew('');
+      mEdge^.Value := TCharStrNew('');
       mEdge^.EdgeType := TNfaEdgeType_Char;
       mEdge^.ToState := Self^.StartState;
 
@@ -500,7 +500,7 @@ Var
   mEdge: PNfaEdge;
 Begin
   FreeStr(Self^.Keyword);
-  Self^.Keyword := strnew('');
+  Self^.Keyword := TCharStrNew('');
 
   mState := PNfaState(TList_EmplaceBack(Self^.States));
   mState^.Acceptable := False;
@@ -508,12 +508,12 @@ Begin
   mState^.Edges := TList_Create(SizeOf(TNfaEdge), 2);
 
   mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-  mEdge^.Value := strnew('');
+  mEdge^.Value := TCharStrNew('');
   mEdge^.EdgeType := TNfaEdgeType_Char;
   mEdge^.ToState := Self^.States^.Size;
 
   mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-  mEdge^.Value := strnew('');
+  mEdge^.Value := TCharStrNew('');
   mEdge^.EdgeType := TNfaEdgeType_Char;
   mEdge^.ToState := Self^.StartState;
 
@@ -528,7 +528,7 @@ Begin
     Begin
       mState^.Acceptable := False;
       mEdge := PNfaEdge(TList_EmplaceBack(mState^.Edges));
-      mEdge^.Value := strnew('');
+      mEdge^.Value := TCharStrNew('');
       mEdge^.EdgeType := TNfaEdgeType_Char;
       mEdge^.ToState := Self^.States^.Size - 1;
     End;
@@ -559,7 +559,7 @@ Begin
   TNfa_ExchangeStates(Self);
 End;
 
-Function TNfa_MatchEdge(Edge: PNfaEdge; Ch: Char;
+Function TNfa_MatchEdge(Edge: PNfaEdge; Ch: PTChar;
   Const CaseInsensitive: Boolean): Boolean;
 Begin
   If Edge^.EdgeType = TNfaEdgeType_Any Then
@@ -567,22 +567,22 @@ Begin
     Result := True;
     Exit;
   End;
-  If strcomp(Edge^.Value, '') = 0 Then
+  If TCharStrComp(Edge^.Value, '') = 0 Then
   Begin
     Result := False;
     Exit;
   End;
   If CaseInsensitive Then
   Begin
-    Result := (Lower(Edge^.Value[0]) = Lower(Ch));
+    Result := (Lower(PByte(Edge^.Value)^) = Lower(Ch^.Bytes[0]));
   End
   Else
   Begin
-    Result := (Edge^.Value[0] = Ch);
+    Result := (PByte(Edge^.Value)^ = Ch^.Bytes[0]);
   End;
 End;
 
-Function TNfa_Match(Var Self: PNfa; Const Ch: Char; Const State: TSize;
+Function TNfa_Match(Var Self: PNfa; Const Ch: PTChar; Const State: TSize;
   Const CaseInsensitive: Boolean): Boolean;
 Var
   I: TSize;
@@ -596,7 +596,7 @@ Begin
   Begin
     mEdge := PNfaEdge(TList_Get(mState^.Edges, mState^.Edges^.Size - 1));
     If ((mEdge^.EdgeType = TNfaEdgeType_Others) And
-      (StrComp(mEdge^.Value, '') <> 0)) Then
+      (TCharStrComp(mEdge^.Value, '') <> 0)) Then
     Begin
       mRealOthers := True;
       For I := 0 To mState^.Edges^.Size - 2 Do
@@ -636,7 +636,7 @@ Begin
   End;
 End;
 
-Function TNfa_Move(Var Self: PNfa; Const Ch: Char;
+Function TNfa_Move(Var Self: PNfa; Const Ch: PTChar;
   Const CaseInsensitive: Boolean): Boolean;
 Var
   mCurrInst: TNfaStateInstruction;
@@ -750,20 +750,20 @@ Begin
   End;
 End;
 
-Function TNfa_Validate(Var Self: PNfa; Input: PChar;
+Function TNfa_Validate(Var Self: PNfa; Input: PTChar;
   Const CaseInsensitive: Boolean): Boolean;
 Var
   I: TSize;
 Begin
-  If strcomp(Self^.Keyword, '') <> 0 Then
+  If TCharStrComp(Self^.Keyword, '') <> 0 Then
     { TODO And what about if the last state is acceptable? }
   Begin
-    Result := (strcomp(Self^.Keyword, Input) = 0);
+    Result := (TCharStrComp(Self^.Keyword, Input) = 0);
     Exit;
   End;
   TNfa_Reset(Self);
   I := 0;
-  While TNfa_Move(Self, Input[I], CaseInsensitive) Do
+  While TNfa_Move(Self, PTChar(@PByte(Input)[I]), CaseInsensitive) Do
   Begin
     Inc(I);
   End;
@@ -810,7 +810,7 @@ Begin
       End;
 
       mEdge := PNfaEdge(TList_Get(mState^.Edges, I));
-      If (strcomp(mEdge^.Value, '') = 0) And (mEdge^.EdgeType = TNfaEdgeType_Char) And
+      If (TCharStrComp(mEdge^.Value, '') = 0) And (mEdge^.EdgeType = TNfaEdgeType_Char) And
         (Not PBoolean(TList_Get(Self^.FAlreadyOn, mEdge^.ToState))^) Then
       Begin
         TNfa_AddState(Self, TStateOp_State, mEdge^.ToState);

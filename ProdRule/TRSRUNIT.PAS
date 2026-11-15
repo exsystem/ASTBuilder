@@ -22,7 +22,7 @@ Function TermRulesExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
   mSavePointS1, mSavePointS2, mSavePointS3: TSize;
   mTermRuleNode: PAstNode;
-  mMode: PChar;
+  mMode: PTChar;
 Label
   S1, S2, S3;
 Begin
@@ -31,7 +31,9 @@ Begin
   Result := True;
   If TermRule(Parser, mTermRuleNode) Then
   Begin
-    TGrammarNode_AddTermRule(PGrammarNode(Ast), '', PTermRuleNode(mTermRuleNode));
+    mMode := TCharStrNew('');
+    TGrammarNode_AddTermRule(PGrammarNode(Ast), mMode, PTermRuleNode(mTermRuleNode));
+    FreeStr(mMode);
     Goto S1;
   End
   Else
@@ -52,7 +54,7 @@ Begin
   End;
   If TGrammarParser_Term(Parser, eId) Then
   Begin
-    mMode := StrNew(TParser_GetCurrentToken(Parser)^.Value);
+    mMode := TCharStrNew(TParser_GetCurrentToken(Parser)^.Value);
   End
   Else
   Begin

@@ -56,7 +56,7 @@ end;
 
 function TTrieIterator.MoveNext: boolean;
 var
-  c: char;
+  c: TChar;
 begin
   Result := False;
   if FCurrent = nil then Exit;
@@ -138,7 +138,7 @@ end;
 
 function TTrieIterator.MoveNext: boolean;
 var
-  c: char;
+  c: TChar;
 begin
   Result := False;
   if FCurrent = nil then Exit;
@@ -220,7 +220,7 @@ end;
 
 function TTrieIterator.MoveNext: boolean;
 var
-  c: char;
+  c: TChar;
 begin
   Result := False;
   if FCurrent = nil then Exit;
@@ -293,7 +293,7 @@ end;
 
 function TTrieIterator.MoveNext: boolean;
 var
-  c: char;
+  c: TChar;
 begin
   Result := False;
   if FCurrent = nil then Exit;

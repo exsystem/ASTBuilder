@@ -24,45 +24,62 @@ Uses {$IFNDEF FPC}
  {$IFDEF USE_STRINGS}strings,{$ENDIF} STREAM, GLEXER, GPARSER, CLEXER, GRMRNODE, TYPEDEF, StrUtil;
 
 Var
-  mHereDocId: PChar;
+  mHereDocId: PTChar;
 
 Procedure TCodeLexer_Init(Var Self: PCodeLexer);
 {$IFDEF VINTAGE} Far; {$ENDIF}
+Var
+  mName: PTChar;
 Begin
-  TGrammarNode_RegisterTermRule(Self^.GrammarNode, '@HEREDOC_END');
+  mName := TCharStrNew('@HEREDOC_END');
+  TGrammarNode_RegisterTermRule(Self^.GrammarNode, mName);
+  FreeStr(mName);
 End;
 
 Procedure TCodeLexer_ProcessToken(Var Self: PCodeLexer);
 {$IFDEF VINTAGE} Far; {$ENDIF}
 Var
-  mMode: PChar;
-  mTokenValue: PChar;
-  mKind: PChar;
+  mMode: PTChar;
+  mTokenValue: PTChar;
+  mKind: PTChar;
+  mTokenPrefix: PTChar;
+  mEndKindName: PTChar;
+  mIsHereDocEnd: Boolean;
 Begin
-  mMode := PPChar(TStack_Top(Self^.Mode))^;
+  mMode := PPTChar(TStack_Top(Self^.Mode))^;
   mTokenValue := Self^.Parent.CurrentToken.Value;
   mKind := TGrammarNode_GetTermRuleName(Self^.GrammarNode,
     PTermRule(Self^.Parent.CurrentToken.Kind)^);
 
-  If StrComp(mMode, 'hereDoc') <> 0 Then
+  If TCharStrComp(mMode, 'hereDoc') <> 0 Then
   Begin
     Exit;
   End;
-  If StrComp(mKind, 'START_HEREDOC') = 0 Then
+  If TCharStrComp(mKind, 'START_HEREDOC') = 0 Then
   Begin
-    mHereDocId := SubStr(mTokenValue, 3, StrLen(mTokenValue) - 3);
+    mHereDocId := SubStr(mTokenValue, 3, TCharStrLen(mTokenValue) - 3);
     Exit;
   End;
-  If StrComp(mKind, 'HEREDOC_TEXT') = 0 Then
+  If TCharStrComp(mKind, 'HEREDOC_TEXT') = 0 Then
   Begin
-    If StrPos(mTokenValue, mHereDocId) = mTokenValue Then
+    mIsHereDocEnd := False;
+    If (mHereDocId <> nil) And
+      (TCharStrLen(mTokenValue) >= TCharStrLen(mHereDocId)) Then
     Begin
+      mTokenPrefix := SubStr(mTokenValue, 0, TCharStrLen(mHereDocId));
+      mIsHereDocEnd := TCharStrComp(mTokenPrefix, mHereDocId) = 0;
+      FreeStr(mTokenPrefix);
+    End;
+    If mIsHereDocEnd Then
+    Begin
+      mEndKindName := TCharStrNew('@HEREDOC_END');
       PTermRule(Self^.Parent.CurrentToken.Kind)^ :=
-        TGrammarNode_GetTermRuleId(Self^.GrammarNode, '@HEREDOC_END');
-      TLexer_Retract(PLexer(Self), StrLen(Self^.Parent.CurrentToken.Value) -
-        StrLen(mHereDocId));
+        TGrammarNode_GetTermRuleId(Self^.GrammarNode, mEndKindName);
+      FreeStr(mEndKindName);
+      TLexer_Retract(PLexer(Self), TCharStrLen(Self^.Parent.CurrentToken.Value) -
+        TCharStrLen(mHereDocId));
       FreeStr(Self^.Parent.CurrentToken.Value);
-      Self^.Parent.CurrentToken.Value := StrNew(mHereDocId);
+      Self^.Parent.CurrentToken.Value := TCharStrNew(mHereDocId);
       TCodeLexer_PopMode(PLexer(Self));
       FreeStr(mHereDocId);
     End;
@@ -111,7 +128,7 @@ Begin
     Begin
       While mErrorNode^.Next <> nil Do
       Begin
-        WriteLn(PChar(mErrorNode^.Data^));
+        WriteLn(TCharStrToAnsiString(PTChar(mErrorNode^.Data^)));
         mErrorNode := mErrorNode^.Next;
       End;
     End;

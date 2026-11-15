@@ -6,7 +6,7 @@ Unit RRUnit;
 Interface
 
 Uses
-  Parser, Lexer, ASTNode;
+  Parser, Lexer, ASTNode, TypeDef;
 
 Function RuleRule(Parser: PParser; Var Ast: PAstNode): Boolean;
 Function RuleRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
@@ -20,7 +20,7 @@ Uses
 { rule -> Id Colon expr Semi }
 Function RuleRuleExpression1(Parser: PParser; Var Ast: PAstNode): Boolean;
 Var
-  mName: PChar;
+  mName: PTChar;
   mGroupNode: PAstNode;
 Label
   S1, S2;
@@ -28,7 +28,7 @@ Begin
   S1:
     If TGrammarParser_Term(Parser, eId) Then
     Begin
-      mName := strnew(TParser_GetCurrentToken(Parser)^.Value);
+      mName := TCharStrNew(TParser_GetCurrentToken(Parser)^.Value);
     End
     Else
     Begin

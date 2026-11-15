@@ -19,7 +19,7 @@ Function Parse(Lexer: PLexer): Boolean;
 Var
   I: TSize;
 Begin
-  If Not IsTermIdInitialChar(TLexer_PeekNextChar(Lexer)) Then
+  If Not IsTermIdInitialChar(TLexer_PeekNextChar(Lexer)^.Bytes[0]) Then
   Begin
     Result := False;
     Exit;
@@ -29,7 +29,7 @@ Begin
   Lexer^.CurrentToken.StartPos := TLexer_GetNextPos(Lexer);
   TLexer_Forward(Lexer, 1);
   I := 1;
-  While IsIdChar(TLexer_PeekNextChar(Lexer)) Do
+  While IsIdChar(TLexer_PeekNextChar(Lexer)^.Bytes[0]) Do
   Begin
     TLexer_Forward(Lexer, 1);
     Inc(I);

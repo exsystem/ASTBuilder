@@ -23,7 +23,7 @@ Label
   S1, S2, S3, S4, S5;
 Begin
   S1:
-    If TLexer_PeekNextChar(Lexer) = '''' Then
+    If TLexer_PeekNextChar(Lexer)^.Bytes[0] = Ord('''') Then
     Begin
       TLexer_Forward(Lexer, 1);
       mOffset := 1;
@@ -34,14 +34,14 @@ Begin
       Exit;
     End;
   S2:
-    If TLexer_PeekNextChar(Lexer) = '\' Then
+    If TLexer_PeekNextChar(Lexer)^.Bytes[0] = Ord('\') Then
     Begin
       TLexer_Forward(Lexer, 1);
       Inc(mOffset);
       Goto S3;
     End
-    Else If (TLexer_PeekNextChar(Lexer) <> #0) And
-      (TLexer_PeekNextChar(Lexer) <> '''') Then
+    Else If (TLexer_PeekNextChar(Lexer)^.Bytes[0] <> 0) And
+      (TLexer_PeekNextChar(Lexer)^.Bytes[0] <> Ord('''')) Then
     Begin
       TLexer_Forward(Lexer, 1);
       Inc(mOffset);
@@ -54,7 +54,7 @@ Begin
       Exit;
     End;
   S3:
-    If TLexer_PeekNextChar(Lexer) <> #0 Then
+    If TLexer_PeekNextChar(Lexer)^.Bytes[0] <> 0 Then
     Begin
       TLexer_Forward(Lexer, 1);
       Inc(mOffset);
@@ -67,7 +67,7 @@ Begin
       Exit;
     End;
   S4:
-    If TLexer_PeekNextChar(Lexer) = '''' Then
+    If TLexer_PeekNextChar(Lexer)^.Bytes[0] = Ord('''') Then
     Begin
       Lexer^.CurrentToken.StartPos := TLexer_GetNextPos(Lexer) - mOffset;
       TLexer_Forward(Lexer, 1);

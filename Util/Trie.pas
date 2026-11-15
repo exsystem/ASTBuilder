@@ -28,7 +28,7 @@ Type
   PSuffixNodePair = ^TSuffixNodePair;
 
   TSuffixNodePair = Record
-    Suffix: PChar;
+    Suffix: PTChar;
     SuffixSize: TSize;
     Node: PNode;
   End;
@@ -44,13 +44,13 @@ Type
 Function TTrie_Create(Const ElementSize: TSize;
   Const ElementDestructor: TElementDestructor): PTrie;
 Procedure TTrie_Clear(Self: PTrie);
-Function TTrie_Get(Self: PTrie; Const Key: PChar): Pointer;
-Procedure TTrie_Set(Self: PTrie; Const Key: PChar; Value: Pointer);
-Procedure TTrie_Erase(Self: PTrie; Const Key: PChar);
+Function TTrie_Get(Self: PTrie; Const Key: PTChar): Pointer;
+Procedure TTrie_Set(Self: PTrie; Const Key: PTChar; Value: Pointer);
+Procedure TTrie_Erase(Self: PTrie; Const Key: PTChar);
 Procedure TTrie_Destroy(Self: PTrie);
 Function TTrie_CreateNode: PNode;
 Function TTrie_Empty(Root: PNode): Boolean;
-Function TTrie_Delete(Self: PTrie; Root: PNode; Key: PChar; Depth: TSize): PNode;
+Function TTrie_Delete(Self: PTrie; Root: PNode; Key: PTChar; Depth: TSize): PNode;
 Function TTrie_Begin(Self: PTrie): PTrieIterator;
 Function TTrie_End(Self: PTrie): PTrieIterator;
 Procedure TTrie_DoClear(Const Self: PTrie; Root: PNode);
@@ -100,7 +100,7 @@ Begin
   Self^.Root^.Leaf := False;
 End;
 
-Function TTrie_Get(Self: PTrie; Const Key: PChar): Pointer;
+Function TTrie_Get(Self: PTrie; Const Key: PTChar): Pointer;
 Var
   mNode: PNode;
   mKey: PByte;
@@ -109,7 +109,7 @@ Begin
   mNode := Self^.Root;
   mKey := PByte(Key);
   I := 0;
-  While I < strlen(Key) * SizeOf(Char) Do
+  While I < TCharStrLen(Key) * SizeOf(TChar) Do
   Begin
     mNode := mNode^.Next[mKey^];
     If mNode = nil Then
@@ -128,7 +128,7 @@ Begin
   Result := nil;
 End;
 
-Procedure TTrie_Set(Self: PTrie; Const Key: PChar; Value: Pointer);
+Procedure TTrie_Set(Self: PTrie; Const Key: PTChar; Value: Pointer);
 Var
   mNode: PNode;
   mKey: PByte;
@@ -137,7 +137,7 @@ Begin
   mNode := Self^.Root;
   mKey := PByte(Key);
   I := 0;
-  While I < strlen(Key) * SizeOf(Char) Do
+  While I < TCharStrLen(Key) * SizeOf(TChar) Do
   Begin
     If mNode^.Next[mKey^] = nil Then
     Begin
@@ -162,7 +162,7 @@ Begin
   Move(Value^, mNode^.Data^, Self^.FElemSize);
 End;
 
-Procedure TTrie_Erase(Self: PTrie; Const Key: PChar);
+Procedure TTrie_Erase(Self: PTrie; Const Key: PTChar);
 Begin
   TTrie_Delete(Self, Self^.Root, Key, 0);
 End;
@@ -185,7 +185,7 @@ Begin
   End;
 End;
 
-Function TTrie_Delete(Self: PTrie; Root: PNode; Key: PChar; Depth: TSize): PNode;
+Function TTrie_Delete(Self: PTrie; Root: PNode; Key: PTChar; Depth: TSize): PNode;
 Var
   mKey: PByte;
 Begin
@@ -196,7 +196,7 @@ Begin
     Exit;
   End;
 
-  If Depth = Succ(StrLen(Key) * SizeOf(Char)) Then
+  If Depth = Succ(TCharStrLen(Key) * SizeOf(TChar)) Then
   Begin
     If Root^.Leaf Then
     Begin
@@ -248,7 +248,7 @@ End;
 Function TTrie_Begin(Self: PTrie): PTrieIterator;
 Begin
   TTrieIterator_Create(Result, Self);
-  Result^.FCurrent.Suffix := StrNew('');
+  Result^.FCurrent.Suffix := TCharStrNew('');
   Result^.FCurrent.SuffixSize := 0;
   Result^.FCurrent.Node := Self^.Root;
 End;
@@ -338,8 +338,8 @@ Begin
         mPair := TStack_Emplace(Self^.FNodeStack);
         If Self^.FCurrent.Suffix = nil Then
         Begin
-          GetMem(mPair^.Suffix, SizeOf(Char));
-          mPair^.SuffixSize := SizeOf(Char);
+          GetMem(mPair^.Suffix, SizeOf(TChar));
+          mPair^.SuffixSize := SizeOf(TChar);
           mDst := PByte(mPair^.Suffix);
         End
         Else

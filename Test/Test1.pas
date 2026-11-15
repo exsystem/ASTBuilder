@@ -58,7 +58,7 @@ Begin
     End;
     Writeln(Format('[ERROR] Illegal token "%s" found at pos %d.',
       [mLexer^.Parent.CurrentToken.Value, mLexer^.Parent.CurrentToken.StartPos]));
-  Until TLexer_PeekNextChar(PLexer(mLexer)) = #0;
+  Until TLexer_PeekNextChar(PLexer(mLexer))^.Bytes[0] = 0;
   mLexer^.Parent.VMT^.Destory(PLexer(mLexer));
   Dispose(mSource);
   Dispose(mLexer);

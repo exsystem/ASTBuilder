@@ -13,6 +13,7 @@
     },
     {
       "type": "lldb",
+      "preLaunchTask": "build",
       "request": "launch",
       "name": "Debug",
       "program": "${workspaceFolder}/ASTBuilder",
