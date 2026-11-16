@@ -8,3 +8,7 @@ cp ../../Grammar/pascal/pascal/libpascal.dylib ~/.vim/astbuilder/
 mkdir -p /tmp/pascal_ast_1/
 #rm -f ~/.vim/astbuilder/gen_highlights.py
 #vim ../Test/vim-zh.pas
+mkdir -p ~/.vim/ftdetect/
+cp ftdetect/pascal.vim ~/.vim/ftdetect/
+echo "syntax on" >> ~/.vimrc
+echo "filetype on" >> ~/.vimrc
