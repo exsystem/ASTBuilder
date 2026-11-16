@@ -36,6 +36,7 @@ uses
   LIST in 'Util\LIST.PAS',
   STACK in 'Util\STACK.PAS',
   STREAM in 'Util\STREAM.PAS',
+  StreamReader in 'Util\StreamReader.pas',
   StrUtil in 'Util\StrUtil.pas',
   Trie in 'Util\Trie.pas',
   TypeDef in 'Util\TypeDef.pas',

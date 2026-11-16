@@ -38,6 +38,7 @@ Type
 
   TStream = Record
     VMT: PStream_VMT;
+    Encoding: TEncodingKind;
   End;
 
   PFileStream = ^TFileStream;
@@ -86,6 +87,7 @@ Procedure TFileStream_Create(Var Self: PFileStream; Filename: String);
 Begin
   New(Self); { Final }
   Self^.Parent.VMT := @mTFileStream_VMT;
+  Self^.Parent.Encoding := ekASCII;
 
   AssignFile(Self^.FFile, Filename);
   Reset(Self^.FFile, SizeOf(TChar));
@@ -179,6 +181,7 @@ Procedure TBinaryFileStream_Create(Var Self: PBinaryFileStream; Filename: String
 Begin
   New(Self); { Final }
   Self^.Parent.VMT := @mTBinaryFileStream_VMT;
+  Self^.Parent.Encoding := ekASCII;
 
   AssignFile(Self^.FFile, Filename);
   Rewrite(Self^.FFile, SizeOf(Byte));

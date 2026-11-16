@@ -11,15 +11,6 @@ Uses
   SysUtils, TypeDef, Stream;
 
 Type
-  { TEncodingKind - enumeration of supported encodings }
-  TEncodingKind = (
-    ekASCII,
-    ekUTF8,
-    ekUTF16LE,      { UTF-16 Little Endian }
-    ekUTF16BE,      { UTF-16 Big Endian }
-    ekGBK           { Chinese GBK encoding }
-    );
-
   PStreamReader = ^TStreamReader;
 
   TStreamReader = Record
@@ -101,14 +92,14 @@ Function TStreamReader_GetUTF8CharSize(FirstByte: Byte): TSize;
 Begin
   If (FirstByte And $80) = $00 Then
     Result := 1   { ASCII: 0xxxxxxx }
-  Else If (FirstByte And $E0) = $C0 Then
+  Else If (FirstByte >= $C2) And (FirstByte <= $DF) Then
     Result := 2   { 2-byte UTF-8: 110xxxxx 10xxxxxx }
-  Else If (FirstByte And $F0) = $E0 Then
+  Else If (FirstByte >= $E0) And (FirstByte <= $EF) Then
     Result := 3   { 3-byte UTF-8: 1110xxxx 10xxxxxx 10xxxxxx }
-  Else If (FirstByte And $F8) = $F0 Then
+  Else If (FirstByte >= $F0) And (FirstByte <= $F4) Then
     Result := 4   { 4-byte UTF-8: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx }
   Else
-    Result := 1;  { Invalid UTF-8, treat as 1 byte }
+    Result := 1;
 End;
 
 { Get number of bytes in a GBK character based on first byte }
@@ -116,7 +107,7 @@ Function TStreamReader_GetGBKCharSize(FirstByte: Byte): TSize;
 Begin
   If (FirstByte And $80) = $00 Then
     Result := 1   { ASCII: 0xxxxxxx }
-  Else If (FirstByte And $80) <> $00 Then
+  Else If (FirstByte >= $81) And (FirstByte <= $FE) Then
     Result := 2   { GBK: first byte >= 0x81 }
   Else
     Result := 1;
@@ -274,6 +265,7 @@ Function TStreamReader_ReadChar(Const Self: PStreamReader; Const Ch: PByte;
 Var
   mByteBuf: Array[0..3] Of Byte;
   mBytesRead, I, mCharSize, mByteCount: Integer;
+  mValidatedSize: TSize;
 Begin
   Result := 0;
 
@@ -325,6 +317,11 @@ Begin
     End;
     Inc(mByteCount);
   End;
+
+  If Not TChar_GetEncodedSize(Self.FEncoding, @mByteBuf[0], mByteCount,
+    mValidatedSize) Or (mValidatedSize <> mByteCount) Then
+    Raise EConvertError.Create('Invalid or truncated ' +
+      TStreamReader_GetEncodingName(Self.FEncoding) + ' character.');
 
   If mByteCount <= MaxSize Then
   Begin
@@ -570,6 +567,7 @@ Begin
   End;
 
   Self^.FEncoding := Encoding;
+  Self^.Parent.Encoding := Encoding;
 
   { Open file for reading }
   AssignFile(Self^.FFile, Filename);

@@ -13,6 +13,7 @@ uses
   TrmNode in 'AST\Trmnode.pas',
   TrmRNode in 'AST\Trmrnode.pas',
   NFA in 'Automata\NFA.pas',
+  StreamReader in 'Util\StreamReader.pas',
   CHSTRULE in 'LexrRule\Grammar\Chstrule.pas',
   CharRule in 'LexrRule\Grammar\Charrule.pas',
   AstkRule in 'LexrRule\Grammar\Astkrule.pas',

@@ -77,11 +77,11 @@ End;
 Function TGrammarLexer_GetNextToken(Var Self: PLexer): Boolean;
 Var
   I: TSize;
+  mAscii: Integer;
   mRule: PLexerRule;
   mKeyword: PGrammarTokenKind;
   mSelf: PGrammarLexer;
   mTokenKind: PGrammarTokenKind;
-  mChar: PTChar;
 Begin
   mTokenKind := PGrammarTokenKind(Self^.CurrentToken.Kind);
   If mTokenKind^ = eEof Then
@@ -89,11 +89,11 @@ Begin
     Result := False;
     Exit;
   End;
-  mChar := TLexer_PeekNextChar(Self);
-  While IsSpace(mChar^.Bytes[0]) Do
+  mAscii := TLexer_GetCurrentAsciiChar(Self);
+  While (mAscii >= 0) And IsSpace(Byte(mAscii)) Do
   Begin
     TLexer_Forward(Self, 1);
-    mChar := TLexer_PeekNextChar(Self);
+    mAscii := TLexer_GetCurrentAsciiChar(Self);
   End;
 
   mSelf := PGrammarLexer(Self);
@@ -129,12 +129,12 @@ Begin
 
   Self^.CurrentToken.StartPos := Self^.FStream^.VMT^.GetPosition(Self^.FStream);
   I := 0;
-  mChar := TLexer_PeekNextChar(Self);
-  While (Not IsSpace(mChar^.Bytes[0])) And (mChar^.Bytes[0] <> 0) Do
+  mAscii := TLexer_GetCurrentAsciiChar(Self);
+  While (mAscii <> 0) And ((mAscii < 0) Or Not IsSpace(Byte(mAscii))) Do
   Begin
     TLexer_Forward(Self, 1);
     Inc(I);
-    mChar := TLexer_PeekNextChar(Self);
+    mAscii := TLexer_GetCurrentAsciiChar(Self);
   End;
   mTokenKind^ := eUndefined;
   FreeStr(Self^.CurrentToken.Error);

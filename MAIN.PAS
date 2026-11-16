@@ -13,11 +13,11 @@ Type
   PSize = TypeDef.PSize;
   {$ENDIF}
 
-  TRegisterTermRule = Procedure(Name: PTChar);
-  TGetMode = Function: PTChar;
-  TGetTokenKind = Function: PTChar;
-  TGetTokenValue = Function: PTChar;
-  TInsertToken = Procedure(Kind: PTChar; Value: PTChar);
+  TRegisterTermRule = Procedure(Name: PAnsiChar);
+  TGetMode = Function: PAnsiChar;
+  TGetTokenKind = Function: PAnsiChar;
+  TGetTokenValue = Function: PAnsiChar;
+  TInsertToken = Procedure(Kind: PAnsiChar; Value: PAnsiChar);
   TPopMode = Procedure;
 
   PContext = ^TContext;
@@ -34,11 +34,11 @@ Type
   TInit = Procedure(Context: PContext);
   TProcessToken = Procedure(Context: PContext);
 
-Procedure RegisterTermRule(Name: PTChar);
-Function GetMode: PTChar;
-Function GetTokenKind: PTChar;
-Function GetTokenValue: PTChar;
-Procedure InsertToken(Kind: PTChar; Value: PTChar);
+Procedure RegisterTermRule(Name: PAnsiChar);
+Function GetMode: PAnsiChar;
+Function GetTokenKind: PAnsiChar;
+Function GetTokenValue: PAnsiChar;
+Procedure InsertToken(Kind: PAnsiChar; Value: PAnsiChar);
 Procedure PopMode;
 
 Function Parse(GrammarFile: String; SourceCodeFile: String; AstPathPrefix: String;
@@ -86,6 +86,9 @@ Var
   {$ENDIF}
   mContext: TContext;
   mLexer: PCodeLexer;
+  mPluginMode: AnsiString;
+  mPluginTokenKind: AnsiString;
+  mPluginTokenValue: AnsiString;
 
 Procedure TCodeLexer_Init(Var Self: PCodeLexer);
 {$IFDEF VINTAGE} Far; {$ENDIF}
@@ -121,35 +124,55 @@ Begin
   mProcessToken(@mContext);
 End;
 
-Procedure RegisterTermRule(Name: PTChar);
+Procedure RegisterTermRule(Name: PAnsiChar);
+Var
+  mName: PTChar;
 Begin
-  TGrammarNode_RegisterTermRule(mLexer^.GrammarNode, Name);
+  mName := TCharStrNewEncoded(AnsiString(Name), ekUTF8);
+  Try
+    TGrammarNode_RegisterTermRule(mLexer^.GrammarNode, mName);
+  Finally
+    FreeStr(mName);
+  End;
 End;
 
-Function GetMode: PTChar;
+Function GetMode: PAnsiChar;
 Begin
-  Result := PPTChar(TStack_Top(mLexer^.Mode))^;
+  mPluginMode := TCharStrToAnsiString(PPTChar(TStack_Top(mLexer^.Mode))^);
+  Result := PAnsiChar(mPluginMode);
 End;
 
-Function GetTokenKind: PTChar;
+Function GetTokenKind: PAnsiChar;
 Begin
-  Result := TGrammarNode_GetTermRuleName(mLexer^.GrammarNode,
-    PTermRule(mLexer^.Parent.CurrentToken.Kind)^);
+  mPluginTokenKind := TCharStrToAnsiString(
+    TGrammarNode_GetTermRuleName(mLexer^.GrammarNode,
+      PTermRule(mLexer^.Parent.CurrentToken.Kind)^));
+  Result := PAnsiChar(mPluginTokenKind);
 End;
 
-Function GetTokenValue: PTChar;
+Function GetTokenValue: PAnsiChar;
 Begin
-  Result := mLexer^.Parent.CurrentToken.Value;
+  mPluginTokenValue := TCharStrToAnsiString(mLexer^.Parent.CurrentToken.Value);
+  Result := PAnsiChar(mPluginTokenValue);
 End;
 
-Procedure InsertToken(Kind: PTChar; Value: PTChar);
+Procedure InsertToken(Kind: PAnsiChar; Value: PAnsiChar);
+Var
+  mKind, mValue: PTChar;
 Begin
-  PTermRule(mLexer^.Parent.CurrentToken.Kind)^ :=
-    TGrammarNode_GetTermRuleId(mLexer^.GrammarNode, Kind);
-  TLexer_Retract(PLexer(mLexer), TCharStrLen(mLexer^.Parent.CurrentToken.Value) -
-    TCharStrLen(Value));
-  FreeStr(mLexer^.Parent.CurrentToken.Value);
-  mLexer^.Parent.CurrentToken.Value := TCharStrNew(Value);
+  mKind := TCharStrNewEncoded(AnsiString(Kind), ekUTF8);
+  mValue := TCharStrNewEncoded(AnsiString(Value), ekUTF8);
+  Try
+    PTermRule(mLexer^.Parent.CurrentToken.Kind)^ :=
+      TGrammarNode_GetTermRuleId(mLexer^.GrammarNode, mKind);
+    TLexer_Retract(PLexer(mLexer),
+      TCharStrLen(mLexer^.Parent.CurrentToken.Value) - TCharStrLen(mValue));
+    FreeStr(mLexer^.Parent.CurrentToken.Value);
+    mLexer^.Parent.CurrentToken.Value := TCharStrNew(mValue);
+  Finally
+    FreeStr(mKind);
+    FreeStr(mValue);
+  End;
 End;
 
 Procedure PopMode;
@@ -188,7 +211,7 @@ Begin
   TGrammarParser_Create(mParser, mGrammarLexer, GrammarRule);
   If Not TGrammarParser_Parse(mParser) Then
   Begin
-    Result := Format('%s', [mParser^.Parent.Error]);
+    Result := TCharStrToAnsiString(mParser^.Parent.Error);
     ErrorToken^.StartPos := mGrammarLexer^.CurrentToken.StartPos;
     ErrorToken^.Value := TCharStrNew(mGrammarLexer^.CurrentToken.Value);
     ErrorToken^.Error := TCharStrNew(mGrammarLexer^.CurrentToken.Error);
@@ -305,7 +328,8 @@ Begin
   Begin
     WriteLn(Format('ERROR: Parser Message: %s', [mResult]));
     WriteLn(Format('ERROR: Current Token at Pos = %d, Value = [%s], Message: %s',
-      [mErrorToken.StartPos, mErrorToken.Value, mErrorToken.Error]));
+      [mErrorToken.StartPos, TCharStrToAnsiString(mErrorToken.Value),
+      TCharStrToAnsiString(mErrorToken.Error)]));
   End;
 
   If mErrorMessagesCount > 0 Then

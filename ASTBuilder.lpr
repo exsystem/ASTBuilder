@@ -5,6 +5,7 @@ Program ASTBuilder;
 Uses
   TypeDef,
   Stream,
+  StreamReader,
   GrmrNode,
   IdNode,
   RuleNode,

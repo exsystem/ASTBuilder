@@ -71,8 +71,9 @@ Var
   mText: PTChar;
 Begin
   mNode := PIdNode(Node);
-  mText := TCharStrNew('Non-Terminal: ');
-  mText := ReallocStr(mText, TCharStrLen(mText) + TCharStrLen(mNode^.Value));
+  mText := TCharStrNewAnsiEncoded('Non-Terminal: ',
+    TChar_GetEncoding(mNode^.Value));
+  mText := ReallocStr(mText, TCharStrByteLen(mText) + TCharStrByteLen(mNode^.Value));
   TCharStrCat(mText, mNode^.Value);
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
@@ -84,8 +85,9 @@ Var
   mText: PTChar;
 Begin
   mNode := PTermNode(Node);
-  mText := TCharStrNew('Terminal: ');
-  mText := ReallocStr(mText, TCharStrLen(mText) + TCharStrLen(mNode^.Token.Value));
+  mText := TCharStrNewAnsiEncoded('Terminal: ',
+    TChar_GetEncoding(mNode^.Token.Value));
+  mText := ReallocStr(mText, TCharStrByteLen(mText) + TCharStrByteLen(mNode^.Token.Value));
   TCharStrCat(mText, mNode^.Token.Value);
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
@@ -121,7 +123,7 @@ Begin
   End;
 
   mText := TCharStrNew(mGroupType);
-  mText := ReallocStr(mText, TCharStrLen(mText) + Length(mTermsRelationship) +
+  mText := ReallocStr(mText, TCharStrByteLen(mText) + Length(mTermsRelationship) +
     Length(':'));
   TCharStrCat(mText, mTermsRelationship);
   TCharStrCat(mText, ':');
@@ -152,7 +154,7 @@ Begin
   mNode := PRuleNode(Node);
   mText := PPTChar(TList_Get(PAstViewer(Intf^.Instance)^.GrammarNode^.NonTermRuleNames,
     mNode^.Id))^;
-  mText := ReallocStr(mText, TCharStrLen(mText) + Length(':'));
+  mText := ReallocStr(mText, TCharStrByteLen(mText) + Length(':'));
   TCharStrCat(mText, ':');
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
   FreeStr(mText);
@@ -184,7 +186,9 @@ Begin
   mNode := PTermRuleNode(Node);
   mName := PPTChar(TList_Get(PAstViewer(Intf^.Instance)^.GrammarNode^.TermRuleNames,
     mNode^.TermRuleId))^;
-  mText := CreateStr(TCharStrLen(mName) + Length(':'));
+  mText := CreateStrEncoded(TCharStrByteLen(mName) +
+    TCharStrAnsiByteLen(':', TChar_GetEncoding(mName)),
+    TChar_GetEncoding(mName));
   TCharStrCat(mText, mName);
   TCharStrCat(mText, ':');
   TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
@@ -220,12 +224,15 @@ Begin
     End;
     mStr := IntToStr(mNode^.Nfa^.StartState);
     mStrPChar := TCharStrNew(mStr);
-    mText := CreateStr(Length('Keyword: ') + TCharStrLen(mNode^.Nfa^.Keyword));
+    mText := CreateStrEncoded(
+      TCharStrAnsiByteLen('Keyword: ', TChar_GetEncoding(mNode^.Nfa^.Keyword)) +
+      TCharStrByteLen(mNode^.Nfa^.Keyword),
+      TChar_GetEncoding(mNode^.Nfa^.Keyword));
     TCharStrCat(mText, 'Keyword: ');
     TCharStrCat(mText, mNode^.Nfa^.Keyword);
     TAstViewer_WriteLn(PAstViewer(Intf^.Instance), mText);
     FreeStr(mText);
-    mText := CreateStr(Length('Start state: ') + TCharStrLen(mStrPChar));
+    mText := CreateStr(Length('Start state: ') + TCharStrByteLen(mStrPChar));
     TCharStrCat(mText, 'Start state: ');
     TCharStrCat(mText, mStrPChar);
     FreeStr(mStrPChar);

@@ -139,6 +139,7 @@ Var
   mCurrToken: PToken;
   mErrMsg: PTChar;
   S1, S2, S3: AnsiString;
+  mEncoding: TEncodingKind;
 Begin
   mNode := PTermNode(Node);
   mSelf := PAstViewer(Intf^.Instance);
@@ -166,8 +167,11 @@ Begin
     S1 := 'Expecting term `';
     S2 := '`, but `';
     S3 := '` was found.';
-    mErrMsg := CreateStr(Length(S1) + TCharStrLen(mNode^.Token.Value) +
-      Length(S2) + TCharStrLen(mCurrToken^.Value) + Length(S3));
+    mEncoding := TChar_GetEncoding(mNode^.Token.Value);
+    mErrMsg := CreateStrEncoded(TCharStrAnsiByteLen(S1, mEncoding) +
+      TCharStrByteLen(mNode^.Token.Value) + TCharStrAnsiByteLen(S2, mEncoding) +
+      TCharStrByteLen(mCurrToken^.Value) + TCharStrAnsiByteLen(S3, mEncoding),
+      mEncoding);
     TCharStrCat(mErrMsg, S1);
     TCharStrCat(mErrMsg, mNode^.Token.Value);
     TCharStrCat(mErrMsg, S2);
@@ -498,13 +502,16 @@ Procedure TAstViewer_PrintParseTree(Self: PAstViewer; ParseTree: PParseTree);
 Var
   I: TSize;
   mLine: PTChar;
+  mEncoding: TEncodingKind;
 Begin
   If ParseTree^.RuleId = 0 Then
   Begin
     mLine := TCharStrNew(TGrammarNode_GetTermRuleName(Self^.FGrammar,
       PTermRule(ParseTree^.Token.Kind)^));
-    mLine := ReallocStr(mLine, TCharStrLen(mLine) + Length(': ') +
-      TCharStrLen(ParseTree^.Token.Value));
+    mEncoding := TChar_GetEncoding(mLine);
+    mLine := ReallocStr(mLine, TCharStrByteLen(mLine) +
+      TCharStrAnsiByteLen(': ', mEncoding) +
+      TCharStrByteLen(ParseTree^.Token.Value));
     TCharStrCat(mLine, ': ');
     TCharStrCat(mLine, ParseTree^.Token.Value);
     TAstViewer_WriteLn(Self, mLine);
@@ -532,6 +539,7 @@ Var
   I: TSize;
   mName: PTChar;
   mDummy: TSize;
+  mTerminatorSize: TSize;
 Begin
   TBinaryFileStream_Create(PBinaryFileStream(Self^.FTreeFile), Path + 'ast.xt');
   TBinaryFileStream_Create(PBinaryFileStream(Self^.FStrFile), Path + 'ast.xs');
@@ -540,7 +548,12 @@ Begin
   For I := 0 To Pred(Self^.FGrammar^.NonTermRuleNames^.Size) Do
   Begin
     mName := PTChar(TList_Get(Self^.FGrammar^.NonTermRuleNames, I)^);
-    TBinaryFileStream_Write(mFile, mName^.Bytes[0], Succ(TCharStrLen(mName)), mDummy);
+    If TChar_GetEncoding(mName) In [ekUTF16LE, ekUTF16BE] Then
+      mTerminatorSize := 2
+    Else
+      mTerminatorSize := 1;
+    TBinaryFileStream_Write(mFile, mName^.Bytes,
+      TCharStrByteLen(mName) + mTerminatorSize, mDummy);
   End;
   mFile^.VMT^.Destroy(mFile);
   Dispose(mFile);
@@ -549,7 +562,12 @@ Begin
   For I := 0 To Pred(Self^.FGrammar^.TermRuleNames^.Size) Do
   Begin
     mName := PTChar(TList_Get(Self^.FGrammar^.TermRuleNames, I)^);
-    TBinaryFileStream_Write(mFile, mName^.Bytes[0], Succ(TCharStrLen(mName)), mDummy);
+    If TChar_GetEncoding(mName) In [ekUTF16LE, ekUTF16BE] Then
+      mTerminatorSize := 2
+    Else
+      mTerminatorSize := 1;
+    TBinaryFileStream_Write(mFile, mName^.Bytes,
+      TCharStrByteLen(mName) + mTerminatorSize, mDummy);
   End;
   mFile^.VMT^.Destroy(mFile);
   Dispose(mFile);
@@ -584,9 +602,9 @@ Begin
     ', ParseTree^.Token.StartPos=', ParseTree^.Token.StartPos,
     ', Self^.FStrOffset=', Self^.FStrOffset);
 }
-  mStrLength := TCharStrLen(ParseTree^.Token.Value);
+  mStrLength := TCharStrByteLen(ParseTree^.Token.Value);
   mStrSize := SizeOf(TChar) * mStrLength;
-  TBinaryFileStream_Write(Self^.FStrFile, ParseTree^.Token.Value^.Bytes[0], mStrSize, mDummy);
+  TBinaryFileStream_Write(Self^.FStrFile, ParseTree^.Token.Value^.Bytes, mStrSize, mDummy);
   Inc(Self^.FStrOffset, mStrLength);
 
   Parent := Self^.FTreeOffset;

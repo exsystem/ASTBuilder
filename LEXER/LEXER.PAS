@@ -43,6 +43,7 @@ Procedure TLexer_Destroy(Var Self: PLexer);
 Function TLexer_CompareNextToken(Var Self: PLexer; Const TokenKind: Pointer): Boolean;
 Procedure TLexer_Forward(Var Self: PLexer; Const Step: TSize);
 Function TLexer_PeekNextChar(Var Self: PLexer): PTChar;
+Function TLexer_GetCurrentAsciiChar(Var Self: PLexer): Integer;
 Function TLexer_PeekNextWord(Var Self: PLexer; Const NextWord: PTChar): Boolean;
 Function TLexer_GetNextChar(Var Self: PLexer): PTChar;
 Procedure TLexer_Retract(Var Self: PLexer; Const Step: TSize);
@@ -83,8 +84,42 @@ End;
 Function TLexer_PeekNextChar(Var Self: PLexer): PTChar;
 Begin
   Result := TLexer_GetNextChar(Self);
-  If Result^.Bytes[0] <> 0 Then
+  If Self^.CurrentCharSize <> 0 Then
     Self^.FStream^.VMT^.Rewind(Self^.FStream, 1);
+End;
+
+Function TLexer_GetCurrentAsciiChar(Var Self: PLexer): Integer;
+Var
+  mChar: PTChar;
+  mCodeUnit: Word;
+Begin
+  mChar := TLexer_PeekNextChar(Self);
+  If Self^.CurrentCharSize = 0 Then
+  Begin
+    Result := 0;
+    Exit;
+  End;
+  If Self^.FStream^.Encoding In [ekUTF16LE, ekUTF16BE] Then
+  Begin
+    If Self^.CurrentCharSize <> 2 Then
+    Begin
+      Result := -1;
+      Exit;
+    End;
+    If Self^.FStream^.Encoding = ekUTF16LE Then
+      mCodeUnit := PByte(mChar)[0] Or (PByte(mChar)[1] Shl 8)
+    Else
+      mCodeUnit := (PByte(mChar)[0] Shl 8) Or PByte(mChar)[1];
+    If mCodeUnit <= $7F Then
+      Result := mCodeUnit
+    Else
+      Result := -1;
+    Exit;
+  End;
+  If (Self^.CurrentCharSize = 1) And (PByte(mChar)^ <= $7F) Then
+    Result := PByte(mChar)^
+  Else
+    Result := -1;
 End;
 
 Function TLexer_GetNextChar(Var Self: PLexer): PTChar;
@@ -98,12 +133,13 @@ Begin
   If (mReadCount = 0) Or (mByteCount = 0) Then
   Begin
     Self^.CurrentChar := TChar_Allocate(1);
-    Self^.CurrentChar^.Bytes[0] := 0;
+    Self^.CurrentChar^.Bytes := 0;
     Self^.CurrentCharSize := 0;
   End
   Else
   Begin
-    Self^.CurrentChar := TChar_Allocate(mByteCount);
+    Self^.CurrentChar := TChar_AllocateEncoded(mByteCount,
+      Self^.FStream^.Encoding);
     Move(mBytes[0], Self^.CurrentChar^, mByteCount);
     Self^.CurrentCharSize := mByteCount;
   End;
@@ -116,7 +152,7 @@ Var
   mNextWordLength, mByteOffset, mCharSize, mCharsRead: TSize;
   mChar: PTChar;
 Begin
-  mNextWordLength := TCharStrLen(NextWord);
+  mNextWordLength := TCharStrByteLen(NextWord);
   mByteOffset := 0;
   mCharsRead := 0;
   Result := True;
@@ -184,10 +220,11 @@ Var
   mDummy: TSize;
 Begin
   FreeStr(Self^.CurrentToken.Value);
-  Self^.CurrentToken.Value := CreateStr(Length * 4);
+  Self^.CurrentToken.Value := CreateStrEncoded(Length * 4,
+    Self^.FStream^.Encoding);
   Self^.FStream^.VMT^.SetPosition(Self^.FStream, Self^.CurrentToken.StartPos);
   Self^.FStream^.VMT^.Read(Self^.FStream, Self^.CurrentToken.Value^, Length, mDummy);
-  PByte(Self^.CurrentToken.Value)[mDummy] := 0;
+  TChar_SetByteLength(Self^.CurrentToken.Value, mDummy);
 End;
 
 End.

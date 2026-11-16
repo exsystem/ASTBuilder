@@ -45,6 +45,7 @@ Var
   mTokenPrefix: PTChar;
   mEndKindName: PTChar;
   mIsHereDocEnd: Boolean;
+  I: TSize;
 Begin
   mMode := PPTChar(TStack_Top(Self^.Mode))^;
   mTokenValue := Self^.Parent.CurrentToken.Value;
@@ -57,16 +58,17 @@ Begin
   End;
   If TCharStrComp(mKind, 'START_HEREDOC') = 0 Then
   Begin
-    mHereDocId := SubStr(mTokenValue, 3, TCharStrLen(mTokenValue) - 3);
+    I := TCharStrByteOffset(mTokenValue, 3);
+    mHereDocId := SubStr(mTokenValue, I, TCharStrByteLen(mTokenValue) - I);
     Exit;
   End;
   If TCharStrComp(mKind, 'HEREDOC_TEXT') = 0 Then
   Begin
     mIsHereDocEnd := False;
     If (mHereDocId <> nil) And
-      (TCharStrLen(mTokenValue) >= TCharStrLen(mHereDocId)) Then
+      (TCharStrByteLen(mTokenValue) >= TCharStrByteLen(mHereDocId)) Then
     Begin
-      mTokenPrefix := SubStr(mTokenValue, 0, TCharStrLen(mHereDocId));
+      mTokenPrefix := SubStr(mTokenValue, 0, TCharStrByteLen(mHereDocId));
       mIsHereDocEnd := TCharStrComp(mTokenPrefix, mHereDocId) = 0;
       FreeStr(mTokenPrefix);
     End;
@@ -109,10 +111,12 @@ Begin
     WriteLn('ACCEPTED')
   Else
   Begin
-    WriteLn(Format('ERROR: Parser Message: %s', [mParser^.Parent.Error]));
+    WriteLn(Format('ERROR: Parser Message: %s',
+      [TCharStrToAnsiString(mParser^.Parent.Error)]));
     WriteLn(Format('ERROR: Current Token at Pos = %d, Value = [%s], Message: %s',
-      [mGrammarLexer^.CurrentToken.StartPos, mGrammarLexer^.CurrentToken.Value,
-      mGrammarLexer^.CurrentToken.Error]));
+      [mGrammarLexer^.CurrentToken.StartPos,
+      TCharStrToAnsiString(mGrammarLexer^.CurrentToken.Value),
+      TCharStrToAnsiString(mGrammarLexer^.CurrentToken.Error)]));
   End;
 
   TCodeLexer_Create(mLexer, mCode);

@@ -79,11 +79,11 @@ Var
   mSkip: Boolean;
   mCommand: PCommand;
   mChar: PTChar;
-  mByteIndex: TSize;
   mMatched: Boolean;
 Label
   S;
 Begin
+  TLexer_PeekNextChar(Self);
   If PTermRule(Self^.CurrentToken.Kind)^ = 1 Then
   Begin
     Result := False;
@@ -91,7 +91,7 @@ Begin
   End;
   mSelf := PCodeLexer(Self);
   S:
-    If TLexer_PeekNextChar(Self)^.Bytes[0] = 0 Then
+    If Self^.CurrentCharSize = 0 Then
     Begin
       TTermRule_Destroy(PTermRule(Self^.CurrentToken.Kind));
       PTermRule(Self^.CurrentToken.Kind) := TTermRule_Make(1);
@@ -165,18 +165,11 @@ Begin
       While True Do
       Begin
         mChar := TLexer_PeekNextChar(Self);
-        If mChar^.Bytes[0] = 0 Then
+        If Self^.CurrentCharSize = 0 Then
           Break;
-        mMatched := True;
-        For mByteIndex := 0 To Pred(Self^.CurrentCharSize) Do
-        Begin
-          If Not TNfa_Move(mTermRuleNode^.Nfa,
-            PTChar(@PByte(mChar)[mByteIndex]), Not Self^.FCaseSensitive) Then
-          Begin
-            mMatched := False;
-            Break;
-          End;
-        End;
+        mMatched := TNfa_Move(mTermRuleNode^.Nfa, mChar,
+          Self^.CurrentCharSize, Self^.FStream^.Encoding,
+          Not Self^.FCaseSensitive);
         If Not mMatched Then
           Break;
         TLexer_Forward(Self, 1);
@@ -235,7 +228,7 @@ Begin
   Self^.CurrentToken.StartPos := Self^.FStream^.VMT^.GetPosition(Self^.FStream);
   I := 0;
   mChar := TLexer_PeekNextChar(Self);
-  While mChar^.Bytes[0] <> 0 Do
+  While Self^.CurrentCharSize <> 0 Do
   Begin
     TLexer_Forward(Self, 1);
     Inc(I);

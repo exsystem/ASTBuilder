@@ -109,7 +109,7 @@ Begin
   mNode := Self^.Root;
   mKey := PByte(Key);
   I := 0;
-  While I < TCharStrLen(Key) * SizeOf(TChar) Do
+  While I < TCharStrByteLen(Key) * SizeOf(TChar) Do
   Begin
     mNode := mNode^.Next[mKey^];
     If mNode = nil Then
@@ -137,7 +137,7 @@ Begin
   mNode := Self^.Root;
   mKey := PByte(Key);
   I := 0;
-  While I < TCharStrLen(Key) * SizeOf(TChar) Do
+  While I < TCharStrByteLen(Key) * SizeOf(TChar) Do
   Begin
     If mNode^.Next[mKey^] = nil Then
     Begin
@@ -196,7 +196,7 @@ Begin
     Exit;
   End;
 
-  If Depth = Succ(TCharStrLen(Key) * SizeOf(TChar)) Then
+  If Depth = Succ(TCharStrByteLen(Key) * SizeOf(TChar)) Then
   Begin
     If Root^.Leaf Then
     Begin

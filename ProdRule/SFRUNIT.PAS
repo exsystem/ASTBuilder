@@ -30,9 +30,10 @@ End;
 Function StringFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mToken: PToken;
-  I, J: TSize;
-  mCh: PTChar;
-  mEscaping: Boolean;
+  I, J, mEndByte, mCharSize, mNextCharSize: TSize;
+  mEncoding: TEncodingKind;
+  mAscii, mEscapedChar: Byte;
+  mEscapedBytes: Array[0..3] Of Byte;
 Label
   S1, S2;
 Begin
@@ -41,35 +42,49 @@ Begin
     Begin
       TNfa_Create(Nfa);
       mToken := TParser_GetCurrentToken(Parser);
-      mCh := CreateStr(1);
-      PByte(mCh)[1] := 0;
-
-      mEscaping := False;
-      I := 1;
+      mEncoding := TChar_GetEncoding(mToken^.Value);
+      mEndByte := TCharStrByteOffset(mToken^.Value,
+        TCharStrLen(mToken^.Value) - 1);
+      I := TCharStrByteOffset(mToken^.Value, 1);
       J := 0;
-      While I < TCharStrLen(mToken^.Value) - 1 Do
+      While I < mEndByte Do
       Begin
-        If mEscaping Then
+        If Not TChar_GetEncodedSize(mEncoding, @PByte(mToken^.Value)[I],
+          mEndByte - I, mCharSize) Then
+          mCharSize := 1;
+        If TChar_GetAsciiValue(mEncoding, @PByte(mToken^.Value)[I],
+          mCharSize, mAscii) And (mAscii = Ord('\')) Then
         Begin
-          mEscaping := False;
-          PByte(mCh)^ := EscapeChar(PByte(mToken^.Value)[I]);
+          Inc(I, mCharSize);
+          If I < mEndByte Then
+          Begin
+            If Not TChar_GetEncodedSize(mEncoding, @PByte(mToken^.Value)[I],
+              mEndByte - I, mNextCharSize) Then
+              mNextCharSize := 1;
+            If TChar_GetAsciiValue(mEncoding, @PByte(mToken^.Value)[I],
+              mNextCharSize, mAscii) Then
+            Begin
+              mEscapedChar := EscapeChar(mAscii);
+              If TChar_EncodeAscii(mEncoding, mEscapedChar,
+                @mEscapedBytes[0], mNextCharSize) Then
+                TNfa_AddEdgeSized(Nfa, PTChar(@mEscapedBytes[0]),
+                  mNextCharSize, mEncoding, J, J + 1);
+            End
+            Else
+              TNfa_AddEdgeSized(Nfa, PTChar(@PByte(mToken^.Value)[I]),
+                mNextCharSize, mEncoding, J, J + 1);
+            Inc(J);
+            Inc(I, mNextCharSize);
+          End;
         End
         Else
-        If PByte(mToken^.Value)[I] = Ord('\') Then
         Begin
-          mEscaping := True;
-          Inc(I);
-          Continue;
-        End
-        Else
-        Begin
-          PByte(mCh)^ := PByte(mToken^.Value)[I];
+          TNfa_AddEdgeSized(Nfa, PTChar(@PByte(mToken^.Value)[I]),
+            mCharSize, mEncoding, J, J + 1);
+          Inc(J);
+          Inc(I, mCharSize);
         End;
-        TNfa_AddEdge(Nfa, mCh, J, J + 1);
-        Inc(J);
-        Inc(I);
       End;
-      FreeStr(mCh);
       TNfa_GetState(Nfa, Nfa^.States^.Size - 1)^.Acceptable := True;
     End
     Else

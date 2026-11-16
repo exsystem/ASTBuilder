@@ -24,13 +24,62 @@ Uses
   TypeDef, IdNode, TrmNode, GrpNode,
   {$IFDEF USE_STRINGS}strings{$ELSE}SysUtils{$ENDIF}, StrUtil, GLEXER, GPARSER;
 
+Function DecodeCharLiteral(Value: PTChar; Bytes: PByte; Out ByteSize: TSize;
+  Out AsciiValue: Byte; Out IsAscii: Boolean): Boolean;
+Var
+  I, mEnd, mCharSize: TSize;
+  mEncoding: TEncodingKind;
+  mAscii: Byte;
+Begin
+  Result := False;
+  ByteSize := 0;
+  IsAscii := False;
+  If Value = nil Then
+    Exit;
+  mEncoding := TChar_GetEncoding(Value);
+  mEnd := TCharStrByteOffset(Value, TCharStrLen(Value) - 1);
+  I := TCharStrByteOffset(Value, 1);
+  If (I >= mEnd) Or Not TChar_GetEncodedSize(mEncoding,
+    @PByte(Value)[I], mEnd - I, mCharSize) Then
+    Exit;
+  If TChar_GetAsciiValue(mEncoding, @PByte(Value)[I], mCharSize, mAscii) And
+    (mAscii = Ord('\')) Then
+  Begin
+    Inc(I, mCharSize);
+    If (I >= mEnd) Or Not TChar_GetEncodedSize(mEncoding,
+      @PByte(Value)[I], mEnd - I, mCharSize) Then
+      Exit;
+    If TChar_GetAsciiValue(mEncoding, @PByte(Value)[I], mCharSize, mAscii) Then
+    Begin
+      mAscii := EscapeChar(mAscii);
+      If Not TChar_EncodeAscii(mEncoding, mAscii, Bytes, ByteSize) Then
+        Exit;
+    End
+    Else
+    Begin
+      Move(PByte(Value)[I], Bytes^, mCharSize);
+      ByteSize := mCharSize;
+    End;
+  End
+  Else
+  Begin
+    Move(PByte(Value)[I], Bytes^, mCharSize);
+    ByteSize := mCharSize;
+  End;
+  IsAscii := TChar_GetAsciiValue(mEncoding, Bytes, ByteSize, AsciiValue);
+  Result := True;
+End;
+
 { individualCharFactor -> TChar DoubleDots TChar }
 Function IndividualCharFactorRuleExpression1(Parser: PParser; Var Nfa: PNfa): Boolean;
 Var
   mSavePointS1: TSize;
   mFrom, mTo: PTChar;
-  mCh: Byte;
-  mChStr: PTChar;
+  mFromBytes, mToBytes, mChBytes: Array[0..3] Of Byte;
+  mFromSize, mToSize, mChSize: TSize;
+  mFromAscii, mToAscii, mCh: Byte;
+  mFromIsAscii, mToIsAscii: Boolean;
+  mEncoding: TEncodingKind;
 Label
   S1, S2, S3, S4;
 Begin
@@ -69,31 +118,33 @@ Begin
       Exit;
     End;
   S4:
-    If PByte(mFrom)[1] = Ord('\') Then
+    If Not DecodeCharLiteral(mFrom, @mFromBytes[0], mFromSize,
+      mFromAscii, mFromIsAscii) Or
+      Not DecodeCharLiteral(mTo, @mToBytes[0], mToSize,
+      mToAscii, mToIsAscii) Or Not mFromIsAscii Or Not mToIsAscii Then
     Begin
-      PByte(mFrom)[0] := EscapeChar(PByte(mFrom)[2]);
-    End
-    Else
-    Begin
-      PByte(mFrom)[0] := PByte(mFrom)[1];
+      FreeStr(mFrom);
+      FreeStr(mTo);
+      Parser^.FCurrentToken := mSavePointS1;
+      Result := False;
+      Exit;
     End;
-  If PByte(mTo)[1] = Ord('\') Then
-  Begin
-    PByte(mTo)[0] := EscapeChar(PByte(mTo)[2]);
-  End
-  Else
-  Begin
-    PByte(mTo)[0] := PByte(mTo)[1];
-  End;
+  mEncoding := TChar_GetEncoding(mFrom);
   TNfa_Create(Nfa);
-  mChStr := CreateStr(1);
-  PByte(mChStr)[1] := 0;
-  For mCh := PByte(mFrom)^ To PByte(mTo)^ Do
+  If mToAscii < mFromAscii Then
   Begin
-    PByte(mChStr)^ := mCh;
-    TNfa_AddEdge(Nfa, mChStr, 0, 1);
+    TNfa_Destroy(Nfa);
+    FreeStr(mFrom);
+    FreeStr(mTo);
+    Parser^.FCurrentToken := mSavePointS1;
+    Result := False;
+    Exit;
   End;
-  FreeStr(mChStr);
+  For mCh := mFromAscii To mToAscii Do
+  Begin
+    If TChar_EncodeAscii(mEncoding, mCh, @mChBytes[0], mChSize) Then
+      TNfa_AddEdgeSized(Nfa, PTChar(@mChBytes[0]), mChSize, mEncoding, 0, 1);
+  End;
   FreeStr(mFrom);
   FreeStr(mTo);
   TNfa_GetState(Nfa, 1)^.Acceptable := True;
@@ -105,8 +156,11 @@ Function IndividualCharFactorRuleExpression2(Parser: PParser; Var Nfa: PNfa): Bo
 Label
   S1, S2;
 Var
-  mCh: PTChar;
   mValue: PTChar;
+  mBytes: Array[0..3] Of Byte;
+  mByteSize: TSize;
+  mAscii: Byte;
+  mIsAscii: Boolean;
 Begin
   S1:
     If TGrammarParser_Term(Parser, eChar) Then
@@ -120,113 +174,145 @@ Begin
     End;
   S2:
     mValue := TParser_GetCurrentToken(Parser)^.Value;
-  TNfa_Create(Nfa);
-  mCh := CreateStr(1);
-  If PByte(mValue)[1] = Ord('\') Then
+  If Not DecodeCharLiteral(mValue, @mBytes[0], mByteSize,
+    mAscii, mIsAscii) Then
   Begin
-    PByte(mCh)[0] := EscapeChar(PByte(mValue)[2]);
-  End
-  Else
-  Begin
-    PByte(mCh)[0] := PByte(mValue)[1];
+    Result := False;
+    Exit;
   End;
-  PByte(mCh)[1] := 0;
-  TNfa_AddEdge(Nfa, mCh, 0, 1);
-  FreeStr(mCh);
+  TNfa_Create(Nfa);
+  TNfa_AddEdgeSized(Nfa, PTChar(@mBytes[0]), mByteSize,
+    TChar_GetEncoding(mValue), 0, 1);
   TNfa_GetState(Nfa, 1)^.Acceptable := True;
   Result := True;
 End;
 
 { TODO individualCharFactor -> CharSet ; [a-z\n\r] }
 Function IndividualCharFactorRuleExpression3(Parser: PParser; Var Nfa: PNfa): Boolean;
-Label
-  S1;
 Var
   mTerm: PTChar;
-  mChList: PTChar;
-  mSourceStart: PTChar;
-  mDestStart: PTChar;
-  mLength: TSize;
-  mCurr: PTChar;
-  mRangeMode: Boolean;
-  mCh: PTChar;
-Begin
-  S1:
-    If TGrammarParser_Term(Parser, eCharSet) Then
+  mEncoding: TEncodingKind;
+  mI, mEndByte, mAfterCurrent, mAfterNext, mAfterEnd: TSize;
+  mCurrent, mNext, mLast, mEncoded: Array[0..3] Of Byte;
+  mCurrentSize, mNextSize, mLastSize, mEncodedSize: TSize;
+  mCurrentAscii, mNextAscii, mLastAscii, mCode: Byte;
+  mCurrentIsAscii, mNextIsAscii, mLastIsAscii, mHasNext: Boolean;
+  mNextEscaped, mIgnoredEscaped: Boolean;
+  Function ReadSetChar(Var Offset: TSize; Bytes: PByte;
+    Var ByteSize: TSize; Var AsciiValue: Byte;
+    Var IsAscii, IsEscaped: Boolean): Boolean;
+  Var
+    mCharSize: TSize;
+    mValue: Byte;
+  Begin
+    Result := False;
+    IsAscii := False;
+    IsEscaped := False;
+    ByteSize := 0;
+    If (Offset >= mEndByte) Or Not TChar_GetEncodedSize(mEncoding,
+      @PByte(mTerm)[Offset], mEndByte - Offset, mCharSize) Then
+      Exit;
+    If TChar_GetAsciiValue(mEncoding, @PByte(mTerm)[Offset], mCharSize,
+      mValue) And (mValue = Ord('\')) Then
     Begin
-      mTerm := TParser_GetCurrentToken(Parser)^.Value;
-      mCurr := SubStr(mTerm, 1, TCharStrLen(mTerm) - 2);
-      mChList := CreateStr(TCharStrLen(mCurr));
-      mSourceStart := mCurr;
-      mDestStart := mChList;
-      mLength := 0;
-      mCh := mCurr;
-      While PByte(mCh)^ <> 0 Do
+      IsEscaped := True;
+      Inc(Offset, mCharSize);
+      If (Offset >= mEndByte) Or Not TChar_GetEncodedSize(mEncoding,
+        @PByte(mTerm)[Offset], mEndByte - Offset, mCharSize) Then
+        Exit;
+      If TChar_GetAsciiValue(mEncoding, @PByte(mTerm)[Offset], mCharSize,
+        mValue) Then
       Begin
-        If PByte(mCh)^ = Ord('\') Then
+        mValue := EscapeChar(mValue);
+        Result := TChar_EncodeAscii(mEncoding, mValue, Bytes, ByteSize);
+        If Result Then
         Begin
-          Move(mSourceStart^, mDestStart^, mLength * SizeOf(TChar));
-          Inc(mDestStart, mLength);
-          Inc(mCh);
-          PByte(mCh)^ := EscapeChar(PByte(mCh)^);
-          mSourceStart := mCh;
-          mLength := 0;
+          AsciiValue := mValue;
+          IsAscii := True;
         End;
-        Inc(mLength);
-        Inc(mCh);
+      End
+      Else
+      Begin
+        Move(PByte(mTerm)[Offset], Bytes^, mCharSize);
+        ByteSize := mCharSize;
+        IsAscii := TChar_GetAsciiValue(mEncoding, Bytes, ByteSize, AsciiValue);
+        Result := True;
       End;
-      Move(mSourceStart^, mDestStart^, mLength * SizeOf(TChar));
-      Inc(mDestStart, mLength);
-      PByte(mDestStart)^ := 0;
-      FreeStr(mCurr);
-
-      mSourceStart := mChList;
-      mCurr := mChList;
-      mRangeMode := False;
-      TNfa_Create(Nfa);
-      mCh := CreateStr(1);
-      PByte(mCh)[1] := 0;
-      Repeat
-        If PByte(mCurr)^ = Ord('-') Then
-        Begin
-          mRangeMode := True;
-        End
-        Else
-        Begin
-          If mRangeMode Then
-          Begin
-            PByte(mCh)^ := PByte(mSourceStart)^;
-            Inc(PByte(mCh)^);
-            While PByte(mCh)^ <> PByte(mCurr)^ Do
-            Begin
-              TNfa_AddEdge(Nfa, mCh, 0, 1);
-              Inc(PByte(mCh)^);
-            End;
-            TNfa_AddEdge(Nfa, mCh, 0, 1);
-            mRangeMode := False;
-          End
-          Else
-          Begin
-            PByte(mCh)^ := PByte(mCurr)^;
-            TNfa_AddEdge(Nfa, mCh, 0, 1);
-            mSourceStart := mCurr;
-          End;
-        End;
-
-        Inc(mCurr);
-      Until mCurr = mDestStart;
-
-      FreeStr(mCh);
-      PByte(mDestStart)^ := Ord('.');
-      FreeStr(mChList);
-      TNfa_GetState(Nfa, 1)^.Acceptable := True;
-      Result := True;
+      Inc(Offset, mCharSize);
     End
     Else
     Begin
-      Result := False;
-      Exit;
+      Move(PByte(mTerm)[Offset], Bytes^, mCharSize);
+      ByteSize := mCharSize;
+      IsAscii := TChar_GetAsciiValue(mEncoding, Bytes, ByteSize, AsciiValue);
+      Inc(Offset, mCharSize);
+      Result := True;
     End;
+  End;
+Begin
+  If Not TGrammarParser_Term(Parser, eCharSet) Then
+  Begin
+    Result := False;
+    Exit;
+  End;
+  mTerm := TParser_GetCurrentToken(Parser)^.Value;
+  mEncoding := TChar_GetEncoding(mTerm);
+  mEndByte := TCharStrByteOffset(mTerm, TCharStrLen(mTerm) - 1);
+  mI := TCharStrByteOffset(mTerm, 1);
+  TNfa_Create(Nfa);
+  Result := True;
+  While mI < mEndByte Do
+  Begin
+    mAfterCurrent := mI;
+    If Not ReadSetChar(mAfterCurrent, @mCurrent[0], mCurrentSize,
+      mCurrentAscii, mCurrentIsAscii, mIgnoredEscaped) Then
+    Begin
+      Result := False;
+      Break;
+    End;
+    mAfterNext := mAfterCurrent;
+    mHasNext := ReadSetChar(mAfterNext, @mNext[0], mNextSize,
+      mNextAscii, mNextIsAscii, mNextEscaped);
+    If mHasNext And Not mNextEscaped And mNextIsAscii And
+      (mNextAscii = Ord('-')) Then
+    Begin
+      mAfterEnd := mAfterNext;
+      If ReadSetChar(mAfterEnd, @mLast[0], mLastSize,
+        mLastAscii, mLastIsAscii, mIgnoredEscaped) Then
+      Begin
+        If mCurrentIsAscii And mLastIsAscii And
+          (mLastAscii >= mCurrentAscii) Then
+        Begin
+          For mCode := mCurrentAscii To mLastAscii Do
+          Begin
+            If TChar_EncodeAscii(mEncoding, mCode, @mEncoded[0], mEncodedSize) Then
+              TNfa_AddEdgeSized(Nfa, PTChar(@mEncoded[0]), mEncodedSize,
+                mEncoding, 0, 1);
+          End;
+        End
+        Else
+        Begin
+          TNfa_AddEdgeSized(Nfa, PTChar(@mCurrent[0]), mCurrentSize,
+            mEncoding, 0, 1);
+          TNfa_AddEdgeSized(Nfa, PTChar(@mNext[0]), mNextSize,
+            mEncoding, 0, 1);
+          TNfa_AddEdgeSized(Nfa, PTChar(@mLast[0]), mLastSize,
+            mEncoding, 0, 1);
+        End;
+        mI := mAfterEnd;
+        Continue;
+      End;
+    End;
+    TNfa_AddEdgeSized(Nfa, PTChar(@mCurrent[0]), mCurrentSize,
+      mEncoding, 0, 1);
+    mI := mAfterCurrent;
+  End;
+  If Not Result Then
+  Begin
+    TNfa_Destroy(Nfa);
+    Exit;
+  End;
+  TNfa_GetState(Nfa, 1)^.Acceptable := True;
 End;
 
 { individualCharFactor -> Dot ; }

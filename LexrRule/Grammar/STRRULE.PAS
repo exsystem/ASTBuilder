@@ -25,7 +25,7 @@ Label
   S1, S2, S3, S4;
 Begin
   S1:
-    If TLexer_PeekNextChar(Lexer)^.Bytes[0] = Ord('''') Then
+    If TLexer_GetCurrentAsciiChar(Lexer) = Ord('''') Then
     Begin
       TLexer_Forward(Lexer, 1);
       mOffset := 1;
@@ -36,20 +36,20 @@ Begin
       Exit;
     End;
   S2:
-    If TLexer_PeekNextChar(Lexer)^.Bytes[0] = Ord('''') Then
+    If TLexer_GetCurrentAsciiChar(Lexer) = Ord('''') Then
     Begin
       Lexer^.CurrentToken.StartPos := TLexer_GetNextPos(Lexer) - mOffset;
       TLexer_Forward(Lexer, 1);
       { Inc(mOffset); }
       Goto S4;
     End
-    Else If TLexer_PeekNextChar(Lexer)^.Bytes[0] = Ord('\') Then
+    Else If TLexer_GetCurrentAsciiChar(Lexer) = Ord('\') Then
     Begin
       TLexer_Forward(Lexer, 1);
       Inc(mOffset);
       Goto S3;
     End
-    Else If TLexer_PeekNextChar(Lexer)^.Bytes[0] <> 0 Then
+    Else If TLexer_GetCurrentAsciiChar(Lexer) <> 0 Then
     Begin
       TLexer_Forward(Lexer, 1);
       Inc(mOffset);
@@ -62,7 +62,7 @@ Begin
       Exit;
     End;
   S3:
-    If TLexer_PeekNextChar(Lexer)^.Bytes[0] <> 0 Then
+    If TLexer_GetCurrentAsciiChar(Lexer) <> 0 Then
     Begin
       TLexer_Forward(Lexer, 1);
       Inc(mOffset);

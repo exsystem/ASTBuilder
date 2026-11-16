@@ -18,7 +18,7 @@ Uses
 
 Function Parse(Lexer: PLexer): Boolean;
 Begin
-  Result := (TLexer_PeekNextChar(Lexer)^.Bytes[0] = 0);
+  Result := (TLexer_GetCurrentAsciiChar(Lexer) = 0);
   If Result Then
   Begin
     FreeStr(Lexer^.CurrentToken.Value);

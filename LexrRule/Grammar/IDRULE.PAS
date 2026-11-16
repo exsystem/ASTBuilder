@@ -18,8 +18,10 @@ Uses
 Function Parse(Lexer: PLexer): Boolean;
 Var
   I: TSize;
+  mAscii: Integer;
 Begin
-  If Not IsNonTermIdInitialChar(TLexer_PeekNextChar(Lexer)^.Bytes[0]) Then
+  mAscii := TLexer_GetCurrentAsciiChar(Lexer);
+  If (mAscii < 0) Or Not IsNonTermIdInitialChar(Byte(mAscii)) Then
   Begin
     Result := False;
     Exit;
@@ -29,8 +31,11 @@ Begin
   Lexer^.CurrentToken.StartPos := TLexer_GetNextPos(Lexer);
   TLexer_Forward(Lexer, 1);
   I := 1;
-  While IsIdChar(TLexer_PeekNextChar(Lexer)^.Bytes[0]) Do
+  While True Do
   Begin
+    mAscii := TLexer_GetCurrentAsciiChar(Lexer);
+    If (mAscii < 0) Or Not IsIdChar(Byte(mAscii)) Then
+      Break;
     TLexer_Forward(Lexer, 1);
     Inc(I);
   End;

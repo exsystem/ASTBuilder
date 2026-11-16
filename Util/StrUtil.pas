@@ -17,10 +17,19 @@ Function Lower(Const Ch: Byte): Byte;
 Function IsTermIdInitialChar(Const Ch: Byte): Boolean;
 Function IsNonTermIdInitialChar(Const Ch: Byte): Boolean;
 Function EscapeChar(Source: Byte): Byte;
-Function TCharStrLen(S: PTChar): TSize;
+Function TCharStrLen(S: PTChar): TSize; { Encoded character count }
+Function TCharStrByteLen(S: PTChar): TSize;
+Function TCharStrCharCount(S: PTChar): TSize;
+Function TCharStrByteOffset(S: PTChar; CharOffset: TSize): TSize;
+Function TCharStrAnsiByteLen(Const Source: AnsiString;
+  Encoding: TEncodingKind): TSize;
 Function TCharStrToAnsiString(S: PTChar): AnsiString;
 Function TCharStrNew(Const Source: PTChar): PTChar; Overload;
 Function TCharStrNew(Const Source: AnsiString): PTChar; Overload;
+Function TCharStrNewAnsiEncoded(Const Source: AnsiString;
+  Encoding: TEncodingKind): PTChar;
+Function TCharStrNewEncoded(Const Source: AnsiString;
+  Encoding: TEncodingKind): PTChar;
 Function TCharStrComp(Const LHS, RHS: PTChar): Integer; Overload;
 Function TCharStrComp(Const LHS: PTChar; Const RHS: AnsiString): Integer; Overload;
 Function TCharStrCopy(Dest, Source: PTChar): PTChar; Overload;
@@ -28,6 +37,7 @@ Function TCharStrCopy(Dest: PTChar; Const Source: AnsiString): PTChar; Overload;
 Function TCharStrCat(Dest, Source: PTChar): PTChar; Overload;
 Function TCharStrCat(Dest: PTChar; Const Source: AnsiString): PTChar; Overload;
 Function CreateStr(Len: TSize): PTChar;
+Function CreateStrEncoded(Len: TSize; Encoding: TEncodingKind): PTChar;
 Function ReallocStr(S: PTChar; Len: TSize): PTChar;
 Procedure FreeStr(S: PTChar);
 Function SubStr(S: PTChar; FromIndex: TSize; Len: TSize): PTChar;
@@ -92,26 +102,94 @@ Begin
   End;
 End;
 
-Function TCharStrLen(S: PTChar): TSize;
+Function TCharStrByteLen(S: PTChar): TSize;
 Var
-  mByte: PByte;
+  I, mByteLength, mCharSize: TSize;
+  mEncoding: TEncodingKind;
 Begin
   Result := 0;
   If S = nil Then
     Exit;
-  mByte := PByte(S);
-  While mByte^ <> 0 Do
+  mEncoding := TChar_GetEncoding(S);
+  mByteLength := TChar_GetByteLength(S);
+  I := 0;
+  While I < mByteLength Do
   Begin
-    Inc(Result);
-    Inc(mByte);
+    If (mEncoding In [ekASCII, ekUTF8, ekGBK]) And (PByte(S)[I] = 0) Then
+      Break;
+    If (mEncoding In [ekUTF16LE, ekUTF16BE]) And
+      (I + 1 < mByteLength) And (PByte(S)[I] = 0) And
+      (PByte(S)[I + 1] = 0) Then
+      Break;
+    If Not TChar_GetEncodedSize(mEncoding, @PByte(S)[I],
+      mByteLength - I, mCharSize) Then
+      mCharSize := 1;
+    Inc(I, mCharSize);
   End;
+  Result := I;
+End;
+
+Function TCharStrLen(S: PTChar): TSize;
+Var
+  I, mCharSize, mByteLength: TSize;
+  mEncoding: TEncodingKind;
+Begin
+  Result := 0;
+  If S = nil Then
+    Exit;
+  mEncoding := TChar_GetEncoding(S);
+  mByteLength := TCharStrByteLen(S);
+  I := 0;
+  While I < mByteLength Do
+  Begin
+    If Not TChar_GetEncodedSize(mEncoding, @PByte(S)[I],
+      mByteLength - I, mCharSize) Then
+      mCharSize := 1;
+    Inc(Result);
+    Inc(I, mCharSize);
+  End;
+End;
+
+Function TCharStrCharCount(S: PTChar): TSize;
+Begin
+  Result := TCharStrLen(S);
+End;
+
+Function TCharStrByteOffset(S: PTChar; CharOffset: TSize): TSize;
+Var
+  I, mByteLength, mCharSize, mCharCount: TSize;
+  mEncoding: TEncodingKind;
+Begin
+  Result := 0;
+  If S = nil Then
+    Exit;
+  mEncoding := TChar_GetEncoding(S);
+  mByteLength := TCharStrByteLen(S);
+  mCharCount := 0;
+  While (Result < mByteLength) And (mCharCount < CharOffset) Do
+  Begin
+    I := Result;
+    If Not TChar_GetEncodedSize(mEncoding, @PByte(S)[I],
+      mByteLength - I, mCharSize) Then
+      mCharSize := 1;
+    Inc(Result, mCharSize);
+    Inc(mCharCount);
+  End;
+End;
+
+Function TCharStrAnsiByteLen(Const Source: AnsiString;
+  Encoding: TEncodingKind): TSize;
+Begin
+  Result := Length(Source);
+  If Encoding In [ekUTF16LE, ekUTF16BE] Then
+    Result := Result * 2;
 End;
 
 Function TCharStrToAnsiString(S: PTChar): AnsiString;
 Var
   mLength: TSize;
 Begin
-  mLength := TCharStrLen(S);
+  mLength := TCharStrByteLen(S);
   SetLength(Result, mLength);
   If mLength > 0 Then
     Move(S^, Result[1], mLength);
@@ -120,47 +198,82 @@ End;
 Function TCharStrNew(Const Source: PTChar): PTChar;
 Var
   mLength: TSize;
+  mEncoding: TEncodingKind;
 Begin
   If Source = nil Then
   Begin
     Result := nil;
     Exit;
   End;
-  mLength := TCharStrLen(Source);
-  Result := CreateStr(mLength);
+  mLength := TCharStrByteLen(Source);
+  mEncoding := TChar_GetEncoding(Source);
+  Result := CreateStrEncoded(mLength, mEncoding);
   If mLength > 0 Then
     Move(Source^, Result^, mLength);
+  TChar_SetByteLength(Result, mLength);
 End;
 
 Function TCharStrNew(Const Source: AnsiString): PTChar;
+Begin
+  Result := TCharStrNewEncoded(Source, ekUTF8);
+End;
+
+Function TCharStrNewAnsiEncoded(Const Source: AnsiString;
+  Encoding: TEncodingKind): PTChar;
+Begin
+  Result := CreateStrEncoded(TCharStrAnsiByteLen(Source, Encoding), Encoding);
+  TCharStrCat(Result, Source);
+End;
+
+Function TCharStrNewEncoded(Const Source: AnsiString;
+  Encoding: TEncodingKind): PTChar;
 Var
   mLength: TSize;
 Begin
   mLength := Length(Source);
-  Result := CreateStr(mLength);
+  Result := CreateStrEncoded(mLength, Encoding);
   If mLength > 0 Then
     Move(Source[1], Result^, mLength);
+  TChar_SetByteLength(Result, mLength);
 End;
 
 Function TCharStrComp(Const LHS, RHS: PTChar): Integer;
 Var
   mLeft, mRight: PByte;
+  I, mLeftLength, mRightLength: TSize;
 Begin
+  mLeftLength := TCharStrByteLen(LHS);
+  mRightLength := TCharStrByteLen(RHS);
   mLeft := PByte(LHS);
   mRight := PByte(RHS);
-  While (mLeft^ = mRight^) And (mLeft^ <> 0) Do
+  I := 0;
+  While (I < mLeftLength) And (I < mRightLength) And (mLeft^ = mRight^) Do
   Begin
     Inc(mLeft);
     Inc(mRight);
+    Inc(I);
   End;
-  Result := Integer(mLeft^)-Integer(mRight^);
+  If I < mLeftLength Then
+  Begin
+    If I < mRightLength Then
+      Result := Integer(mLeft^) - Integer(mRight^)
+    Else
+      Result := Integer(mLeft^);
+  End
+  Else If I < mRightLength Then
+    Result := -Integer(mRight^)
+  Else
+    Result := 0;
 End;
 
 Function TCharStrComp(Const LHS: PTChar; Const RHS: AnsiString): Integer;
 Var
   mRight: PTChar;
 Begin
-  mRight := TCharStrNew(RHS);
+  If LHS = nil Then
+    mRight := TCharStrNew(RHS)
+  Else
+    mRight := TCharStrNewAnsiEncoded(RHS, TChar_GetEncoding(LHS));
   Result := TCharStrComp(LHS, mRight);
   FreeStr(mRight);
 End;
@@ -170,10 +283,10 @@ Var
   mLength: TSize;
 Begin
   Result := Dest;
-  mLength := TCharStrLen(Source);
+  mLength := TCharStrByteLen(Source);
   If mLength > 0 Then
     Move(Source^, Dest^, mLength);
-  PByte(Dest)[mLength] := 0;
+  TChar_SetByteLength(Dest, mLength);
 End;
 
 Function TCharStrCopy(Dest: PTChar; Const Source: AnsiString): PTChar;
@@ -184,7 +297,7 @@ Begin
   mLength := Length(Source);
   If mLength > 0 Then
     Move(Source[1], Dest^, mLength);
-  PByte(Dest)[mLength] := 0;
+  TChar_SetByteLength(Dest, mLength);
 End;
 
 Function TCharStrCat(Dest, Source: PTChar): PTChar;
@@ -192,55 +305,96 @@ Var
   mOffset, mLength: TSize;
 Begin
   Result := Dest;
-  mOffset := TCharStrLen(Dest);
-  mLength := TCharStrLen(Source);
+  mOffset := TCharStrByteLen(Dest);
+  mLength := TCharStrByteLen(Source);
   If mLength > 0 Then
     Move(Source^, PByte(Dest)[mOffset], mLength);
-  PByte(Dest)[mOffset + mLength] := 0;
+  TChar_SetByteLength(Dest, mOffset + mLength);
 End;
 
 Function TCharStrCat(Dest: PTChar; Const Source: AnsiString): PTChar;
 Var
-  mOffset, mLength: TSize;
+  mOffset, mLength, I: TSize;
+  mEncoding: TEncodingKind;
 Begin
   Result := Dest;
-  mOffset := TCharStrLen(Dest);
-  mLength := Length(Source);
-  If mLength > 0 Then
-    Move(Source[1], PByte(Dest)[mOffset], mLength);
-  PByte(Dest)[mOffset + mLength] := 0;
+  mOffset := TCharStrByteLen(Dest);
+  mEncoding := TChar_GetEncoding(Dest);
+  If mEncoding In [ekUTF16LE, ekUTF16BE] Then
+  Begin
+    mLength := Length(Source) * 2;
+    For I := 1 To Length(Source) Do
+    Begin
+      If mEncoding = ekUTF16LE Then
+      Begin
+        PByte(Dest)[mOffset + (I - 1) * 2] := Byte(Source[I]);
+        PByte(Dest)[mOffset + (I - 1) * 2 + 1] := 0;
+      End
+      Else
+      Begin
+        PByte(Dest)[mOffset + (I - 1) * 2] := 0;
+        PByte(Dest)[mOffset + (I - 1) * 2 + 1] := Byte(Source[I]);
+      End;
+    End;
+  End
+  Else
+  Begin
+    mLength := Length(Source);
+    If mLength > 0 Then
+      Move(Source[1], PByte(Dest)[mOffset], mLength);
+  End;
+  TChar_SetByteLength(Dest, mOffset + mLength);
 End;
 
 Function CreateStr(Len: TSize): PTChar;
 Begin
-  GetMem(Result, Len + 1);
-  FillChar(Result^, Len + 1, 0);
+  Result := CreateStrEncoded(Len, ekUTF8);
+End;
+
+Function CreateStrEncoded(Len: TSize; Encoding: TEncodingKind): PTChar;
+Var
+  mTerminatorSize: TSize;
+Begin
+  If Encoding In [ekUTF16LE, ekUTF16BE] Then
+    mTerminatorSize := 2
+  Else
+    mTerminatorSize := 1;
+  Result := TChar_AllocateEncoded(Len + mTerminatorSize, Encoding);
+  FillChar(Result^, Len + mTerminatorSize, 0);
+  TChar_SetByteLength(Result, 0);
 End;
 
 Function ReallocStr(S: PTChar; Len: TSize): PTChar;
 Var
   mLength: TSize;
+  mEncoding: TEncodingKind;
 Begin
-  Result := CreateStr(Len);
-  mLength := TCharStrLen(S);
+  If S = nil Then
+    mEncoding := ekUTF8
+  Else
+    mEncoding := TChar_GetEncoding(S);
+  Result := CreateStrEncoded(Len, mEncoding);
+  mLength := TCharStrByteLen(S);
   If mLength > Len Then
     mLength := Len;
   If mLength > 0 Then
     Move(S^, Result^, mLength);
+  TChar_SetByteLength(Result, mLength);
   FreeStr(S);
 End;
 
 Procedure FreeStr(S: PTChar);
 Begin
   If S <> nil Then
-    FreeMem(S);
+    TChar_Deallocate(S);
 End;
 
 Function SubStr(S: PTChar; FromIndex: TSize; Len: TSize): PTChar;
 Begin
-  Result := CreateStr(Len);
+  Result := CreateStrEncoded(Len, TChar_GetEncoding(S));
   If Len > 0 Then
     Move(PByte(S)[FromIndex], Result^, Len);
+  TChar_SetByteLength(Result, Len);
 End;
 
 End.

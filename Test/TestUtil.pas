@@ -5,7 +5,7 @@ Unit TestUtil;
 Interface
 
 Uses
-  {$IFDEF VINTAGE}WinCrt, {$ENDIF} Lexer, GLexer, Stream, TypeDef;
+  {$IFDEF VINTAGE}WinCrt, {$ENDIF} Lexer, GLexer, Stream, StreamReader, TypeDef;
 
 Function PropmtForFile(Prompt: PTChar; DefaultFilePath: PTChar): PStream; Overload;
 Function PropmtForFile(Const Prompt, DefaultFilePath: AnsiString): PStream; Overload;
@@ -41,7 +41,7 @@ Begin
   {$IFDEF FPC}
   mFilePath := 'Test/TestCase/' + mFilePath;
   {$ENDIF}
-  TFileStream_Create(PFileStream(Result), mFilePath);
+  TStreamReader_Create(PStreamReader(Result), mFilePath);
 End;
 
 Function PropmtForFile(Const Prompt, DefaultFilePath: AnsiString): PStream;
