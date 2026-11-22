@@ -12,20 +12,15 @@ This directory contains a syntax highlighting plugin for Pascal files that uses 
 
 ## Requirements
 
-- ASTBuilder executable
-- A grammar plugin library (.dylib on macOS, .so on Linux)
+- Free Pascal Compiler (`fpc`) to build ASTBuilder
+- A C compiler (`cc`) to build the grammar plugin
+- Vim
 
 ## Installation
 
-1. Copy the contents of this directory to your Vim syntax directory:
-   - Unix/Linux: `~/.vim/syntax/`
-   - macOS: `~/Library/Vim/syntax/`
-   - Windows: `vimfiles\syntax\`
-
-2. Or if using a plugin manager like vim-plug, add:
-   ```vim
-   Plug 'path/to/this/directory'
-   ```
+Run `./install.sh` from this directory. The script builds ASTBuilder and the
+encoding-aware C grammar plugin from this repository, then installs them with
+the Pascal syntax and file-detection scripts under `~/.vim`.
 
 ## How It Works
 
@@ -79,15 +74,18 @@ These files are automatically cleaned up after highlighting is applied.
 
 ## Notes
 
-- The plugin requires ASTBuilder to be installed and accessible
+- The installer builds the current ASTBuilder executable and `libpascal`
+  (`.dylib` on macOS, `.so` on Linux); it does not use a prebuilt plugin binary.
+- The parser defaults to UTF-8. Set the global encoding in the application
+  before parsing to test another encoding.
 - For Heredoc support, ensure your grammar includes START_HEREDOC and HEREDOC_TEXT rules
 - All highlighting is derived from AST token names, not regex patterns
 
 ## Known Issues
 
-- ASTBuilder may crash with an access violation when using certain grammar plugins (issue in ASTBuilder itself)
-- The pre-built `libpascal.dylib` from the Grammar directory may cause crashes with some test files
-- As a workaround, syntax highlighting can still work without the grammar plugin for basic Pascal files
+- Other custom grammar plugins may still trigger ASTBuilder failures; this
+  installer rebuilds the in-repository Pascal example plugin.
+- Basic Pascal syntax highlighting can work without a grammar plugin.
 
 ## License
 
