@@ -2,6 +2,7 @@
 
 Program TestStreamReader;
 
+{$MODE DELPHI}
 {$APPTYPE CONSOLE}
 {$H+}{ Enable long strings (AnsiString) }
 
@@ -20,16 +21,38 @@ Var
   mInfo: TEncodingInfo;
   I: Integer;
   mChString: String;
+  mGlobalReadTest: Boolean;
 
 Begin
   WriteLn('=== StreamReader Test ===');
   WriteLn;
 
+  TChar_SetGlobalEncoding(ekGBK);
+  TStreamReader_Create(mReader, 'TestCase/test_chinese_utf8.txt');
+  If mReader^.Parent.Encoding <> ekGBK Then
+    Halt(10);
+  TStreamReader_Destroy(PStream(mReader));
+
+  mGlobalReadTest := False;
+  mReader := nil;
+  Try
+    TStreamReader_Create(mReader, 'TestCase/test_chinese_utf8.txt', ekUTF8);
+  Except
+    On E: EConvertError Do
+      mGlobalReadTest := True;
+  End;
+  If Not mGlobalReadTest Then
+  Begin
+    TStreamReader_Destroy(PStream(mReader));
+    Halt(11);
+  End;
+  TChar_SetGlobalEncoding(ekUTF8);
+
   { Test 1: Read Chinese UTF-8 file }
   WriteLn('Test 1: Reading Chinese UTF-8 file');
   WriteLn('-----------------------------------');
 
-  TStreamReader_Create(mReader, 'TestCase/test_chinese_utf8.txt', ekUTF8);
+  TStreamReader_Create(mReader, 'TestCase/test_chinese_utf8.txt');
 
   { Read all text }
   If TStreamReader_ReadAllText(mReader, mText) > 0 Then
@@ -47,7 +70,7 @@ Begin
   WriteLn('Test 2: Reading character by character (raw bytes)');
   WriteLn('----------------------------------------------------');
 
-  TStreamReader_Create(mReader, 'TestCase/test_chinese_utf8.txt', ekUTF8);
+  TStreamReader_Create(mReader, 'TestCase/test_chinese_utf8.txt');
 
   Write('First 15 characters: ');
   For I := 1 To 15 Do
@@ -71,7 +94,7 @@ Begin
   WriteLn('Test 3: Reading line by line');
   WriteLn('------------------------------');
 
-  TStreamReader_Create(mReader, 'TestCase/test_chinese_utf8.txt', ekUTF8);
+  TStreamReader_Create(mReader, 'TestCase/test_chinese_utf8.txt');
 
   WriteLn('Lines:');
   While TStreamReader_ReadLine(mReader, mLine) Do
@@ -97,7 +120,7 @@ Begin
   WriteLn('Test 5: Reading character by character (as strings)');
   WriteLn('------------------------------------------------------');
 
-  TStreamReader_Create(mReader, 'TestCase/test_chinese_utf8.txt', ekUTF8);
+  TStreamReader_Create(mReader, 'TestCase/test_chinese_utf8.txt');
 
   Write('All characters as strings: ');
   While TStreamReader_ReadCharToString(mReader, mChString) Do

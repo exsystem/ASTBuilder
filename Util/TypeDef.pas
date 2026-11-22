@@ -47,6 +47,8 @@ Type
 
 Function TChar_Allocate(Const ByteSize: TSize): PTChar;
 Procedure TChar_Deallocate(Var Self: PTChar);
+Function TChar_GetGlobalEncoding: TEncodingKind;
+Procedure TChar_SetGlobalEncoding(Encoding: TEncodingKind);
 Function TChar_AllocateEncoded(Const ByteSize: TSize; Encoding: TEncodingKind): PTChar;
 Procedure TChar_AllocateEncodedDeallocate(Var Self: PTChar; Encoding: TEncodingKind);
 Function TChar_GetEncoding(Self: PTChar): TEncodingKind;
@@ -100,28 +102,48 @@ Begin
   End;
 End;
 
-Function TChar_GetEncoding(Self: PTChar): TEncodingKind;
+Function TChar_GetGlobalEncoding: TEncodingKind;
 Begin
   Result := GlobalEncoding;
 End;
 
+Procedure TChar_SetGlobalEncoding(Encoding: TEncodingKind);
+Begin
+  GlobalEncoding := Encoding;
+End;
+
+Function TChar_GetEncoding(Self: PTChar): TEncodingKind;
+Begin
+  Result := TChar_GetGlobalEncoding;
+End;
+
 Procedure TChar_SetEncoding(Self: PTChar; Encoding: TEncodingKind);
 Begin
-  // 当前实现中，编码是全局设置的，不需要为每个字符单独存储
+  { Compatibility wrapper: encoding is process-wide, not stored per character. }
+  TChar_SetGlobalEncoding(Encoding);
 End;
 
 Function TChar_GetByteLength(Self: PTChar): TSize;
 Var
   I, mCharSize: TSize;
+  mEncoding: TEncodingKind;
 Begin
   Result := 0;
   if Self = nil then Exit;
-  
-  // 计算所有有效字符的总字节数
+
+  mEncoding := TChar_GetGlobalEncoding;
   I := 0;
-  while TChar_GetEncodedSize(GlobalEncoding, @PByte(Self)[I], 
-      MaxInt - I, mCharSize) do
-  begin
+  While True Do
+  Begin
+    If (mEncoding In [ekUTF16LE, ekUTF16BE]) And
+      (PByte(Self)[I] = 0) And (PByte(Self)[I + 1] = 0) Then
+      Break;
+    If Not (mEncoding In [ekUTF16LE, ekUTF16BE]) And
+      (PByte(Self)[I] = 0) Then
+      Break;
+    If Not TChar_GetEncodedSize(mEncoding, @PByte(Self)[I],
+      MaxInt - I, mCharSize) Then
+      Break;
     Inc(Result, mCharSize);
     Inc(I, mCharSize);
   end;

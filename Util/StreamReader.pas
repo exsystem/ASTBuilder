@@ -37,8 +37,9 @@ Function TStreamReader_GetUTF16CharSize(FirstByte, SecondByte: Byte;
   TStreamReader API functions
 ============================================================ }
 
+Procedure TStreamReader_Create(Var Self: PStreamReader; Filename: String); Overload;
 Procedure TStreamReader_Create(Var Self: PStreamReader; Filename: String;
-  Encoding: TEncodingKind = ekUTF8);
+  Encoding: TEncodingKind); Overload;
 Procedure TStreamReader_Destroy(Const Self: PStream);
 { Read a character as raw bytes, returns number of bytes read (0 = EOF) }
 Function TStreamReader_ReadChar(Const Self: PStreamReader; Const Ch: PByte;
@@ -551,20 +552,26 @@ Begin
 End;
 
 Procedure TStreamReader_Create(Var Self: PStreamReader; Filename: String;
-  Encoding: TEncodingKind = ekUTF8);
+  Encoding: TEncodingKind); Overload;
 Var
   mInfo: TEncodingInfo;
+  mHasBom: Boolean;
 Begin
-  New(Self);
+  If Encoding <> TChar_GetGlobalEncoding Then
+    Raise EConvertError.CreateFmt(
+      'Stream encoding (%d) does not match the global encoding (%d).',
+      [Ord(Encoding), Ord(TChar_GetGlobalEncoding)]);
 
-  mInfo.Kind := ekUTF8;
+  mInfo.Kind := Encoding;
   mInfo.BOMSize := 0;
-  { Detect encoding if ekUTF8 (default) }
-  If TStreamReader_DetectEncoding(Filename, mInfo) Then
-  Begin
-    If Encoding = ekUTF8 Then
-      Encoding := mInfo.Kind;
-  End;
+  mHasBom := TStreamReader_DetectEncoding(Filename, mInfo);
+  If mHasBom And (mInfo.BOMSize > 0) And (mInfo.Kind <> Encoding) Then
+    Raise EConvertError.CreateFmt(
+      'File encoding (%s) does not match the global encoding (%s).',
+      [TStreamReader_GetEncodingName(mInfo.Kind),
+       TStreamReader_GetEncodingName(Encoding)]);
+
+  New(Self);
 
   Self^.FEncoding := Encoding;
   Self^.Parent.Encoding := Encoding;
@@ -575,7 +582,7 @@ Begin
 
   { Skip a BOM only when it matches the selected encoding. }
   Self^.FByteStart := 0;
-  If Encoding = mInfo.Kind Then
+  If mHasBom And (Encoding = mInfo.Kind) Then
   Begin
     Self^.FByteStart := mInfo.BOMSize;
     Seek(Self^.FFile, Self^.FByteStart);
@@ -587,6 +594,11 @@ Begin
   Self^.FCharBytePositions[0] := Self^.FByteStart;
   Self^.FCharBytePositionCount := 1;
   Self^.Parent.VMT := @mTStreamReader_VMT;
+End;
+
+Procedure TStreamReader_Create(Var Self: PStreamReader; Filename: String); Overload;
+Begin
+  TStreamReader_Create(Self, Filename, TChar_GetGlobalEncoding);
 End;
 
 { Count total characters in file }

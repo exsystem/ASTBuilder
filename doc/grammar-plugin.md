@@ -21,11 +21,29 @@ When using a grammar file, ASTBuilder may use a corresponding plugin dynamic lib
     GetTokenValue: TGetTokenValue;
     InsertToken: TInsertToken;
     PopMode: TPopMode;
+    Encoding: Byte;
   End;
 
   Procedure Init(Context: PContext);
   Procedure ProcessToken(Context: PContext);
 ```
+
+All `PTChar` arguments and results contain bytes in `Context.Encoding`. The
+encoding values follow `TEncodingKind` in `TypeDef.pas` (`0` ASCII, `1` UTF-8,
+`2` UTF-16 LE, `3` UTF-16 BE, `4` GBK). Plug-ins must interpret those bytes
+using that encoding; the callbacks no longer convert text to `PAnsiChar`.
+This changes the plug-in ABI, so existing plug-ins must be rebuilt.
+
+Set the process-wide encoding before parsing or creating encoded strings:
+
+```pascal
+TChar_SetGlobalEncoding(ekGBK);
+Parse(...);
+```
+
+UTF-8 remains the default. Text files with a BOM must match the configured
+encoding; the reader will report a mismatch rather than silently changing the
+global setting.
 
 ### `Init`
 

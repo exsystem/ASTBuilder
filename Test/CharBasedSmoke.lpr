@@ -9,11 +9,13 @@ Var
   mText, mPattern, mNext: PTChar;
   mNfa: PNfa;
 Begin
+  TChar_SetGlobalEncoding(ekUTF8);
   mText := TCharStrNewEncoded(#$C3#$A9, ekUTF8);
   If (TCharStrLen(mText) <> 1) Or (TCharStrByteLen(mText) <> 2) Then
     Halt(1);
   FreeStr(mText);
 
+  TChar_SetGlobalEncoding(ekUTF16LE);
   mText := TCharStrNewEncoded(#$2D#$4E, ekUTF16LE);
   If (TCharStrLen(mText) <> 1) Or (TCharStrByteLen(mText) <> 2) Then
     Halt(2);
@@ -24,6 +26,12 @@ Begin
     Halt(9);
   FreeStr(mText);
 
+  mText := TCharStrNew('A');
+  If (TCharStrLen(mText) <> 1) Or (TCharStrByteLen(mText) <> 2) Or
+    (PByte(mText)[0] <> $41) Or (PByte(mText)[1] <> 0) Then
+    Halt(11);
+  FreeStr(mText);
+
   mText := CreateStrEncoded(TCharStrAnsiByteLen('A', ekUTF16LE), ekUTF16LE);
   TCharStrCat(mText, 'A');
   If (TCharStrLen(mText) <> 1) Or (TCharStrByteLen(mText) <> 2) Or
@@ -31,11 +39,13 @@ Begin
     Halt(10);
   FreeStr(mText);
 
-  mText := TCharStrNewEncoded(#$D6#$D0, ekGBK);
+  TChar_SetGlobalEncoding(ekGBK);
+  mText := TCharStrNew(#$D6#$D0);
   If (TCharStrLen(mText) <> 1) Or (TCharStrByteLen(mText) <> 2) Then
     Halt(6);
   FreeStr(mText);
 
+  TChar_SetGlobalEncoding(ekUTF16LE);
   mText := TCharStrNewEncoded(#$41#$00#$2D#$4E, ekUTF16LE);
   If (TCharStrLen(mText) <> 2) Or (TCharStrByteLen(mText) <> 4) Then
     Halt(3);
@@ -51,6 +61,7 @@ Begin
     Halt(4);
   FreeStr(mText);
 
+  TChar_SetGlobalEncoding(ekUTF8);
   mPattern := TCharStrNewEncoded(#$F0#$9F#$8C#$8D, ekUTF8);
   mText := TCharStrNewEncoded(#$F0#$9F#$8C#$8D, ekUTF8);
   TNfa_Create(mNfa);
@@ -63,6 +74,7 @@ Begin
   FreeStr(mPattern);
   FreeStr(mText);
 
+  TChar_SetGlobalEncoding(ekUTF16LE);
   mPattern := TCharStrNewEncoded(#$00#$00, ekUTF16LE);
   mText := TCharStrNewEncoded(#$00#$00#$41#$00, ekUTF16LE);
   TNfa_Create(mNfa);
@@ -77,4 +89,5 @@ Begin
   TNfa_Destroy(mNfa);
   FreeStr(mPattern);
   FreeStr(mText);
+  TChar_SetGlobalEncoding(ekUTF8);
 End.

@@ -901,15 +901,23 @@ In this demo, the plugin is written in C. First, create a file named `astbuilder
 #ifndef ASTBUILDER_H
 #define ASTBUILDER_H 
 
-typedef void (*TRegisterTermRule)(char *Name);
+#include <stdint.h>
 
-typedef char *(*TGetMode)(void);
+typedef const uint8_t *PTChar;
 
-typedef char *(*TGetTokenKind)(void);
+enum {
+    ekASCII = 0, ekUTF8 = 1, ekUTF16LE = 2, ekUTF16BE = 3, ekGBK = 4
+};
 
-typedef char *(*TGetTokenValue)(void);
+typedef void (*TRegisterTermRule)(PTChar Name);
 
-typedef void (*TInsertToken)(char *Kind, char *Value);
+typedef PTChar (*TGetMode)(void);
+
+typedef PTChar (*TGetTokenKind)(void);
+
+typedef PTChar (*TGetTokenValue)(void);
+
+typedef void (*TInsertToken)(PTChar Kind, PTChar Value);
 
 typedef void (*TPopMode)(void);
 
@@ -922,10 +930,15 @@ struct TContext {
     TGetTokenValue GetTokenValue;
     TInsertToken InsertToken;
     TPopMode PopMode;
+    uint8_t Encoding;
 };
 
 #endif //ASTBUILDER_H
 ```
+
+All `PTChar` buffers contain bytes in `Context->Encoding`; plugins must encode
+literals and inspect strings using that value. The example plugin source is available in
+[library.c](../Test/TestCase/pascal/library.c).
 
 Next, create a file named `library.h` with this content.
 
@@ -940,41 +953,9 @@ void ProcessToken(const struct TContext* Context);
 #endif //PASCAL_LIBRAR
 ```
 
-Finally, create a file named `astbuilder.c` with this content.
-
-```c
-#include "library.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-void Init(const struct TContext *Context) {
-    Context->RegisterTermRule("@HEREDOC_END");
-}
-
-void ProcessToken(const struct TContext *Context) {
-    const char *mode = Context->GetMode();
-    const char *token_value = Context->GetTokenValue();
-    const char *token_kind = Context->GetTokenKind();
-    static char *here_doc_id;
-    if (strcmp(mode, "hereDoc") != 0) {
-        return;
-    }
-    if (strcmp(token_kind, "START_HEREDOC") == 0) {
-        const size_t here_doc_id_high = strlen(token_value) - 3;
-        here_doc_id = (char *) malloc(here_doc_id_high + 1);
-        strncpy(here_doc_id, token_value + 3, here_doc_id_high);
-        here_doc_id[here_doc_id_high] = '\0';
-        return;
-    }
-    if (strcmp(token_kind, "HEREDOC_TEXT") == 0 && strstr(token_value, here_doc_id) == token_value) {
-        Context->InsertToken("@HEREDOC_END", here_doc_id);
-        Context->PopMode();
-        free(here_doc_id);
-    }
-}
-```
+Finally, create the plugin implementation using encoding-aware byte helpers;
+the checked-in [library.c](../Test/TestCase/pascal/library.c) demonstrates
+handling ASCII rule names and UTF-8, GBK, and UTF-16 encoded token buffers.
 
 Then, compile the plugin with those source code files into a dynamic library file, such as `libpascal.dylib` on macOS, `libpascal.so` on Linux, or `pascal.dll` on Windows.
 

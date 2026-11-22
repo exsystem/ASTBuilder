@@ -13,11 +13,11 @@ Type
   PSize = TypeDef.PSize;
   {$ENDIF}
 
-  TRegisterTermRule = Procedure(Name: PAnsiChar);
-  TGetMode = Function: PAnsiChar;
-  TGetTokenKind = Function: PAnsiChar;
-  TGetTokenValue = Function: PAnsiChar;
-  TInsertToken = Procedure(Kind: PAnsiChar; Value: PAnsiChar);
+  TRegisterTermRule = Procedure(Name: PTChar);
+  TGetMode = Function: PTChar;
+  TGetTokenKind = Function: PTChar;
+  TGetTokenValue = Function: PTChar;
+  TInsertToken = Procedure(Kind: PTChar; Value: PTChar);
   TPopMode = Procedure;
 
   PContext = ^TContext;
@@ -29,16 +29,17 @@ Type
     GetTokenValue: TGetTokenValue;
     InsertToken: TInsertToken;
     PopMode: TPopMode;
+    Encoding: Byte;
   End;
 
   TInit = Procedure(Context: PContext);
   TProcessToken = Procedure(Context: PContext);
 
-Procedure RegisterTermRule(Name: PAnsiChar);
-Function GetMode: PAnsiChar;
-Function GetTokenKind: PAnsiChar;
-Function GetTokenValue: PAnsiChar;
-Procedure InsertToken(Kind: PAnsiChar; Value: PAnsiChar);
+Procedure RegisterTermRule(Name: PTChar);
+Function GetMode: PTChar;
+Function GetTokenKind: PTChar;
+Function GetTokenValue: PTChar;
+Procedure InsertToken(Kind: PTChar; Value: PTChar);
 Procedure PopMode;
 
 Function Parse(GrammarFile: String; SourceCodeFile: String; AstPathPrefix: String;
@@ -86,9 +87,9 @@ Var
   {$ENDIF}
   mContext: TContext;
   mLexer: PCodeLexer;
-  mPluginMode: AnsiString;
-  mPluginTokenKind: AnsiString;
-  mPluginTokenValue: AnsiString;
+  mPluginMode: PTChar;
+  mPluginTokenKind: PTChar;
+  mPluginTokenValue: PTChar;
 
 Procedure TCodeLexer_Init(Var Self: PCodeLexer);
 {$IFDEF VINTAGE} Far; {$ENDIF}
@@ -124,11 +125,11 @@ Begin
   mProcessToken(@mContext);
 End;
 
-Procedure RegisterTermRule(Name: PAnsiChar);
+Procedure RegisterTermRule(Name: PTChar);
 Var
   mName: PTChar;
 Begin
-  mName := TCharStrNewEncoded(AnsiString(Name), ekUTF8);
+  mName := TCharStrNew(Name);
   Try
     TGrammarNode_RegisterTermRule(mLexer^.GrammarNode, mName);
   Finally
@@ -136,32 +137,38 @@ Begin
   End;
 End;
 
-Function GetMode: PAnsiChar;
+Function GetMode: PTChar;
 Begin
-  mPluginMode := TCharStrToAnsiString(PPTChar(TStack_Top(mLexer^.Mode))^);
-  Result := PAnsiChar(mPluginMode);
+  FreeStr(mPluginMode);
+  mPluginMode := nil;
+  mPluginMode := TCharStrNew(PPTChar(TStack_Top(mLexer^.Mode))^);
+  Result := mPluginMode;
 End;
 
-Function GetTokenKind: PAnsiChar;
+Function GetTokenKind: PTChar;
 Begin
-  mPluginTokenKind := TCharStrToAnsiString(
+  FreeStr(mPluginTokenKind);
+  mPluginTokenKind := nil;
+  mPluginTokenKind := TCharStrNew(
     TGrammarNode_GetTermRuleName(mLexer^.GrammarNode,
       PTermRule(mLexer^.Parent.CurrentToken.Kind)^));
-  Result := PAnsiChar(mPluginTokenKind);
+  Result := mPluginTokenKind;
 End;
 
-Function GetTokenValue: PAnsiChar;
+Function GetTokenValue: PTChar;
 Begin
-  mPluginTokenValue := TCharStrToAnsiString(mLexer^.Parent.CurrentToken.Value);
-  Result := PAnsiChar(mPluginTokenValue);
+  FreeStr(mPluginTokenValue);
+  mPluginTokenValue := nil;
+  mPluginTokenValue := TCharStrNew(mLexer^.Parent.CurrentToken.Value);
+  Result := mPluginTokenValue;
 End;
 
-Procedure InsertToken(Kind: PAnsiChar; Value: PAnsiChar);
+Procedure InsertToken(Kind: PTChar; Value: PTChar);
 Var
   mKind, mValue: PTChar;
 Begin
-  mKind := TCharStrNewEncoded(AnsiString(Kind), ekUTF8);
-  mValue := TCharStrNewEncoded(AnsiString(Value), ekUTF8);
+  mKind := TCharStrNew(Kind);
+  mValue := TCharStrNew(Value);
   Try
     PTermRule(mLexer^.Parent.CurrentToken.Kind)^ :=
       TGrammarNode_GetTermRuleId(mLexer^.GrammarNode, mKind);
@@ -204,8 +211,8 @@ Var
   mErrorNode: PNode;
   e: PString;
 Begin
-  TStreamReader_Create(PStreamReader(mGrammar), GrammarFile, ekUTF8);
-  TStreamReader_Create(PStreamReader(mCode), SourceCodeFile, ekUTF8);
+  TStreamReader_Create(PStreamReader(mGrammar), GrammarFile);
+  TStreamReader_Create(PStreamReader(mCode), SourceCodeFile);
 
   mGrammarLexer := PLexer(GetGrammarLexer(mGrammar));
   TGrammarParser_Create(mParser, mGrammarLexer, GrammarRule);
@@ -238,6 +245,7 @@ Begin
     mContext.GetTokenValue := GetTokenValue;
     mContext.InsertToken := InsertToken;
     mContext.PopMode := PopMode;
+    mContext.Encoding := Ord(TChar_GetGlobalEncoding);
     mLexer^.OnInit := TCodeLexer_Init;
     mLexer^.OnProcessToken := TCodeLexer_ProcessToken;
   End;
@@ -274,6 +282,12 @@ Begin
   Begin
     FreeLibrary(mHandle);
   End;
+  FreeStr(mPluginMode);
+  mPluginMode := nil;
+  FreeStr(mPluginTokenKind);
+  mPluginTokenKind := nil;
+  FreeStr(mPluginTokenValue);
+  mPluginTokenValue := nil;
   TParseTree_Destroy(mViewer^.FParseTree);
   TAstViewer_Destroy(PParser(mViewer));
   Dispose(mViewer);

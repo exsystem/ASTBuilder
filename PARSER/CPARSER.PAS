@@ -631,7 +631,7 @@ Begin
       Write('  ');
     End;
   End;
-  Writeln(PAnsiChar(Content));
+  Writeln(TCharStrToAnsiString(Content));
 End;
 
 Procedure TAstViewer_Indent(Self: PAstViewer);

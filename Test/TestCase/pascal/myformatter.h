@@ -5,15 +5,27 @@
 #ifndef MYFORMATTER_H
 #define MYFORMATTER_H
 
-typedef void (*TRegisterTermRule)(char *Name);
+#include <stdint.h>
 
-typedef char *(*TGetMode)(void);
+typedef const uint8_t *PTChar;
 
-typedef char *(*TGetTokenKind)(void);
+enum {
+    ekASCII = 0,
+    ekUTF8 = 1,
+    ekUTF16LE = 2,
+    ekUTF16BE = 3,
+    ekGBK = 4
+};
 
-typedef char *(*TGetTokenValue)(void);
+typedef void (*TRegisterTermRule)(PTChar Name);
 
-typedef void (*TInsertToken)(char *Kind, char *Value);
+typedef PTChar (*TGetMode)(void);
+
+typedef PTChar (*TGetTokenKind)(void);
+
+typedef PTChar (*TGetTokenValue)(void);
+
+typedef void (*TInsertToken)(PTChar Kind, PTChar Value);
 
 typedef void (*TPopMode)(void);
 
@@ -26,6 +38,7 @@ struct TContext {
     TGetTokenValue GetTokenValue;
     TInsertToken InsertToken;
     TPopMode PopMode;
+    uint8_t Encoding;
 };
 
 #endif //MYFORMATTER_H

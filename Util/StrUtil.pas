@@ -44,6 +44,17 @@ Function SubStr(S: PTChar; FromIndex: TSize; Len: TSize): PTChar;
 
 Implementation
 
+Uses
+  SysUtils;
+
+Procedure TCharStr_RequireGlobalEncoding(Encoding: TEncodingKind);
+Begin
+  If Encoding <> TChar_GetGlobalEncoding Then
+    Raise EConvertError.CreateFmt(
+      'String encoding (%d) does not match the global encoding (%d).',
+      [Ord(Encoding), Ord(TChar_GetGlobalEncoding)]);
+End;
+
 Function IsSpace(Const Ch: Byte): Boolean;
 Begin
   Result := Ch In [Ord(' '), 9, 10, 11, 12, 13];
@@ -215,7 +226,7 @@ End;
 
 Function TCharStrNew(Const Source: AnsiString): PTChar;
 Begin
-  Result := TCharStrNewEncoded(Source, ekUTF8);
+  Result := TCharStrNewAnsiEncoded(Source, TChar_GetGlobalEncoding);
 End;
 
 Function TCharStrNewAnsiEncoded(Const Source: AnsiString;
@@ -291,11 +302,29 @@ End;
 
 Function TCharStrCopy(Dest: PTChar; Const Source: AnsiString): PTChar;
 Var
-  mLength: TSize;
+  mLength, I: TSize;
+  mEncoding: TEncodingKind;
 Begin
   Result := Dest;
-  mLength := Length(Source);
-  If mLength > 0 Then
+  mEncoding := TChar_GetGlobalEncoding;
+  mLength := TCharStrAnsiByteLen(Source, mEncoding);
+  If mEncoding In [ekUTF16LE, ekUTF16BE] Then
+  Begin
+    For I := 1 To Length(Source) Do
+    Begin
+      If mEncoding = ekUTF16LE Then
+      Begin
+        PByte(Dest)[(I - 1) * 2] := Byte(Source[I]);
+        PByte(Dest)[(I - 1) * 2 + 1] := 0;
+      End
+      Else
+      Begin
+        PByte(Dest)[(I - 1) * 2] := 0;
+        PByte(Dest)[(I - 1) * 2 + 1] := Byte(Source[I]);
+      End;
+    End;
+  End
+  Else If mLength > 0 Then
     Move(Source[1], Dest^, mLength);
   TChar_SetByteLength(Dest, mLength);
 End;
@@ -348,13 +377,14 @@ End;
 
 Function CreateStr(Len: TSize): PTChar;
 Begin
-  Result := CreateStrEncoded(Len, ekUTF8);
+  Result := CreateStrEncoded(Len, TChar_GetGlobalEncoding);
 End;
 
 Function CreateStrEncoded(Len: TSize; Encoding: TEncodingKind): PTChar;
 Var
   mTerminatorSize: TSize;
 Begin
+  TCharStr_RequireGlobalEncoding(Encoding);
   If Encoding In [ekUTF16LE, ekUTF16BE] Then
     mTerminatorSize := 2
   Else
@@ -370,7 +400,7 @@ Var
   mEncoding: TEncodingKind;
 Begin
   If S = nil Then
-    mEncoding := ekUTF8
+    mEncoding := TChar_GetGlobalEncoding
   Else
     mEncoding := TChar_GetEncoding(S);
   Result := CreateStrEncoded(Len, mEncoding);

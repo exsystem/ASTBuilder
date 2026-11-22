@@ -166,7 +166,8 @@ End;
 Procedure TNfa_AddEdge(Self: PNfa; Value: PTChar; Source: TSize; Destination: TSize);
 Begin
   If Value = nil Then
-    TNfa_AddEdgeSized(Self, Value, 0, ekUTF8, Source, Destination)
+    TNfa_AddEdgeSized(Self, Value, 0, TChar_GetGlobalEncoding, Source,
+      Destination)
   Else
     TNfa_AddEdgeSized(Self, Value, TCharStrByteLen(Value),
       TChar_GetEncoding(Value), Source, Destination);
@@ -876,7 +877,7 @@ Begin
   mByteLength := TCharStrByteLen(Input);
   If Input = nil Then
   Begin
-    Result := TNfa_ValidateEncoded(Self, Input, 0, ekUTF8,
+    Result := TNfa_ValidateEncoded(Self, Input, 0, TChar_GetGlobalEncoding,
       CaseInsensitive);
     Exit;
   End;
