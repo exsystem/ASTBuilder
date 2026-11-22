@@ -14,7 +14,7 @@ Type
     );
 
   TChar = packed Record
-    Bytes: Byte;
+    Bytes: Array[0..0] of Byte;  // 零长度数组，实际使用时动态分配
   End;
   PTChar = ^TChar;
   PPTChar = ^PTChar;
@@ -32,13 +32,6 @@ Type
   PSize = ^TSize;
   TSize = UIntPtr;
 
-  PCharBufferInfo = ^TCharBufferInfo;
-  TCharBufferInfo = packed Record
-    Encoding: TEncodingKind;
-    ByteLength: TSize;
-    Capacity: TSize;
-  End;
-
   { TODO Allocator? }
   TElementDestructor = Procedure(Const Element: Pointer);
 
@@ -53,18 +46,26 @@ Type
   PTermRule = ^TTermRule;
 
 Function TChar_Allocate(Const ByteSize: TSize): PTChar;
-Function TChar_AllocateEncoded(Const ByteSize: TSize;
-  Encoding: TEncodingKind): PTChar;
 Procedure TChar_Deallocate(Var Self: PTChar);
+Function TChar_AllocateEncoded(Const ByteSize: TSize; Encoding: TEncodingKind): PTChar;
+Procedure TChar_AllocateEncodedDeallocate(Var Self: PTChar; Encoding: TEncodingKind);
 Function TChar_GetEncoding(Self: PTChar): TEncodingKind;
+Procedure TChar_SetEncoding(Self: PTChar; Encoding: TEncodingKind);
 Function TChar_GetByteLength(Self: PTChar): TSize;
-Procedure TChar_SetByteLength(Self: PTChar; ByteLength: TSize);
+Procedure TChar_SetByteLength(Self: PTChar; Length: TSize);
 Function TChar_GetEncodedSize(Encoding: TEncodingKind; Bytes: PByte;
   AvailableBytes: TSize; Out CharSize: TSize): Boolean;
 Function TChar_GetAsciiValue(Encoding: TEncodingKind; Bytes: PByte;
   CharSize: TSize; Out Value: Byte): Boolean;
 Function TChar_EncodeAscii(Encoding: TEncodingKind; Value: Byte;
   Bytes: PByte; Out CharSize: TSize): Boolean;
+
+Function TChar_GetCurrentEncodedSize(Bytes: PByte; AvailableBytes: TSize;
+  Out CharSize: TSize): Boolean;
+Function TChar_GetCurrentAsciiValue(Bytes: PByte; CharSize: TSize;
+  Out Value: Byte): Boolean;
+Function TChar_EncodeCurrentAscii(Value: Byte; Bytes: PByte;
+  Out CharSize: TSize): Boolean;
 
 Function TSize_Make(Const Id: TSize): PSize;
 Procedure TSize_Destroy(Var Self: PSize);
@@ -76,73 +77,71 @@ Procedure TTermRule_Destroy(Var Self: PTermRule);
 
 Implementation
 
+// 全局编码配置 - 整个流程使用单一编码
+var
+  GlobalEncoding: TEncodingKind = ekUTF8;
+
 Function TChar_Allocate(Const ByteSize: TSize): PTChar;
 Begin
-  Result := TChar_AllocateEncoded(ByteSize, ekUTF8);
-End;
-
-Function TChar_AllocateEncoded(Const ByteSize: TSize;
-  Encoding: TEncodingKind): PTChar;
-Var
-  mInfo: PCharBufferInfo;
-  mData: PByte;
-Begin
-  If ByteSize = 0 Then
-  Begin
+  if ByteSize = 0 then begin
     Result := nil;
     Exit;
-  End;
-  GetMem(mInfo, SizeOf(TCharBufferInfo) + ByteSize);
-  mInfo^.Encoding := Encoding;
-  mInfo^.ByteLength := ByteSize;
-  mInfo^.Capacity := ByteSize;
-  mData := PByte(mInfo);
-  Inc(mData, SizeOf(TCharBufferInfo));
-  Result := PTChar(mData);
+  end;
+  // 分配实际需要的字节数，不固定为4字节
+  GetMem(Result, ByteSize);
 End;
 
 Procedure TChar_Deallocate(Var Self: PTChar);
-Var
-  mInfo: PByte;
 Begin
   If Self <> nil Then
   Begin
-    mInfo := PByte(Self);
-    Dec(mInfo, SizeOf(TCharBufferInfo));
-    FreeMem(mInfo);
+    FreeMem(Self);
     Self := nil;
   End;
 End;
 
 Function TChar_GetEncoding(Self: PTChar): TEncodingKind;
-Var
-  mInfo: PByte;
 Begin
-  mInfo := PByte(Self);
-  Dec(mInfo, SizeOf(TCharBufferInfo));
-  Result := PCharBufferInfo(mInfo)^.Encoding;
+  Result := GlobalEncoding;
+End;
+
+Procedure TChar_SetEncoding(Self: PTChar; Encoding: TEncodingKind);
+Begin
+  // 当前实现中，编码是全局设置的，不需要为每个字符单独存储
 End;
 
 Function TChar_GetByteLength(Self: PTChar): TSize;
 Var
-  mInfo: PByte;
+  I, mCharSize: TSize;
 Begin
-  mInfo := PByte(Self);
-  Dec(mInfo, SizeOf(TCharBufferInfo));
-  Result := PCharBufferInfo(mInfo)^.ByteLength;
+  Result := 0;
+  if Self = nil then Exit;
+  
+  // 计算所有有效字符的总字节数
+  I := 0;
+  while TChar_GetEncodedSize(GlobalEncoding, @PByte(Self)[I], 
+      MaxInt - I, mCharSize) do
+  begin
+    Inc(Result, mCharSize);
+    Inc(I, mCharSize);
+  end;
 End;
 
-Procedure TChar_SetByteLength(Self: PTChar; ByteLength: TSize);
-Var
-  mInfo: PCharBufferInfo;
-  mInfoData: PByte;
+Procedure TChar_SetByteLength(Self: PTChar; Length: TSize);
 Begin
-  mInfoData := PByte(Self);
-  Dec(mInfoData, SizeOf(TCharBufferInfo));
-  mInfo := PCharBufferInfo(mInfoData);
-  If ByteLength > mInfo^.Capacity Then
-    ByteLength := mInfo^.Capacity;
-  mInfo^.ByteLength := ByteLength;
+  // 简化实现：TChar 直接存储字节数据，长度由调用者管理
+End;
+
+Function TChar_AllocateEncoded(Const ByteSize: TSize; Encoding: TEncodingKind): PTChar;
+Begin
+  // 编码参数用于未来扩展，当前实现中编码是全局设置的
+  Result := TChar_Allocate(ByteSize);
+End;
+
+Procedure TChar_AllocateEncodedDeallocate(Var Self: PTChar; Encoding: TEncodingKind);
+Begin
+  // 编码参数用于未来扩展，当前实现中编码是全局设置的
+  TChar_Deallocate(Self);
 End;
 
 Function TChar_GetAsciiValue(Encoding: TEncodingKind; Bytes: PByte;
@@ -289,6 +288,25 @@ Begin
     End;
   End;
   Result := True;
+End;
+
+// 当前编码相关的便捷函数（使用全局变量）
+Function TChar_GetCurrentEncodedSize(Bytes: PByte; AvailableBytes: TSize;
+  Out CharSize: TSize): Boolean;
+Begin
+  Result := TChar_GetEncodedSize(GlobalEncoding, Bytes, AvailableBytes, CharSize);
+End;
+
+Function TChar_GetCurrentAsciiValue(Bytes: PByte; CharSize: TSize;
+  Out Value: Byte): Boolean;
+Begin
+  Result := TChar_GetAsciiValue(GlobalEncoding, Bytes, CharSize, Value);
+End;
+
+Function TChar_EncodeCurrentAscii(Value: Byte; Bytes: PByte;
+  Out CharSize: TSize): Boolean;
+Begin
+  Result := TChar_EncodeAscii(GlobalEncoding, Value, Bytes, CharSize);
 End;
 
 Function TSize_Make(Const Id: TSize): PSize;

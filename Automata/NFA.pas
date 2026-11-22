@@ -666,7 +666,7 @@ Begin
   End;
   If CaseInsensitive And (CharSize = 1) Then
   Begin
-    Result := (Lower(PByte(Edge^.Value)^) = Lower(Ch^.Bytes));
+    Result := (Lower(PByte(Edge^.Value)^) = Lower(PByte(Ch)^));
     Exit;
   End;
   If CaseInsensitive And (CharSize = 2) And
@@ -675,12 +675,12 @@ Begin
     If Encoding = ekUTF16LE Then
     Begin
       mLeftCodeUnit := PByte(Edge^.Value)[0] Or (PByte(Edge^.Value)[1] Shl 8);
-      mRightCodeUnit := Ch^.Bytes Or (PByte(Ch)[1] Shl 8);
+      mRightCodeUnit := PByte(Ch)[0] Or (PByte(Ch)[1] Shl 8);
     End
     Else
     Begin
       mLeftCodeUnit := (PByte(Edge^.Value)[0] Shl 8) Or PByte(Edge^.Value)[1];
-      mRightCodeUnit := (Ch^.Bytes Shl 8) Or PByte(Ch)[1];
+      mRightCodeUnit := (PByte(Ch)[0] Shl 8) Or PByte(Ch)[1];
     End;
     If mLeftCodeUnit < 128 Then
     Begin

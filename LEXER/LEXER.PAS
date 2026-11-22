@@ -133,7 +133,7 @@ Begin
   If (mReadCount = 0) Or (mByteCount = 0) Then
   Begin
     Self^.CurrentChar := TChar_Allocate(1);
-    Self^.CurrentChar^.Bytes := 0;
+    PByte(Self^.CurrentChar)^ := 0;
     Self^.CurrentCharSize := 0;
   End
   Else
